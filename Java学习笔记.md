@@ -156,16 +156,11 @@ public class StingConcat {
         int b = 20;
         int c = a + b;
         System.out.println("a + b=" + c);
-
         boolean aBiggerThanB = a > b;
         System.out.println("a > b 是" + aBiggerThanB + "的");
-
         System.out.println("a + b=" + a + b);
-
         System.out.println("a + b =" + (a + b));
-
         System.out.println("a * b=" + a * b);
-
     }
 }
 ```
@@ -190,8 +185,6 @@ Java中的 if-else，for语句，switch语句 语法与C语言一样。
 * import java.util.Scanner; 是告诉程序，Scaner 这个类型在哪里。
 * 创建Scanner类型的“变量”，它就是我们提过的工具，可以帮我们从标准收入读取数据
 * nextLine()和 nextint0)两个方法可以从命令行读取一行字符串或者一行字符串代表的整数
-
-
 ### 1.10 数组
 
 * 数组的“实”是一块地址连续的内存，就像是编号连续的一沓白纸
