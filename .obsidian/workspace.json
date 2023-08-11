@@ -13,8 +13,8 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Java学习笔记.md",
-                "mode": "preview",
+                "file": "Redis笔记.md",
+                "mode": "source",
                 "source": false
               }
             }
@@ -85,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Java学习笔记.md",
+                "file": "Redis笔记.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Java学习笔记.md",
+                "file": "Redis笔记.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Java学习笔记.md"
+                "file": "Redis笔记.md"
               }
             }
           },
@@ -154,10 +154,10 @@
       "command-palette:打开命令面板": false
     }
   },
-  "active": "58637e166c017adf",
+  "active": "8b9c5f573c82f4ef",
   "lastOpenFiles": [
+    "Java学习笔记.md",
     "Redis笔记.md",
-    "README.md",
-    "Java学习笔记.md"
+    "README.md"
   ]
 }
