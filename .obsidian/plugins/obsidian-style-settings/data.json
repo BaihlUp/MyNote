@@ -1,0 +1,20 @@
+{
+  "blue-topaz-theme@@transparent-setting-panel": false,
+  "Blue-Topaz-Codebox-Highlight@@code-theme-selection": "code-theme-monokai",
+  "Blue-Topaz-Codebox-Highlight@@mute-code-indent-line": false,
+  "Blue-Topaz-Codebox-Highlight@@code-line-number": false,
+  "blue-topaz-theme@@color-scheme-options": "color-scheme-options-default",
+  "blue-topaz-theme@@background-settings-workplace-background-image": true,
+  "blue-topaz-theme@@background-image-settings-switch": false,
+  "blue-topaz-theme@@background-settings-workplace-theme-light": "background-settings-workplace-waves2-light",
+  "blue-topaz-theme@@brightness-4-bg": 1.2,
+  "blue-topaz-theme@@toggle-nonoverlapping-bg": false,
+  "Blue-Topaz-Codebox-Highlight@@muted-code-activeline-bg": false,
+  "Blue-Topaz-Codebox-Highlight@@remove-language-type": false,
+  "Blue-Topaz-Codebox-Highlight@@nowrap-edit-codebox": false,
+  "blue-topaz-theme@@toggle-bg-panel-page": false,
+  "blue-topaz-theme@@layout-style-options": "layout-style-options-default",
+  "blue-topaz-theme@@background-settings-workplace-theme-dark": "background-settings-workplace-theme-dark-blue-gas",
+  "blue-topaz-theme@@saturate-4-bg": 0.3,
+  "blue-topaz-theme@@blur-depth": 30
+}
