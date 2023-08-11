@@ -361,8 +361,6 @@ public class ReferenceAndPrimaryDataType {
         System.out.println("m3=" + m3);
         System.out.println("m4=" + m4);
         System.out.println("m5=" + m5);
-
-
         int a = 999;
 
     }
