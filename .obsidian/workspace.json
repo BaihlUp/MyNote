@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "220 - 程序设计/224 - Java、Lua/Java学习笔记.md",
+                "file": "Redis笔记.md",
                 "mode": "preview",
                 "source": false
               }
@@ -73,7 +73,8 @@
               "state": {}
             }
           }
-        ]
+        ],
+        "currentTab": 3
       }
     ],
     "direction": "horizontal",
@@ -93,7 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "220 - 程序设计/224 - Java、Lua/Java学习笔记.md",
+                "file": "Redis笔记.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -110,7 +111,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "220 - 程序设计/224 - Java、Lua/Java学习笔记.md",
+                "file": "Redis笔记.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -133,7 +134,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "220 - 程序设计/224 - Java、Lua/Java学习笔记.md"
+                "file": "Redis笔记.md"
               }
             }
           },
@@ -166,8 +167,8 @@
   },
   "active": "359b1760e738e8c0",
   "lastOpenFiles": [
-    "Redis笔记.md",
     "220 - 程序设计/224 - Java、Lua/Java学习笔记.md",
+    "Redis笔记.md",
     "220 - 程序设计/224 - Java、Lua",
     "README.md",
     "220 - 程序设计"
