@@ -1,6 +1,8 @@
 [
-  "obsidian-style-settings",
   "oz-image-plugin",
   "obsidian-git",
-  "remotely-save"
+  "remotely-save",
+  "obsidian-style-settings",
+  "obsidian-weread-plugin",
+  "cm-editor-syntax-highlight-obsidian"
 ]
