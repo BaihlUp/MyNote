@@ -152,8 +152,7 @@
       "daily-notes:打开/创建今天的日记": false,
       "templates:插入模板": false,
       "command-palette:打开命令面板": false,
-      "remotely-save:Remotely Save": false,
-      "obsidian-weread-plugin:Weread": false
+      "remotely-save:Remotely Save": false
     }
   },
   "active": "709906ef0b82dc36",
