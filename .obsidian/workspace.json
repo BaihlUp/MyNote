@@ -64,17 +64,8 @@
               "type": "bookmarks",
               "state": {}
             }
-          },
-          {
-            "id": "ac0a080006388cf2",
-            "type": "leaf",
-            "state": {
-              "type": "file-tree-view",
-              "state": {}
-            }
           }
-        ],
-        "currentTab": 3
+        ]
       }
     ],
     "direction": "horizontal",
@@ -165,7 +156,7 @@
       "obsidian-weread-plugin:Weread": false
     }
   },
-  "active": "359b1760e738e8c0",
+  "active": "709906ef0b82dc36",
   "lastOpenFiles": [
     "220 - 程序设计/224 - Java、Lua/Java学习笔记.md",
     "Redis笔记.md",
