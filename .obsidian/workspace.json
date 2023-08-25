@@ -147,7 +147,7 @@
             }
           }
         ],
-        "currentTab": 4
+        "currentTab": 3
       }
     ],
     "direction": "horizontal",
@@ -166,7 +166,7 @@
       "file-tree-alternative:File Tree Alternative Plugin": false
     }
   },
-  "active": "f42e6bee2b2f170a",
+  "active": "9959a7e7bf7e5676",
   "lastOpenFiles": [
     "Redis笔记.md",
     "220 - 程序设计/224 - Java、Lua/Java学习笔记.md",
