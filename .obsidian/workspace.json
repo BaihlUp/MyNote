@@ -64,12 +64,21 @@
               "type": "bookmarks",
               "state": {}
             }
+          },
+          {
+            "id": "ac0a080006388cf2",
+            "type": "leaf",
+            "state": {
+              "type": "file-tree-view",
+              "state": {}
+            }
           }
-        ]
+        ],
+        "currentTab": 3
       }
     ],
     "direction": "horizontal",
-    "width": 253.49999618530273
+    "width": 457.49999618530273
   },
   "right": {
     "id": "5d24e164f43845ec",
@@ -153,10 +162,11 @@
       "templates:插入模板": false,
       "command-palette:打开命令面板": false,
       "remotely-save:Remotely Save": false,
-      "obsidian-weread-plugin:Weread": false
+      "obsidian-weread-plugin:Weread": false,
+      "file-tree-alternative:File Tree Alternative Plugin": false
     }
   },
-  "active": "f42e6bee2b2f170a",
+  "active": "5488cabcaec85d40",
   "lastOpenFiles": [
     "Redis笔记.md",
     "220 - 程序设计/224 - Java、Lua/Java学习笔记.md",
