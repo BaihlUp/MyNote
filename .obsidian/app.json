@@ -2,5 +2,7 @@
   "defaultViewMode": "preview",
   "livePreview": true,
   "readableLineLength": true,
-  "showLineNumber": false
+  "showLineNumber": false,
+  "trashOption": "local",
+  "alwaysUpdateLinks": true
 }
