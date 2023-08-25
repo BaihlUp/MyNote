@@ -4,16 +4,16 @@
     "type": "split",
     "children": [
       {
-        "id": "e385dcd39cd3d832",
+        "id": "8ff06c4040e80c4e",
         "type": "tabs",
         "children": [
           {
-            "id": "f42e6bee2b2f170a",
+            "id": "359b1760e738e8c0",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "220 - 程序设计/224 - Java、Lua/Java学习笔记.md",
+                "file": "Redis笔记.md",
                 "mode": "preview",
                 "source": false
               }
@@ -73,8 +73,7 @@
               "state": {}
             }
           }
-        ],
-        "currentTab": 3
+        ]
       }
     ],
     "direction": "horizontal",
@@ -94,7 +93,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "220 - 程序设计/224 - Java、Lua/Java学习笔记.md",
+                "file": "Redis笔记.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -111,7 +110,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "220 - 程序设计/224 - Java、Lua/Java学习笔记.md",
+                "file": "Redis笔记.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -134,7 +133,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "220 - 程序设计/224 - Java、Lua/Java学习笔记.md"
+                "file": "Redis笔记.md"
               }
             }
           },
@@ -147,7 +146,7 @@
             }
           }
         ],
-        "currentTab": 3
+        "currentTab": 4
       }
     ],
     "direction": "horizontal",
@@ -162,14 +161,13 @@
       "templates:插入模板": false,
       "command-palette:打开命令面板": false,
       "remotely-save:Remotely Save": false,
-      "obsidian-weread-plugin:Weread": false,
-      "file-tree-alternative:File Tree Alternative Plugin": false
+      "obsidian-weread-plugin:Weread": false
     }
   },
-  "active": "9959a7e7bf7e5676",
+  "active": "359b1760e738e8c0",
   "lastOpenFiles": [
-    "Redis笔记.md",
     "220 - 程序设计/224 - Java、Lua/Java学习笔记.md",
+    "Redis笔记.md",
     "220 - 程序设计/224 - Java、Lua",
     "README.md",
     "220 - 程序设计"
