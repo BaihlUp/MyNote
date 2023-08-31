@@ -1,0 +1,43 @@
+name: Hexo deploy
+
+on: 
+  push:
+    branches:
+      - main  # main分支有push操作时自动触发这个action
+    paths-ignore:  # 忽略指定的目录
+      - 'source/_drafts/**'
+      - '.github/**'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: A job to deploy blog.
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+      with:
+        submodules: true
+        
+    - name: Cache node modules
+      uses: actions/cache@v1
+      id: cache
+      with:
+        path: node_modules
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+    - name: Install Dependencies
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: npm ci
+        
+    # Deploy hexo blog website.
+    - name: Deploy
+      id: deploy
+      uses: sma11black/hexo-action@v1.0.3
+      with:
+        deploy_key: ${{ secrets.HEXO_DEPLOY_KEY }}
+        user_name: baihlUp
+        user_email: 2677443264@qq.com
+        commit_msg: ${{ github.event.head_commit.message }}ion)
+    - name: Get the output
+      run: |
+        echo "${{ steps.deploy.outputs.notify }}"
