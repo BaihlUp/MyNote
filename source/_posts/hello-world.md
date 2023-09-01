@@ -9,7 +9,7 @@ Welcome to [Hexo](https://hexo.io/)! This is your very first post. Check [docume
   
 ``` bash 
 $ hexo new "My New Post"
-```
+``` 
 
 More info: [Writing](https://hexo.io/docs/writing.html)
 
