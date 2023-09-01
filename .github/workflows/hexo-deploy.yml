@@ -7,38 +7,64 @@ on:
     paths-ignore:  # 忽略指定的目录
       - 'source/_drafts/**'
       - '.github/**'
+env:
+  GIT_USER: BaihlUp
+  GIT_EMAIL: 2677443264@qq.com
+  #THEME_REPO: sanonz/hexo-theme-concise
+  #THEME_BRANCH: master
+  DEPLOY_REPO: BaihlUp/baihlUp.github.io
+  DEPLOY_BRANCH: master
+
 jobs:
   build:
+    name: Build on node ${{ matrix.node_version }} and ${{ matrix.os }}
     runs-on: ubuntu-latest
-    name: A job to deploy blog.
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v1
-      with:
-        submodules: true
-        
-    - name: Cache node modules
-      uses: actions/cache@v1
-      id: cache
-      with:
-        path: node_modules
-        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-node-
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        node_version: [16.x]
 
-    - name: Install Dependencies
-      if: steps.cache.outputs.cache-hit != 'true'
-      run: npm ci
-        
-    # Deploy hexo blog website.
-    - name: Deploy
-      id: deploy
-      uses: sma11black/hexo-action@v1.0.3
-      with:
-        deploy_key: ${{ secrets.HEXO_DEPLOY_KEY }}
-        user_name: BaihlUp
-        user_email: 2677443264@qq.com
-        commit_msg: ${{ github.event.head_commit.message }}ion)
-    - name: Get the output
-      run: |
-        echo "${{ steps.deploy.outputs.notify }}"
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v2
+        with:
+          ref: main
+
+      # - name: Checkout theme repo
+      #   uses: actions/checkout@v2
+      #   with:
+      #     repository: ${{ env.THEME_REPO }}
+      #     ref: ${{ env.THEME_BRANCH }}
+      #     path: themes/concise
+
+      - name: Checkout deploy repo
+        uses: actions/checkout@v2
+        with:
+          repository: ${{ env.DEPLOY_REPO }}
+          ref: ${{ env.DEPLOY_BRANCH }}
+          path: .deploy_git
+
+      - name: Use Node.js ${{ matrix.node_version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node_version }}
+
+      - name: Setup Hexo
+        env:
+          HEXO_DEPLOY_PRI: ${{secrets.HEXO_DEPLOY_KEY}}
+        run: |
+          sudo timedatectl set-timezone "Asia/Shanghai"
+          mkdir -p ~/.ssh/
+          echo "$HEXO_DEPLOY_PRI" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          git config --global user.name $GIT_USER
+          git config --global user.email $GIT_EMAIL
+
+      - name: Install dependencies
+        run: |
+          npm install
+
+      - name: Deploy hexo
+        run: |
+          npm run deploy
