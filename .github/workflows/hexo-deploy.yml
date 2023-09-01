@@ -10,8 +10,9 @@ on:
 env:
   GIT_USER: BaihlUp
   GIT_EMAIL: 2677443264@qq.com
-  THEME_REPO: blinkfox/hexo-theme-matery
-  THEME_BRANCH: master
+  # THEME_REPO: blinkfox/hexo-theme-matery
+  THEME_REPO: jerryc127/hexo-theme-butterfly
+  THEME_BRANCH: dev
   DEPLOY_REPO: BaihlUp/baihlUp.github.io
   DEPLOY_BRANCH: master
 
@@ -45,7 +46,7 @@ jobs:
         with:
           repository: ${{ env.THEME_REPO }}
           ref: ${{ env.THEME_BRANCH }}
-          path: themes/matery
+          path: themes/butterfly
 
       # - name: Checkout deploy repo
       #   uses: actions/checkout@v3
