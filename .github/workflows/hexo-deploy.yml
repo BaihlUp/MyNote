@@ -37,34 +37,48 @@ jobs:
       #     ref: ${{ env.THEME_BRANCH }}
       #     path: themes/concise
 
-      - name: Checkout deploy repo
-        uses: actions/checkout@v3
-        with:
-          repository: ${{ env.DEPLOY_REPO }}
-          ref: ${{ env.DEPLOY_BRANCH }}
-          path: .deploy_git
+      # - name: Checkout deploy repo
+      #   uses: actions/checkout@v3
+      #   with:
+      #     repository: ${{ env.DEPLOY_REPO }}
+      #     ref: ${{ env.DEPLOY_BRANCH }}
+      #     path: .deploy_git
 
       - name: Setup Node.js ${{ matrix.node_version }}
         uses: actions/setup-node@v3
         with:
           node-version: '18'
 
-      - name: Setup Hexo
-        env:
-          HEXO_DEPLOY_PRI: ${{secrets.HEXO_DEPLOY_KEY}}
-        run: |
-          sudo timedatectl set-timezone "Asia/Shanghai"
-          mkdir -p ~/.ssh/
-          echo "$HEXO_DEPLOY_PRI" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan github.com >> ~/.ssh/known_hosts
-          git config --global user.name $GIT_USER
-          git config --global user.email $GIT_EMAIL
+      # - name: Setup Hexo
+      #   env:
+      #     HEXO_DEPLOY_PRI: ${{secrets.HEXO_DEPLOY_KEY}}
+      #   run: |
+      #     sudo timedatectl set-timezone "Asia/Shanghai"
+      #     mkdir -p ~/.ssh/
+      #     echo "$HEXO_DEPLOY_PRI" > ~/.ssh/id_rsa
+      #     chmod 600 ~/.ssh/id_rsa
+      #     ssh-keyscan github.com >> ~/.ssh/known_hosts
+      #     git config --global user.name $GIT_USER
+      #     git config --global user.email $GIT_EMAIL
 
-      - name: Install dependencies
-        run: |
-          npm install
+      # - name: Install dependencies
+      #   run: |
+      #     npm install
 
-      - name: Deploy hexo
+      # - name: Deploy hexo
+      #   run: |
+      #     npm run deploy
+
+      # Deploy hexo blog website.
+      - name: Deploy
+        id: deploy
+        uses: sma11black/hexo-action@v1.0.3
+        with:
+          deploy_key: ${{ secrets.HEXO_DEPLOY_KEY }}
+          user_name: $GIT_USER
+          user_email: $GIT_EMAIL
+          commit_msg: ${{ github.event.head_commit.message }}  # (or delete this input setting to use hexo default settings)
+      # Use the output from the `deploy` step(use for test action)
+      - name: Get the output
         run: |
-          npm run deploy
+          echo "${{ steps.deploy.outputs.notify }}"
