@@ -10,8 +10,8 @@ on:
 env:
   GIT_USER: BaihlUp
   GIT_EMAIL: 2677443264@qq.com
-  #THEME_REPO: sanonz/hexo-theme-concise
-  #THEME_BRANCH: master
+  THEME_REPO: blinkfox/hexo-theme-matery
+  THEME_BRANCH: master
   DEPLOY_REPO: BaihlUp/baihlUp.github.io
   DEPLOY_BRANCH: master
 
@@ -30,12 +30,22 @@ jobs:
         with:
           ref: main
 
-      # - name: Checkout theme repo
-      #   uses: actions/checkout@v2
-      #   with:
-      #     repository: ${{ env.THEME_REPO }}
-      #     ref: ${{ env.THEME_BRANCH }}
-      #     path: themes/concise
+      # Caching dependencies to speed up workflows. (GitHub will remove any cache entries that have not been accessed in over 7 days.)
+      - name: Cache node modules
+        uses: actions/cache@v1
+        id: cache
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Checkout theme repo
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ env.THEME_REPO }}
+          ref: ${{ env.THEME_BRANCH }}
+          path: themes/matery
 
       # - name: Checkout deploy repo
       #   uses: actions/checkout@v3
