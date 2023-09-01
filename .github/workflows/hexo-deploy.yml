@@ -25,7 +25,7 @@ jobs:
         key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
         restore-keys: |
           ${{ runner.os }}-node-
-          
+
     - name: Install Dependencies
       if: steps.cache.outputs.cache-hit != 'true'
       run: npm ci
@@ -36,7 +36,7 @@ jobs:
       uses: sma11black/hexo-action@v1.0.3
       with:
         deploy_key: ${{ secrets.HEXO_DEPLOY_KEY }}
-        user_name: baihlUp
+        user_name: BaihlUp
         user_email: 2677443264@qq.com
         commit_msg: ${{ github.event.head_commit.message }}ion)
     - name: Get the output
