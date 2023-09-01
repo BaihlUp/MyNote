@@ -11,7 +11,7 @@ env:
   GIT_USER: BaihlUp
   GIT_EMAIL: 2677443264@qq.com
   # THEME_REPO: blinkfox/hexo-theme-matery
-  THEME_REPO: yelog/hexo-theme-3-hexo
+  THEME_REPO: dusign/hexo-theme-snail
   THEME_BRANCH: master
   DEPLOY_REPO: BaihlUp/baihlUp.github.io
   DEPLOY_BRANCH: master
@@ -46,7 +46,7 @@ jobs:
         with:
           repository: ${{ env.THEME_REPO }}
           ref: ${{ env.THEME_BRANCH }}
-          path: themes/3-hexo
+          path: themes/snail
 
       # - name: Checkout deploy repo
       #   uses: actions/checkout@v3
