@@ -86,8 +86,8 @@ jobs:
         uses: sma11black/hexo-action@v1.0.4
         with:
           deploy_key: ${{ secrets.HEXO_DEPLOY_KEY }}
-          user_name: ${{ GIT_USER }}
-          user_email: ${{ GIT_EMAIL }}
+          user_name: ${{ env.GIT_USER }}
+          user_email: ${{ env.GIT_EMAIL }}
           commit_msg: ${{ github.event.head_commit.message }}  # (or delete this input setting to use hexo default settings)
       # Use the output from the `deploy` step(use for test action)
       - name: Get the output
