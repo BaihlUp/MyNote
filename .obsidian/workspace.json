@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "220 - 程序设计/224 - Java、Lua/Java学习笔记.md",
+                "file": "Redis笔记.md",
                 "mode": "preview",
                 "source": false
               }
@@ -85,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "220 - 程序设计/224 - Java、Lua/Java学习笔记.md",
+                "file": "Redis笔记.md",
                 "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "220 - 程序设计/224 - Java、Lua/Java学习笔记.md",
+                "file": "Redis笔记.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "220 - 程序设计/224 - Java、Lua/Java学习笔记.md"
+                "file": "Redis笔记.md"
               }
             }
           }
@@ -147,10 +147,10 @@
       "command-palette:打开命令面板": false
     }
   },
-  "active": "8015790f090d1264",
+  "active": "aecbabdb91fb6e13",
   "lastOpenFiles": [
-    "8月份-18510743852.pdf",
     "220 - 程序设计/224 - Java、Lua/Java学习笔记.md",
+    "8月份-18510743852.pdf",
     "Redis笔记.md",
     "source/_posts/220 - 程序设计/224 - Java、Lua/Java学习笔记.md",
     "220 - 程序设计/224 - Java、Lua",
