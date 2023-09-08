@@ -129,11 +129,12 @@
               }
             }
           }
-        ]
+        ],
+        "currentTab": 3
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 243.5
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -146,11 +147,12 @@
       "command-palette:打开命令面板": false
     }
   },
-  "active": "1247c9aa2da35d94",
+  "active": "8015790f090d1264",
   "lastOpenFiles": [
+    "8月份-18510743852.pdf",
+    "220 - 程序设计/224 - Java、Lua/Java学习笔记.md",
     "Redis笔记.md",
     "source/_posts/220 - 程序设计/224 - Java、Lua/Java学习笔记.md",
-    "220 - 程序设计/224 - Java、Lua/Java学习笔记.md",
     "220 - 程序设计/224 - Java、Lua",
     "220 - 程序设计",
     "node_modules/normalize-path/README.md",
@@ -161,7 +163,6 @@
     "node_modules/no-case/dist.es2015/index.spec.js.map",
     "node_modules/no-case/dist.es2015/index.spec.js",
     "node_modules/no-case/dist.es2015/index.spec.d.ts",
-    "node_modules/no-case/dist.es2015/index.js.map",
     "node_modules/no-case/README.md",
     "node_modules/nib/iconic/iconic_stroke.svg",
     "node_modules/nib/docs/README.md",
@@ -184,7 +185,6 @@
     "node_modules/hexo-renderer-stylus/README.md",
     "node_modules/hexo-renderer-ejs/README.md",
     "node_modules/hexo-pagination/README.md",
-    "node_modules/hexo-log/README.md",
     "themes/yilia/source-src/css/img/tooltip.svg",
     "themes/yilia/source-src/css/img/scrollbar_arrow.png",
     "themes/yilia/source-src/css/img/checkered-pattern.png",
