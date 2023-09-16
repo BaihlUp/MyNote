@@ -1,6 +1,6 @@
 ---
 title: Kubernetes-v1.26.1部署指南
-date: 2023-09-01 09:27:41
+date: 2023-09-16 16:27:41
 tags: Kubernetes
 ---
 
