@@ -1,0 +1,149 @@
+{
+  "main": {
+    "id": "7a15edd3a6eeed10",
+    "type": "split",
+    "children": [
+      {
+        "id": "45076e726356e05b",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "167a00a1d1d40228",
+            "type": "leaf",
+            "state": {
+              "type": "empty",
+              "state": {}
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "cf81c2cb1392e070",
+    "type": "split",
+    "children": [
+      {
+        "id": "7f4e85c1fd349cf1",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "45ebc14681c8095b",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "206ee310f225d09c",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "e73c9496fb9b5ce8",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {}
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "df408e6434c90015",
+    "type": "split",
+    "children": [
+      {
+        "id": "88419e4f61e39e12",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "c37e6cbf5f691f6b",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "80e5ab3c0883d94e",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "e8c1c28ab4cc08f2",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true
+              }
+            }
+          },
+          {
+            "id": "e1f6351eaea67c7f",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {}
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:打开快速切换": false,
+      "graph:查看关系图谱": false,
+      "canvas:新建白板": false,
+      "daily-notes:打开/创建今天的日记": false,
+      "templates:插入模板": false,
+      "command-palette:打开命令面板": false
+    }
+  },
+  "active": "167a00a1d1d40228",
+  "lastOpenFiles": [
+    "license-image.md",
+    "node_modules/moment-timezone/README.md",
+    "source/_posts/Kubernetes中的Calico网络.md",
+    "source/_posts/Kubernetes-v1.26.1部署指南.md",
+    "source/_posts/hello-world.md",
+    "scaffolds/page.md"
+  ]
+}

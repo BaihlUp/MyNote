@@ -1,7 +1,9 @@
 ---
 title: Kubernetes中的Calico网络
 date: 2023-09-18 16:27:41
-tags: Kubernetes, Calico
+tags:
+  - Kubernetes
+  - Calico
 ---
 
 [toc]
