@@ -4,16 +4,40 @@
     "type": "split",
     "children": [
       {
-        "id": "45076e726356e05b",
+        "id": "197237e9e61ce6e1",
         "type": "tabs",
         "children": [
           {
-            "id": "167a00a1d1d40228",
+            "id": "d2515ad46970dbb9",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {}
-            }
+              "type": "markdown",
+              "state": {
+                "file": "source/_posts/Kubernetes-v1.26.1部署指南.md",
+                "mode": "source",
+                "source": true
+              }
+            },
+            "group": "1ebdf822045237f4"
+          }
+        ]
+      },
+      {
+        "id": "ac9a3e31b56d706b",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "3cd629853ad20c3f",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "source/_posts/Kubernetes-v1.26.1部署指南.md",
+                "mode": "preview",
+                "source": false
+              }
+            },
+            "group": "1ebdf822045237f4"
           }
         ]
       }
@@ -65,7 +89,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 216.5,
+    "collapsed": true
   },
   "right": {
     "id": "df408e6434c90015",
@@ -81,6 +106,7 @@
             "state": {
               "type": "backlink",
               "state": {
+                "file": "source/_posts/Kubernetes-v1.26.1部署指南.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -97,6 +123,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
+                "file": "source/_posts/Kubernetes-v1.26.1部署指南.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -118,14 +145,28 @@
             "type": "leaf",
             "state": {
               "type": "outline",
-              "state": {}
+              "state": {
+                "file": "source/_posts/Kubernetes-v1.26.1部署指南.md"
+              }
+            }
+          },
+          {
+            "id": "2c618cb86f0020fb",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency"
+              }
             }
           }
-        ]
+        ],
+        "currentTab": 3
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 300,
+    "collapsed": true
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -137,13 +178,16 @@
       "command-palette:打开命令面板": false
     }
   },
-  "active": "167a00a1d1d40228",
+  "active": "d2515ad46970dbb9",
   "lastOpenFiles": [
-    "license-image.md",
-    "node_modules/moment-timezone/README.md",
-    "source/_posts/Kubernetes中的Calico网络.md",
+    "source/_posts/零基础学 Python.md",
     "source/_posts/Kubernetes-v1.26.1部署指南.md",
     "source/_posts/hello-world.md",
+    "source/_posts/Kubernetes中的Calico网络.md",
+    "未命名.md",
+    "scaffolds/draft.md",
+    "license-image.md",
+    "node_modules/moment-timezone/README.md",
     "scaffolds/page.md"
   ]
 }
