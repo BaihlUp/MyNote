@@ -4,40 +4,40 @@
     "type": "split",
     "children": [
       {
-        "id": "197237e9e61ce6e1",
+        "id": "1ff5b1e91f02c81c",
         "type": "tabs",
         "children": [
           {
-            "id": "d2515ad46970dbb9",
+            "id": "5f3bbd729ecba184",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "source/_posts/Kubernetes-v1.26.1部署指南.md",
+                "file": "source/_posts/220 - 程序设计/223 - Go & Python/零基础学 Python.md",
                 "mode": "source",
                 "source": true
               }
             },
-            "group": "1ebdf822045237f4"
+            "group": "7272aeca1ec99b85"
           }
         ]
       },
       {
-        "id": "ac9a3e31b56d706b",
+        "id": "6dc7f1a432ea30d2",
         "type": "tabs",
         "children": [
           {
-            "id": "3cd629853ad20c3f",
+            "id": "4129a8c26fd64454",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "source/_posts/Kubernetes-v1.26.1部署指南.md",
-                "mode": "preview",
+                "file": "source/_posts/220 - 程序设计/223 - Go & Python/零基础学 Python.md",
+                "mode": "source",
                 "source": false
               }
             },
-            "group": "1ebdf822045237f4"
+            "group": "7272aeca1ec99b85"
           }
         ]
       }
@@ -89,8 +89,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 216.5,
-    "collapsed": true
+    "width": 342.49999618530273
   },
   "right": {
     "id": "df408e6434c90015",
@@ -106,7 +105,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "source/_posts/Kubernetes-v1.26.1部署指南.md",
+                "file": "source/_posts/220 - 程序设计/223 - Go & Python/零基础学 Python.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -123,7 +122,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "source/_posts/Kubernetes-v1.26.1部署指南.md",
+                "file": "source/_posts/220 - 程序设计/223 - Go & Python/零基础学 Python.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -146,7 +145,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "source/_posts/Kubernetes-v1.26.1部署指南.md"
+                "file": "source/_posts/220 - 程序设计/223 - Go & Python/零基础学 Python.md"
               }
             }
           },
@@ -178,10 +177,28 @@
       "command-palette:打开命令面板": false
     }
   },
-  "active": "d2515ad46970dbb9",
+  "active": "45ebc14681c8095b",
   "lastOpenFiles": [
-    "source/_posts/零基础学 Python.md",
+    "source/_posts/295 - 前端&移动/298 - 网站开发",
+    "source/_posts/295 - 前端&移动/297 - 客户端开发 - 副本",
+    "source/_posts/295 - 前端&移动/297 - 客户端开发",
+    "source/_posts/295 - 前端&移动/296 - 学习笔记 - 副本",
+    "source/_posts/295 - 前端&移动/296 - 学习笔记",
+    "source/_posts/295 - 前端&移动/新建文件夹",
+    "source/_posts/290 - 信息安全/294 - 参考资料",
+    "source/_posts/290 - 信息安全/292 - OpenSSL - 副本",
+    "source/_posts/290 - 信息安全/292 - OpenSSL",
+    "source/_posts/290 - 信息安全/291 - 学习笔记 - 副本",
+    "source/_posts/290 - 信息安全/291 - 学习笔记",
+    "source/_posts/250 - 虚拟化&云计算/251 - 学习笔记/Kubernetes-v1.26.1部署指南.md",
+    "source/_posts/220 - 程序设计/未命名.md",
+    "source/_posts/220 - 程序设计/223 - Go & Python/零基础学 Python.md",
+    "source/_posts/250 - 虚拟化&云计算/251 - 学习笔记/Kubernetes中的Calico网络.md",
+    "source/_posts/250 - 虚拟化&云计算/Kubernetes-v1.26.1部署指南.md",
     "source/_posts/Kubernetes-v1.26.1部署指南.md",
+    "source/_posts/250 - 虚拟化&云计算/Kubernetes中的Calico网络.md",
+    "source/_posts/220 - 程序设计/零基础学 Python.md",
+    "source/_posts/零基础学 Python.md",
     "source/_posts/hello-world.md",
     "source/_posts/Kubernetes中的Calico网络.md",
     "未命名.md",
