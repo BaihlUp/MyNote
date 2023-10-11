@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "source/_posts/220 - 程序设计/223 - Go & Python/零基础学 Python.md",
+                "file": "source/_posts/200 - 我的百宝箱/204 - 工具使用/Obsidian的使用.md",
                 "mode": "source",
                 "source": true
               }
@@ -32,8 +32,8 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "source/_posts/220 - 程序设计/223 - Go & Python/零基础学 Python.md",
-                "mode": "source",
+                "file": "source/_posts/200 - 我的百宝箱/204 - 工具使用/Obsidian的使用.md",
+                "mode": "preview",
                 "source": false
               }
             },
@@ -89,7 +89,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 342.49999618530273
+    "width": 260.49999618530273
   },
   "right": {
     "id": "df408e6434c90015",
@@ -105,7 +105,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "source/_posts/220 - 程序设计/223 - Go & Python/零基础学 Python.md",
+                "file": "source/_posts/200 - 我的百宝箱/204 - 工具使用/Obsidian的使用.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -122,7 +122,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "source/_posts/220 - 程序设计/223 - Go & Python/零基础学 Python.md",
+                "file": "source/_posts/200 - 我的百宝箱/204 - 工具使用/Obsidian的使用.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -145,7 +145,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "source/_posts/220 - 程序设计/223 - Go & Python/零基础学 Python.md"
+                "file": "source/_posts/200 - 我的百宝箱/204 - 工具使用/Obsidian的使用.md"
               }
             }
           },
@@ -177,22 +177,22 @@
       "command-palette:打开命令面板": false
     }
   },
-  "active": "45ebc14681c8095b",
+  "active": "5f3bbd729ecba184",
   "lastOpenFiles": [
-    "source/_posts/295 - 前端&移动/298 - 网站开发",
-    "source/_posts/295 - 前端&移动/297 - 客户端开发 - 副本",
-    "source/_posts/295 - 前端&移动/297 - 客户端开发",
-    "source/_posts/295 - 前端&移动/296 - 学习笔记 - 副本",
-    "source/_posts/295 - 前端&移动/296 - 学习笔记",
-    "source/_posts/295 - 前端&移动/新建文件夹",
-    "source/_posts/290 - 信息安全/294 - 参考资料",
-    "source/_posts/290 - 信息安全/292 - OpenSSL - 副本",
-    "source/_posts/290 - 信息安全/292 - OpenSSL",
-    "source/_posts/290 - 信息安全/291 - 学习笔记 - 副本",
-    "source/_posts/290 - 信息安全/291 - 学习笔记",
+    "source/_posts/220 - 程序设计/223 - Go & Python/零基础学 Python.md",
+    "source/_posts/200 - 我的百宝箱/204 - 工具使用/Obsidian的使用.md",
+    "source/_posts/200 - 我的百宝箱/205 - 理财 & 赚钱",
+    "source/_posts/200 - 我的百宝箱/新建文件夹",
+    "source/_posts/200 - 我的百宝箱/20",
+    "source/_posts/200 - 我的百宝箱/204 - 工具使用",
+    "source/_posts/200 - 我的百宝箱/202 - 职业成长",
+    "source/_posts/200 - 我的百宝箱/203 - 知识管理",
+    "source/_posts/200 - 我的百宝箱/201 - 学习笔记",
+    "source/_posts/200 - 我的百宝箱",
+    "source/_posts/200 - 杂项/204 - 工具使用",
+    "source/_posts/200 - 杂项/203 - 知识管理 - 副本",
     "source/_posts/250 - 虚拟化&云计算/251 - 学习笔记/Kubernetes-v1.26.1部署指南.md",
     "source/_posts/220 - 程序设计/未命名.md",
-    "source/_posts/220 - 程序设计/223 - Go & Python/零基础学 Python.md",
     "source/_posts/250 - 虚拟化&云计算/251 - 学习笔记/Kubernetes中的Calico网络.md",
     "source/_posts/250 - 虚拟化&云计算/Kubernetes-v1.26.1部署指南.md",
     "source/_posts/Kubernetes-v1.26.1部署指南.md",
