@@ -13,9 +13,9 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "source/_posts/220 - 程序设计/223 - Go & Python/零基础学 Python.md",
+                "file": "220 - 程序设计/223 - Go & Python/零基础学 Python.md",
                 "mode": "source",
-                "source": true
+                "source": false
               }
             },
             "group": "1e945d371352e4cd"
@@ -32,8 +32,8 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "source/_posts/220 - 程序设计/223 - Go & Python/零基础学 Python.md",
-                "mode": "preview",
+                "file": "220 - 程序设计/223 - Go & Python/零基础学 Python.md",
+                "mode": "source",
                 "source": false
               }
             },
@@ -89,7 +89,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 291.49999618530273
+    "width": 242.49999618530273
   },
   "right": {
     "id": "df408e6434c90015",
@@ -105,7 +105,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "source/_posts/220 - 程序设计/223 - Go & Python/零基础学 Python.md",
+                "file": "220 - 程序设计/223 - Go & Python/零基础学 Python.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -122,7 +122,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "source/_posts/220 - 程序设计/223 - Go & Python/零基础学 Python.md",
+                "file": "220 - 程序设计/223 - Go & Python/零基础学 Python.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -145,7 +145,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "source/_posts/220 - 程序设计/223 - Go & Python/零基础学 Python.md"
+                "file": "220 - 程序设计/223 - Go & Python/零基础学 Python.md"
               }
             }
           },
@@ -176,15 +176,17 @@
       "command-palette:打开命令面板": false
     }
   },
-  "active": "6216b66d7de66960",
+  "active": "2ca5f68388f44b5d",
   "lastOpenFiles": [
+    "250 - 虚拟化&云计算/251 - 学习笔记/Kubernetes中的Calico网络.md",
+    "250 - 虚拟化&云计算/251 - 学习笔记/Kubernetes-v1.26.1部署指南.md",
+    "source/_posts/200 - 我的百宝箱/204 - 工具使用/Obsidian的使用.md",
+    "source/_posts/220 - 程序设计/223 - Go & Python/零基础学 Python.md",
     "source/_posts/220 - 程序设计/未命名.md",
     "source/_posts/250 - 虚拟化&云计算/251 - 学习笔记/Kubernetes-v1.26.1部署指南.md",
     "source/_posts/250 - 虚拟化&云计算/251 - 学习笔记/Kubernetes中的Calico网络.md",
-    "source/_posts/220 - 程序设计/223 - Go & Python/零基础学 Python.md",
     "license-image.md",
     "MWebLibrary",
-    "source/_posts/200 - 我的百宝箱/204 - 工具使用/Obsidian的使用.md",
     "source/_posts/200 - 我的百宝箱/205 - 理财 & 赚钱",
     "source/_posts/200 - 我的百宝箱/新建文件夹",
     "source/_posts/200 - 我的百宝箱/20",
