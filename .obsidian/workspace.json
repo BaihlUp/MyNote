@@ -89,8 +89,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 291.49999618530273,
-    "collapsed": true
+    "width": 291.49999618530273
   },
   "right": {
     "id": "df408e6434c90015",
@@ -177,7 +176,7 @@
       "command-palette:打开命令面板": false
     }
   },
-  "active": "2ca5f68388f44b5d",
+  "active": "6216b66d7de66960",
   "lastOpenFiles": [
     "source/_posts/220 - 程序设计/未命名.md",
     "source/_posts/250 - 虚拟化&云计算/251 - 学习笔记/Kubernetes-v1.26.1部署指南.md",
