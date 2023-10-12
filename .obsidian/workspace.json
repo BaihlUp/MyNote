@@ -15,7 +15,7 @@
               "state": {
                 "file": "source/_posts/220 - 程序设计/223 - Go & Python/零基础学 Python.md",
                 "mode": "source",
-                "source": false
+                "source": true
               }
             },
             "group": "1e945d371352e4cd"
@@ -89,7 +89,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 260.49999618530273
+    "width": 291.49999618530273,
+    "collapsed": true
   },
   "right": {
     "id": "df408e6434c90015",
@@ -173,16 +174,18 @@
       "canvas:新建白板": false,
       "daily-notes:打开/创建今天的日记": false,
       "templates:插入模板": false,
-      "command-palette:打开命令面板": false,
-      "remotely-save:Remotely Save": false
+      "command-palette:打开命令面板": false
     }
   },
   "active": "2ca5f68388f44b5d",
   "lastOpenFiles": [
+    "source/_posts/220 - 程序设计/未命名.md",
+    "source/_posts/250 - 虚拟化&云计算/251 - 学习笔记/Kubernetes-v1.26.1部署指南.md",
+    "source/_posts/250 - 虚拟化&云计算/251 - 学习笔记/Kubernetes中的Calico网络.md",
+    "source/_posts/220 - 程序设计/223 - Go & Python/零基础学 Python.md",
     "license-image.md",
     "MWebLibrary",
     "source/_posts/200 - 我的百宝箱/204 - 工具使用/Obsidian的使用.md",
-    "source/_posts/220 - 程序设计/223 - Go & Python/零基础学 Python.md",
     "source/_posts/200 - 我的百宝箱/205 - 理财 & 赚钱",
     "source/_posts/200 - 我的百宝箱/新建文件夹",
     "source/_posts/200 - 我的百宝箱/20",
@@ -192,9 +195,6 @@
     "source/_posts/200 - 我的百宝箱/201 - 学习笔记",
     "source/_posts/200 - 我的百宝箱",
     "source/_posts/200 - 杂项/204 - 工具使用",
-    "source/_posts/250 - 虚拟化&云计算/251 - 学习笔记/Kubernetes-v1.26.1部署指南.md",
-    "source/_posts/220 - 程序设计/未命名.md",
-    "source/_posts/250 - 虚拟化&云计算/251 - 学习笔记/Kubernetes中的Calico网络.md",
     "source/_posts/250 - 虚拟化&云计算/Kubernetes-v1.26.1部署指南.md",
     "source/_posts/Kubernetes-v1.26.1部署指南.md",
     "source/_posts/250 - 虚拟化&云计算/Kubernetes中的Calico网络.md",
