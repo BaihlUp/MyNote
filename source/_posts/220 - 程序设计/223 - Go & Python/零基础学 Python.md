@@ -722,7 +722,7 @@ Y=1
 
 ## 2.7 Python列表推导式
 
-```
+```python
 list3 = [ i*i for i in (1, 2, 3, 4) if i > 2]
 print(list3)
 ```

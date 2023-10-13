@@ -33,7 +33,7 @@
               "type": "markdown",
               "state": {
                 "file": "220 - 程序设计/223 - Go & Python/零基础学 Python.md",
-                "mode": "source",
+                "mode": "preview",
                 "source": false
               }
             },
@@ -89,7 +89,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 242.49999618530273
+    "width": 242.49999618530273,
+    "collapsed": true
   },
   "right": {
     "id": "df408e6434c90015",
