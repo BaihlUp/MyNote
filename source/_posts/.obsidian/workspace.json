@@ -6,6 +6,7 @@
       {
         "id": "3a3f8dc1c882a8b7",
         "type": "tabs",
+        "dimension": 46.86648501362398,
         "children": [
           {
             "id": "6216b66d7de66960",
@@ -15,7 +16,7 @@
               "state": {
                 "file": "220 - 程序设计/223 - Go & Python/零基础学 Python.md",
                 "mode": "source",
-                "source": false
+                "source": true
               }
             },
             "group": "1e945d371352e4cd"
@@ -25,6 +26,7 @@
       {
         "id": "589b16bb08aeb3e5",
         "type": "tabs",
+        "dimension": 53.13351498637602,
         "children": [
           {
             "id": "2ca5f68388f44b5d",
@@ -165,7 +167,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 300,
+    "collapsed": true
   },
   "left-ribbon": {
     "hiddenItems": {
