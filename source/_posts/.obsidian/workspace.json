@@ -13,9 +13,9 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "220 - 程序设计/223 - Go & Python/零基础学 Python.md",
+                "file": "220 - 程序设计/223 - Go & Python/Python爬虫.md",
                 "mode": "source",
-                "source": false
+                "source": true
               }
             },
             "group": "1e945d371352e4cd"
@@ -32,7 +32,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "220 - 程序设计/223 - Go & Python/零基础学 Python.md",
+                "file": "220 - 程序设计/223 - Go & Python/Python爬虫.md",
                 "mode": "preview",
                 "source": false
               }
@@ -106,7 +106,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "220 - 程序设计/223 - Go & Python/零基础学 Python.md",
+                "file": "220 - 程序设计/223 - Go & Python/Python爬虫.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -123,7 +123,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "220 - 程序设计/223 - Go & Python/零基础学 Python.md",
+                "file": "220 - 程序设计/223 - Go & Python/Python爬虫.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -146,7 +146,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "220 - 程序设计/223 - Go & Python/零基础学 Python.md"
+                "file": "220 - 程序设计/223 - Go & Python/Python爬虫.md"
               }
             }
           },
@@ -177,8 +177,13 @@
       "command-palette:打开命令面板": false
     }
   },
-  "active": "2ca5f68388f44b5d",
+  "active": "6216b66d7de66960",
   "lastOpenFiles": [
+    "220 - 程序设计/223 - Go & Python/零基础学 Python.md",
+    "220 - 程序设计/223 - Go & Python/Python爬虫.md",
+    "Pasted image 20231018143854.png",
+    "Pasted image 20231018142835.png",
+    "Pasted image 20231018105801.png",
     "250 - 虚拟化&云计算/251 - 学习笔记/Kubernetes中的Calico网络.md",
     "250 - 虚拟化&云计算/251 - 学习笔记/Kubernetes-v1.26.1部署指南.md",
     "source/_posts/200 - 我的百宝箱/204 - 工具使用/Obsidian的使用.md",
