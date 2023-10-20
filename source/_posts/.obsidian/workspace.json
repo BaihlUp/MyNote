@@ -6,7 +6,6 @@
       {
         "id": "3a3f8dc1c882a8b7",
         "type": "tabs",
-        "dimension": 46.86648501362398,
         "children": [
           {
             "id": "6216b66d7de66960",
@@ -14,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "220 - 程序设计/223 - Go & Python/Python爬虫.md",
+                "file": "220 - 程序设计/223 - Go & Python/Python爬虫学习.md",
                 "mode": "source",
                 "source": true
               }
@@ -26,7 +25,6 @@
       {
         "id": "589b16bb08aeb3e5",
         "type": "tabs",
-        "dimension": 53.13351498637602,
         "children": [
           {
             "id": "2ca5f68388f44b5d",
@@ -34,7 +32,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "220 - 程序设计/223 - Go & Python/Python爬虫.md",
+                "file": "220 - 程序设计/223 - Go & Python/Python爬虫学习.md",
                 "mode": "preview",
                 "source": false
               }
@@ -107,7 +105,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "220 - 程序设计/223 - Go & Python/Python爬虫.md",
+                "file": "220 - 程序设计/223 - Go & Python/Python爬虫学习.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -124,7 +122,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "220 - 程序设计/223 - Go & Python/Python爬虫.md",
+                "file": "220 - 程序设计/223 - Go & Python/Python爬虫学习.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -147,7 +145,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "220 - 程序设计/223 - Go & Python/Python爬虫.md"
+                "file": "220 - 程序设计/223 - Go & Python/Python爬虫学习.md"
               }
             }
           },
@@ -166,7 +164,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 298.5
+    "width": 300
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -181,7 +179,7 @@
   "active": "6216b66d7de66960",
   "lastOpenFiles": [
     "220 - 程序设计/223 - Go & Python/零基础学 Python.md",
-    "220 - 程序设计/223 - Go & Python/Python爬虫.md",
+    "220 - 程序设计/223 - Go & Python/Python爬虫学习.md",
     "Pasted image 20231018143854.png",
     "Pasted image 20231018142835.png",
     "Pasted image 20231018105801.png",
