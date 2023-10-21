@@ -6,6 +6,7 @@
       {
         "id": "3a3f8dc1c882a8b7",
         "type": "tabs",
+        "dimension": 46.86648501362398,
         "children": [
           {
             "id": "6216b66d7de66960",
@@ -25,6 +26,7 @@
       {
         "id": "589b16bb08aeb3e5",
         "type": "tabs",
+        "dimension": 53.13351498637602,
         "children": [
           {
             "id": "2ca5f68388f44b5d",
@@ -89,7 +91,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 242.49999618530273
+    "width": 242.49999618530273,
+    "collapsed": true
   },
   "right": {
     "id": "df408e6434c90015",
@@ -164,7 +167,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 300,
+    "collapsed": true
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -180,9 +184,6 @@
   "lastOpenFiles": [
     "220 - 程序设计/223 - Go & Python/零基础学 Python.md",
     "220 - 程序设计/223 - Go & Python/Python爬虫学习.md",
-    "Pasted image 20231018143854.png",
-    "Pasted image 20231018142835.png",
-    "Pasted image 20231018105801.png",
     "250 - 虚拟化&云计算/251 - 学习笔记/Kubernetes中的Calico网络.md",
     "250 - 虚拟化&云计算/251 - 学习笔记/Kubernetes-v1.26.1部署指南.md",
     "source/_posts/200 - 我的百宝箱/204 - 工具使用/Obsidian的使用.md",
