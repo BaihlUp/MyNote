@@ -6,7 +6,7 @@
       {
         "id": "3a3f8dc1c882a8b7",
         "type": "tabs",
-        "dimension": 46.86648501362398,
+        "dimension": 53.51993214588634,
         "children": [
           {
             "id": "6216b66d7de66960",
@@ -14,7 +14,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "220 - 程序设计/223 - Go & Python/Python爬虫学习.md",
+                "file": "220 - 程序设计/223 - Go & Python/Python核心技术与实战.md",
                 "mode": "source",
                 "source": true
               }
@@ -26,7 +26,7 @@
       {
         "id": "589b16bb08aeb3e5",
         "type": "tabs",
-        "dimension": 53.13351498637602,
+        "dimension": 46.480067854113656,
         "children": [
           {
             "id": "2ca5f68388f44b5d",
@@ -34,8 +34,8 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "220 - 程序设计/223 - Go & Python/Python爬虫学习.md",
-                "mode": "preview",
+                "file": "220 - 程序设计/223 - Go & Python/Python核心技术与实战.md",
+                "mode": "source",
                 "source": false
               }
             },
@@ -70,7 +70,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "[\"date\"]",
+                "query": "line:(metaclass)",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -108,7 +108,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "220 - 程序设计/223 - Go & Python/Python爬虫学习.md",
+                "file": "220 - 程序设计/223 - Go & Python/Python核心技术与实战.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -125,7 +125,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "220 - 程序设计/223 - Go & Python/Python爬虫学习.md",
+                "file": "220 - 程序设计/223 - Go & Python/Python核心技术与实战.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -148,7 +148,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "220 - 程序设计/223 - Go & Python/Python爬虫学习.md"
+                "file": "220 - 程序设计/223 - Go & Python/Python核心技术与实战.md"
               }
             }
           },
@@ -167,8 +167,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300,
-    "collapsed": true
+    "width": 300
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -180,9 +179,11 @@
       "command-palette:打开命令面板": false
     }
   },
-  "active": "6216b66d7de66960",
+  "active": "45ebc14681c8095b",
   "lastOpenFiles": [
     "220 - 程序设计/223 - Go & Python/零基础学 Python.md",
+    "220 - 程序设计/223 - Go & Python/Python核心技术与实战.md",
+    "截屏2023-10-22 18.15.17.png",
     "220 - 程序设计/223 - Go & Python/Python爬虫学习.md",
     "250 - 虚拟化&云计算/251 - 学习笔记/Kubernetes中的Calico网络.md",
     "250 - 虚拟化&云计算/251 - 学习笔记/Kubernetes-v1.26.1部署指南.md",
