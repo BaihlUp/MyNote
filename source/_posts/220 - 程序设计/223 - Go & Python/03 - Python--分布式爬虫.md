@@ -214,3 +214,12 @@ scrapy genspider jobbole new.cnblogs.com
 ## 机器学习识别
 EasyDL
 
+
+## 8 Scrapy突破反爬的限制
+![[Pasted image 20231024200047.png]]
+
+网站数据动态填充
+
+![[Pasted image 20231024190906.png]]
+
+![[Pasted image 20231024191715.png]]
