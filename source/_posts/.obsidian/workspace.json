@@ -6,7 +6,7 @@
       {
         "id": "3a3f8dc1c882a8b7",
         "type": "tabs",
-        "dimension": 53.51993214588634,
+        "dimension": 56.53075328265377,
         "children": [
           {
             "id": "6216b66d7de66960",
@@ -26,7 +26,7 @@
       {
         "id": "589b16bb08aeb3e5",
         "type": "tabs",
-        "dimension": 46.480067854113656,
+        "dimension": 43.46924671734623,
         "children": [
           {
             "id": "2ca5f68388f44b5d",
@@ -35,7 +35,7 @@
               "type": "markdown",
               "state": {
                 "file": "220 - 程序设计/223 - Go & Python/Python核心技术与实战.md",
-                "mode": "source",
+                "mode": "preview",
                 "source": false
               }
             },
@@ -179,8 +179,10 @@
       "command-palette:打开命令面板": false
     }
   },
-  "active": "45ebc14681c8095b",
+  "active": "6216b66d7de66960",
   "lastOpenFiles": [
+    "Pasted image 20231023095714.png",
+    "Pasted image 20231023095654.png",
     "220 - 程序设计/223 - Go & Python/零基础学 Python.md",
     "220 - 程序设计/223 - Go & Python/Python核心技术与实战.md",
     "截屏2023-10-22 18.15.17.png",

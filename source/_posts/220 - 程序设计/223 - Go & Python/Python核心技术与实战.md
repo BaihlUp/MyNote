@@ -325,7 +325,7 @@ if __name__ == "__main__":
 ## 2.3 装饰器
 [[零基础学 Python]]
 
-## 2.4 metaclass
+## 2.4 metaclass**
 没看懂，需要再研究
 
 ## 2.5 迭代器和生成器
@@ -713,3 +713,208 @@ Wall time: 4.98 s
 - 协程的写法更加简洁清晰，把 async / await 语法和 create_task 结合来用，对于中小级别的并发需求已经毫无压力。
 - 写协程程序的时候，你的脑海中要有清晰的事件循环概念，知道程序在什么时候需要暂停、等待 I/O，什么时候需要一并执行到底。
 
+## 2.7 并发编程
+### 2.7.1 线程
+使用 `Thread` 创建线程，示例如下：
+```python
+from threading import Thread  
+  
+def task(count: int):  
+    for n in range(count):  
+        print(n)  
+  
+  
+thread1 = Thread(target=task, args=(10,))  
+thread2 = Thread(target=task, args=(20,))  
+
+thread1.daemon = True  # 创建守护线程
+thread2.daemon = True 
+
+thread1.start()  
+thread2.start()  
+  
+thread1.join()  # 等待线程结束
+thread2.join()  
+  
+print("Main threads is end")
+```
+以上默认创建的是 非守护线程，执行`thread1.daemon = True`设置成守护线程， 主线程需要使用 join 等待守护线程结束，否则主程序结束后，线程可能未执行完。
+
+- 守护线程会在主线程结束时候自动结束
+- 主线程需要等到所有非守护线程结束才能结束（默认创建的为非守护线程）
+- 守护线程一般用于执行后台任务和服务，如日志记录、监控、定时任务等
+
+### 2.7.2 线程安全队列
+queue模块中的Queue类提供了线程安全队列功能：
+1. queue.put(item, block=False)  非阻塞写入数据到队列
+2. queue.put(item, timeout=3)    阻塞超时3s
+3. queue.get(block=False)
+4. queue.get(timeout=10)
+5. queue.qsize()
+6. queue.empty()
+7. queue.full()
+
+通过继承 Thread 类创建线程，实现生产者和消费者：
+```python
+from threading import Thread
+from queue import Queue  
+
+class MsgProducer(Thread):  
+    def __init__(self, name: str, count: int, queue: Queue):  
+        super().__init__()  
+  
+        self.name = name  
+        self.count = count  
+        self.queue = queue  
+  
+    def run(self) -> None:  
+        for n in range(self.count):  
+            msg = f"{self.name} - {n}"  
+            self.queue.put(msg, block=True)  
+  
+  
+class MsgConsumer(Thread):  
+    def __init__(self, name: str, queue: Queue):  
+        super().__init__()  
+  
+        self.name = name  
+        self.queue = queue  
+        self.daemon = True  
+  
+    def run(self) -> None:  
+        while True:  
+            msg = self.queue.get(block=True)  
+            print(f"{self.name} - {msg}\n", end='')  # 取消print默认带的换行符
+  
+  
+queue = Queue(3)  
+threads = list()  
+threads.append(MsgProducer("PA", 10, queue))  
+threads.append(MsgProducer("PB", 10, queue))  
+threads.append(MsgProducer("PC", 10, queue))  
+  
+threads.append(MsgConsumer("CA", queue))  
+threads.append(MsgConsumer("CB", queue))  
+  
+for t in threads:  
+    t.start()
+```
+
+以上消费者线程设置为了守护线程，会等到所有生产者线程和主线程结束后，自动结束。run函数表示线程要执行的逻辑，主线程中创建了3个生产者线程和2个消费者线程。
+
+### 2.7.3 线程锁
+使用Lock让线程顺序执行：
+
+```python
+from threading import Thread, Lock, Condition  
+
+task_lock = Lock()  
+def task(name: str):  
+    global task_lock  
+    for n in range(2):  
+        task_lock.acquire()  # 获取锁
+        print(f"{name} - round {n} - step 1\n", end='')  
+        print(f"{name} - round {n} - step 2\n", end='')  
+        print(f"{name} - round {n} - step 3\n", end='')  
+        task_lock.release()  # 释放锁
+  
+  
+t1 = Thread(target=task, args=("A",))  
+t2 = Thread(target=task, args=("B",))  
+t3 = Thread(target=task, args=("C",))  
+  
+t1.start()  
+t2.start()  
+t3.start()
+```
+以上三个线程将依次执行task函数。
+
+基于 list 自定义实现一个安全队列：
+
+```python
+from threading import Thread, Lock, Condition
+
+class SafeQueue:  
+    def __init__(self, size: int):  
+        self.__item_list = list()  
+        self.size = size  
+        self.__item_lock = Condition()  
+  
+    def put(self, item):  
+        with self.__item_lock:  # 使用with语句加锁，多线程可以并发访问 
+            while len(self.__item_list) >= self.size:  
+                self.__item_lock.wait()  # 队列满，阻塞等待
+  
+            self.__item_list.insert(0, item)  
+            self.__item_lock.notify_all()  
+  
+    def get(self):  
+        with self.__item_lock:  
+            while len(self.__item_list) == 0:  
+                self.__item_lock.wait()  # 队列空，阻塞等待
+  
+            result = self.__item_list.pop()  
+            self.__item_lock.notify_all()  # 通知所有wait的线程
+  
+            return result
+```
+
+
+### 2.7.4 线程池
+线程的创建和销毁相对比较昂贵，频繁的创建和销毁线程不利于高性能。
+
+```python
+import time  
+from concurrent.futures import ThreadPoolExecutor
+
+def task(name: str):  
+    print(f"{name} - step 1\n", end='')  
+    time.sleep(1)  
+    print(f"{name} - step 2\n", end='')  
+  
+    return f"{name} complete"  
+
+# 创建一个ThreadPoolExecutor，设置max_workers指定线程池的大小
+with ThreadPoolExecutor(max_workers=4) as executor:
+	# 提交任务给线程池
+    result_1 = executor.submit(task, 'A')  
+    result_2 = executor.submit(task, 'B')  
+
+    # 获取任务的执行结果
+    print(result_1.result())  
+    print(result_2.result())  
+  
+with ThreadPoolExecutor() as executor:  
+	# 批量提交多个任务
+    results = executor.map(task, ['C', 'D'])  
+  
+    for r in results:  
+        print(r)
+```
+`ThreadPoolExecutor` 类是一个用于管理线程池的工具，可用于异步执行函数或方法。
+1. `executor.submit()` 方法提交任务给线程池，后边的参数是给任务传递的参数，可以多个
+2. 创建`ThreadPoolExecutor` 类时，根据 `max_workers` 参数来控制线程池中的线程数量，默认根据CPU数量设置线程数
+3. executor.map函数批量提交多个任务到线程池
+
+**使用submit提交多个任务，示例：**
+
+```python
+import concurrent.futures
+import requests
+import time
+
+def download_one(url):
+    resp = requests.get(url)
+    print('Read {} from {}'.format(len(resp.content), url))
+ 
+def download_all(sites):
+    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+        to_do = []
+        for site in sites:
+            future = executor.submit(download_one, site)
+            to_do.append(future)
+            
+        for future in concurrent.futures.as_completed(to_do):
+            future.result()
+```
+以上使用 `concurrent.futures.as_completed` 函数处理多个并发任务的结果。它的作用是返回一个生成器，该生成器在任务完成时生成任务的 Future 对象，而不是按照它们完成的顺序。这使你可以处理任何任务的结果，而不必等待它们按照提交的顺序完成。
