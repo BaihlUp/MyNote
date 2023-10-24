@@ -14,7 +14,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "220 - 程序设计/223 - Go & Python/02 - Python--进阶篇.md",
+                "file": "220 - 程序设计/00 - 目录.md",
                 "mode": "source",
                 "source": true
               }
@@ -34,7 +34,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "220 - 程序设计/223 - Go & Python/02 - Python--进阶篇.md",
+                "file": "220 - 程序设计/00 - 目录.md",
                 "mode": "preview",
                 "source": false
               }
@@ -107,7 +107,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "220 - 程序设计/223 - Go & Python/02 - Python--进阶篇.md",
+                "file": "220 - 程序设计/00 - 目录.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -124,7 +124,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "220 - 程序设计/223 - Go & Python/02 - Python--进阶篇.md",
+                "file": "220 - 程序设计/00 - 目录.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -147,7 +147,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "220 - 程序设计/223 - Go & Python/02 - Python--进阶篇.md"
+                "file": "220 - 程序设计/00 - 目录.md"
               }
             }
           },
@@ -181,8 +181,8 @@
   "active": "6216b66d7de66960",
   "lastOpenFiles": [
     "220 - 程序设计/223 - Go & Python/01 - Python--基础篇.md",
+    "220 - 程序设计/00 - 目录.md",
     "220 - 程序设计/223 - Go & Python/02 - Python--进阶篇.md",
-    "220 - 程序设计/目录.md",
     "220 - 程序设计/223 - Go & Python/03 - Python--分布式爬虫.md",
     "220 - 程序设计/223 - Go & Python/01 - Python程序设计/01 - 基础篇.md",
     "220 - 程序设计/223 - Go & Python/01 - Python程序设计/03 - 分布式爬虫.md",
