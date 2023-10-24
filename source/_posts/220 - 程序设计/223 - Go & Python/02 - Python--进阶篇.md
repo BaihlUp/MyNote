@@ -1,8 +1,8 @@
+# 0 参考资料
+- Python核心技术与实战 -- Geek
 
-
-# 2 进阶篇
-## 2.1 Python对象的比较、拷贝
-### 2.1.1 比较
+# 1 Python对象的比较、拷贝
+## 1.1 比较
 **`is` 操作符和 `==`操作符：**
 
 在 Python 中，每个对象的身份标识，都能通过函数 id(object) 获得。因此，`'is'`操作符，相当于比较对象之间的 ID 是否相等，
@@ -54,7 +54,7 @@ if a is not None:
 
 但是`'=='`操作符却不同，执行`a == b`相当于是去执行`a.__eq__(b)`，而 Python 大部分的数据类型都会去重载`__eq__`这个函数，其内部的处理通常会复杂一些。比如，对于列表，`__eq__`函数会去遍历列表中的元素，比较它们的顺序和值是否相等。
 
-### 2.1.2 深拷贝和浅拷贝
+## 1.2 深拷贝和浅拷贝
 - **浅拷贝**
 
 常见的浅拷贝的方法，是使用数据类型本身的构造器，比如下面两个例子：
@@ -199,8 +199,8 @@ def deepcopy(x, memo=None, _nil=[]):
         ...    
 ```
 
-## 2.2 值传递 or 引用传递
-### 2.2.1 Python变量及其赋值
+# 2 值传递 or 引用传递
+## 2.1 Python变量及其赋值
 Python代码示例：
 ```python
 a = 1
@@ -245,7 +245,7 @@ del l 删除了 l 这个变量，从此以后你无法访问 l，但是对象 [1
 - 对于不可变对象（字符串，整型，元祖等等），所有指向该对象的变量的值总是一样的，也不会改变。但是通过某些操作（+= 等等）更新不可变对象的值时，会返回一个新的对象。
 - 变量可以被删除，但是对象无法被删除。
 
-### 2.2.2 Python函数的参数传递
+## 2.2 Python函数的参数传递
 Python 的参数传递是**赋值传递** （pass by assignment），或者叫作对象的**引用传递**（pass by object reference）。Python 里所有的数据类型都是对象，所以参数传递时，只是让新变量与原变量指向相同的对象而已，并不存在值传递或是引用传递一说。
 ```python
 def my_func2(b):
@@ -322,14 +322,477 @@ if __name__ == "__main__":
 ```
 
 
-## 2.3 装饰器
-[[零基础学 Python]]
+# 3 装饰器
+## 3.1 函数装饰器
+函数的基本用法包括：
+1. 函数参数传递变量
+2. 函数当作参数传递
+3. 函数中嵌套函数
+4. 函数的返回值可以是函数对象（闭包）
 
-## 2.4 metaclass**
+```python
+def my_decorator(func):
+    def wrapper():
+        print('wrapper of decorator')
+        func()
+    return wrapper
+ 
+def greet():
+    print('hello world')
+ 
+greet = my_decorator(greet)
+greet()
+ 
+# 输出
+wrapper of decorator
+hello world
+```
+
+这段代码中，变量 greet 指向了内部函数 wrapper()，而内部函数 wrapper() 中又会调用原函数 greet()，因此，最后调用 greet() 时，就会先打印`'wrapper of decorator'`，然后输出`'hello world'`。
+这里的函数 my_decorator() 就是一个装饰器，它把真正需要执行的函数 greet() 包裹在其中，并且改变了它的行为，但是原函数 greet() 不变。
+
+事实上，上述代码在 Python 中有更简单、更优雅的表示：
+```python
+def my_decorator(func):
+    def wrapper():
+        print('wrapper of decorator')
+        func()
+    return wrapper
+ 
+@my_decorator
+def greet():
+    print('hello world')
+ 
+greet()
+```
+这里的`@`，我们称之为语法糖，`@my_decorator`就相当于前面的`greet=my_decorator(greet)`语句，只不过更加简洁。因此，如果你的程序中有其它函数需要做类似的装饰，你只需在它们的上方加上`@decorator`就可以了，这样就大大提高了函数的重复利用和程序的可读性。
+
+- **带有参数的装饰器**
+
+`*args`和`**kwargs`，表示接受任意数量和类型的参数：
+```python
+def my_decorator(func):
+    def wrapper(*args, **kwargs):
+        print('wrapper of decorator')
+        func(*args, **kwargs)
+    return wrapper
+```
+
+- **带有自定义参数的装饰器**
+
+```python
+def repeat(num):
+    def my_decorator(func):
+        def wrapper(*args, **kwargs):
+            for i in range(num):
+                print('wrapper of decorator')
+                func(*args, **kwargs)
+        return wrapper
+    return my_decorator
+ 
+ 
+@repeat(4)
+def greet(message):
+    print(message)
+ 
+greet('hello world')
+ 
+# 输出：
+wrapper of decorator
+hello world
+wrapper of decorator
+hello world
+wrapper of decorator
+hello world
+wrapper of decorator
+hello world
+```
+
+- **原函数还是原函数吗？**
+
+```python
+greet.__name__
+## 输出
+'wrapper'
+ 
+help(greet)
+# 输出
+Help on function wrapper in module __main__:
+ 
+wrapper(*args, **kwargs)
+```
+greet() 函数被装饰以后，它的元信息变了。元信息告诉我们“它不再是以前的那个 greet() 函数，而是被 wrapper() 函数取代了”。
+
+通常使用内置的装饰器`@functools.wrap`，它会帮助保留原函数的元信息（也就是将原函数的元信息，拷贝到对应的装饰器函数里）。
+```python
+import functools
+ 
+def my_decorator(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        print('wrapper of decorator')
+        func(*args, **kwargs)
+    return wrapper
+    
+@my_decorator
+def greet(message):
+    print(message)
+ 
+greet.__name__
+ 
+# 输出
+'greet'
+```
+
+## 3.2 类装饰器
+- 类的装饰器是类方法的装饰器的缩写
+- 可以通过装饰器改变方法的调用方式和行为
+
+### 3.2.1  `__call__` 模式方法
+类装饰器主要依赖于函数`__call_()`，每当你调用一个类的示例时，函数`__call__()`就会被执行一次。
+```python
+class Count:
+    def __init__(self, func):
+        self.func = func
+        self.num_calls = 0
+	# 类默认没有 __call__ 模式方法，当增加 __call__ 方法后则可以调用类
+    def __call__(self, *args, **kwargs):
+        self.num_calls += 1
+        print('num of calls is: {}'.format(self.num_calls))
+        return self.func(*args, **kwargs)
+ 
+@Count
+def example():
+    print("hello world")
+ 
+example()
+ 
+# 输出
+num of calls is: 1
+hello world
+ 
+example()
+ 
+# 输出
+num of calls is: 2
+hello world
+ 
+...
+```
+定义了类 Count，初始化时传入原函数 func()，而`__call__()`函数表示让变量 num_calls 自增 1，然后打印，并且调用原函数。因此，在我们第一次调用函数 example() 时，num_calls 的值是 1，而在第二次调用时，它的值变成了 2。
+
+- **在函数中**
+
+```python
+def func1():  
+	pass  
+dir(func1)
+```
+输出：
+```shell
+['__annotations__',
+ '__builtins__',
+ '__call__',  # 类中没有此方法
+ '__class__',
+ '__closure__',
+ '__code__',
+ '__defaults__',
+ '__delattr__',
+ '__dict__',
+ '__dir__',
+ '__doc__',
+ '__eq__',
+ ...
+```
+
+- **在类中**
+
+```python
+class Class1:
+    pass
+
+cls = Class1()
+cls()   # 报错
+```
+增加 `__call__` :
+```python
+class Class1:
+    def __call__(self, *args, **kwargs):
+        print("class is run")
+
+cls = Class1()
+cls()
+```
+输出：
+```shell
+class is run
+```
+
+### 3.2.2 classmethod 装饰器
+classmethod 修饰的方法定义为类的方法，用于类直接调用。
+```python
+class Klass1:
+      @classmethod
+      def funcs(cls): 
+           print("Class method")
+        
+Klass1.funcs()
+```
+输出：
+```shell
+Class method
+```
+
+**用途：** `classmethod` 用于定义类方法，类方法与类相关联，而不是与类的实例相关联。它们可以访问类级别的属性和方法，但不能直接访问实例级别的属性和方法。通常用于实现与类相关的功能，而不需要创建类的实例。
+**调用方式：** 类方法的第一个参数通常被命名为 `cls`，它表示类本身，可以使用它来访问类的属性和调用其他类方法。类方法可以通过类名或类的实例调用。
+
+```python
+class MyClass:
+    class_variable = 0
+
+    def __init__(self, value):
+        self.value = value
+
+    @classmethod
+    def increment_class_variable(cls):
+        cls.class_variable += 1
+
+# 使用类方法
+MyClass.increment_class_variable()
+print(MyClass.class_variable)  # 1
+```
+
+
+### 3.2.3 staticmethod 装饰器
+- **用途：** `staticmethod` 用于定义静态方法，静态方法与类相关联，但不依赖于类的实例。它们不能访问类级别的属性或实例级别的属性。通常用于实现与类相关但不需要访问实例状态的功能。
+- **调用方式：** 静态方法没有特殊的参数，可以通过类名或类的实例调用。
+
+```python
+class MathUtils:
+    @staticmethod
+    def add(x, y):
+        return x + y
+
+# 使用静态方法
+result = MathUtils.add(5, 3)  # 8
+```
+
+### 3.2.4 `classmethod` 和 `staticmethod`的区别
+
+- 主要区别在于能否访问类属性和实例属性。类方法可以访问类属性，但不能访问实例属性，而静态方法既不能访问类属性也不能访问实例属性。
+    
+- 使用 `classmethod` 主要是为了在方法内部操作类级别的属性或实现与类相关的逻辑，而使用 `staticmethod` 主要是为了封装与类相关但与实例无关的功能。
+    
+- 如果你需要在方法内部访问或修改类级别的属性，或者需要与类相关的操作，使用 `classmethod`。如果方法不依赖于类或实例的状态，使用 `staticmethod`。
+
+### 3.2.5 property 修饰器
+`property` 修饰器是一种用于创建属性的特殊装饰器，它允许你定义一个方法，这个方法可以像访问属性一样被调用，而不需要使用函数调用的方式。这样可以隐藏属性的内部实现细节，同时可以提供更多的控制和验证。
+
+1. **创建只读属性**
+
+```python
+class Circle:
+    def __init__(self, radius):
+        self._radius = radius
+
+    @property
+    def radius(self):
+        return self._radius
+
+# 创建 Circle 类的实例
+circle = Circle(5)
+# 访问只读属性
+print(circle.radius)
+# 尝试修改属性会引发 AttributeError
+# circle.radius = 10  # 这会引发 AttributeError
+```
+
+2. **创建可读写属性**
+
+提供一个与属性同名的setter方法，用户设置属性的值。
+```python
+class Circle:
+    def __init__(self, radius):
+        self._radius = radius
+
+    @property
+    def radius(self):
+        return self._radius
+
+    @radius.setter
+    def radius(self, value):
+        if value < 0:
+            raise ValueError("Radius cannot be negative")
+        self._radius = value
+
+# 创建 Circle 类的实例
+circle = Circle(5)
+# 访问可读写属性
+print(circle.radius)
+# 设置属性的值
+circle.radius = 10
+print(circle.radius)
+```
+
+3. **创建可删除属性**
+
+```python
+class Circle:
+    def __init__(self, radius):
+        self._radius = radius
+
+    @property
+    def radius(self):
+        return self._radius
+
+    @radius.setter
+    def radius(self, value):
+        if value < 0:
+            raise ValueError("Radius cannot be negative")
+        self._radius = value
+
+    @radius.deleter
+    def radius(self):
+        print("Deleting radius")
+        del self._radius
+
+# 创建 Circle 类的实例
+circle = Circle(5)
+# 删除属性
+del circle.radius
+```
+在执行 del 属性时，会自动执行 deleter 属性方法。可删除属性可以做一些实例收尾操作，比如连接数据库，在清理数据库连接时。
+
+> 通过使用 `property`可以隐藏内部实现细节，封装属性的访问和修改，从而提供更多的控制和验证。在定义时常用下划线前缀（例如`_radius`）来表示属性是受保护的。
+
+
+
+## 3.3 装饰器的嵌套
+
+```python
+@decorator1
+@decorator2
+@decorator3
+def func():
+    ...
+```
+
+执行顺序从里到外，上边的代码等价如下：
+```python
+decorator1(decorator2(decorator3(func)))
+
+```
+
+**示例：**
+```python
+import functools
+ 
+def my_decorator1(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        print('execute decorator1')
+        func(*args, **kwargs)
+    return wrapper
+ 
+ 
+def my_decorator2(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        print('execute decorator2')
+        func(*args, **kwargs)
+    return wrapper
+ 
+ 
+@my_decorator1
+@my_decorator2
+def greet(message):
+    print(message)
+ 
+ 
+greet('hello world')
+ 
+# 输出
+execute decorator1
+execute decorator2
+hello world
+```
+
+## 3.4 装饰器的应用实例
+### 3.4.1 身份认证
+在某函数执行前做身份认证，如果未认证则抛出异常。
+```python
+import functools
+ 
+def authenticate(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        request = args[0]
+        if check_user_logged_in(request): # 如果用户处于登录状态
+            return func(*args, **kwargs) # 执行函数 post_comment() 
+        else:
+            raise Exception('Authentication failed')
+    return wrapper
+    
+@authenticate
+def post_comment(request, ...)
+    ...
+ 
+```
+
+### 3.4.2 日志记录
+统计日志记录某函数的执行时间：
+```python
+import time
+import functools
+ 
+def log_execution_time(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        start = time.perf_counter()
+        res = func(*args, **kwargs)
+        end = time.perf_counter()
+        print('{} took {} ms'.format(func.__name__, (end - start) * 1000))
+        return res
+    return wrapper
+    
+@log_execution_time
+def calculate_similarity(items):
+    ...
+```
+装饰器 log_execution_time 记录某个函数的运行时间，并返回其执行结果。如果你想计算任何函数的执行时间，在这个函数上方加上`@log_execution_time`即可。
+
+### 3.4.3 输入合理性检查
+```python
+import functools
+ 
+def validation_check(input):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs): 
+        ... # 检查输入是否合法
+    
+@validation_check
+def neural_network_training(param1, param2, ...):
+    ...
+```
+
+### 3.4.4 缓存
+LRU cache，在 Python 中的表示形式是`@lru_cache`。`@lru_cache`会缓存进程中的函数参数和结果，当缓存满了以后，会删除 least recenly used 的数据。
+使用缓存装饰器，来包裹这些检查函数，避免其被反复调用，进而提高程序运行效率，比如写成下面这样：
+```python
+from functools import lru_cache
+@lru_cache
+def check(param1, param2, ...) # 检查用户设备类型，版本号等等
+    ...
+```
+
+通过使用 `lru_cache` 提升斐波那契数列计算时间
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/202309221129781.png)
+
+# 4 metaclass**
 没看懂，需要再研究
 
-## 2.5 迭代器和生成器
-### 2.5.1 迭代器
+# 5 迭代器和生成器
+## 5.1 迭代器
 可迭代对象，通过 iter() 函数返回一个迭代器，再通过 next() 函数就可以实现遍历。for in 语句将这个过程隐式化。
 
 ```python
@@ -370,8 +833,8 @@ print(l1)   # [1, 2, 3, 4]
 print(l2)   # <list_iterator object at 0x104887010>
 ```
 
-### 2.5.2 生成器
-#### 2.5.2.1 生成器的使用
+## 5.2 生成器
+### 5.2.1 生成器的使用
 **生成器是懒人版本的迭代器**，在迭代器中，如果我们想要枚举它的元素，这些元素需要事先生成，但是生成器，是在调用 `next()`函数的时候，才会生成下一个变量，并不需要在内存中同时保存太多值。
 
 ```python
@@ -424,7 +887,7 @@ after sum called memory used: 4.609375 MB
 使用生成器时，不需要在内存中同时保存对元素求和，我们只需要知道每个元素在相加的那一刻是多少就行了，用完就可以扔掉了。
 相对迭代器，使用生成器省掉更多的内存。
 
-#### 2.5.2.2 生成器更多用法
+### 5.2.2 生成器更多用法
 ```python
 def generator(k):  
     i = 1  
@@ -462,7 +925,7 @@ print(list(index_generator([1, 6, 2, 4, 5, 2, 8, 6, 3, 2], 2)))
 ```
 以上 index_generator 返回了一个生成器，然后使用 list 转换为列表，默认会执行 遍历生成器的元素。
 
-#### 2.5.2.3 使用生成器实现判断子序列
+### 5.2.3 使用生成器实现判断子序列
 给定两个序列，判定第一个是不是第二个的子序列：序列就是列表，子序列则指的是，一个列表的元素在第二个列表中都按顺序出现，但是并不必挨在一起。举个例子，[1, 3, 5] 是 [1, 2, 3, 4, 5] 的子序列，[1, 4, 3] 则不是。
 
 ```python
@@ -502,8 +965,8 @@ True
 False 
 ```
 
-## 2.6 Python 协程
-### 2.6.1 asyncio使用
+# 6 并发编程--Python 协程
+## 6.1 asyncio使用
 协程事件循环：
 ![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/%E6%88%AA%E5%B1%8F2023-10-22%2018.15.17.png)
 
@@ -538,7 +1001,7 @@ Wall time: 10 s
 在函数前通过 async 定义了协程函数，使用 await 把协程函数加入事件循环，并等待协程函数完成，使用 asyncio.run 执行协程函数。
 如果你 `print(crawl_page(''))`，便会输出`<coroutine object crawl_page at 0x000002BEDF141148>`，提示你这是一个 Python 的协程对象，而并不会真正执行这个函数。
 
-### 2.6.2 asyncio创建任务
+## 6.2 asyncio创建任务
 以上方式在main中直接使用 await 调用协程函数，会让main函数阻塞，程序执行完的总时间是所有协程函数执行时间之和，下边使用asyncio创建任务执行：
 
 ```python
@@ -587,7 +1050,7 @@ Spent 5.002599277999252
 
 通过`asyncio.create_task`只是把协程函数放到队列中，直接返回，然后由时间循环进行调度执行，使用 await 等待任务执行完毕，以上方式执行总时间是所有协程函数最长的那个。
 
-### 2.6.3 asyncio进阶用法
+## 6.3 asyncio进阶用法
 把正在执行的任务取消、判断任务是否完成、为任务设置超时时间等。
 
 ```python
@@ -654,7 +1117,7 @@ if __name__ == "__main__":
 3. `asyncio.wait_for` 为任务设置超时时间
 4. `asyncio.gather` 获取多个协程执行结果，若有一个协程异常则退出，设置`return_exceptions=True` 则不退出，正常获取协程异常结果
 
-### 2.6.4 实战和总结
+## 6.4 实战和总结
 通过协程实现获取豆瓣数据：
 
 ```python
@@ -713,8 +1176,8 @@ Wall time: 4.98 s
 - 协程的写法更加简洁清晰，把 async / await 语法和 create_task 结合来用，对于中小级别的并发需求已经毫无压力。
 - 写协程程序的时候，你的脑海中要有清晰的事件循环概念，知道程序在什么时候需要暂停、等待 I/O，什么时候需要一并执行到底。
 
-## 2.7 并发编程
-### 2.7.1 线程
+# 7 并发编程--多线程
+## 7.1 线程
 使用 `Thread` 创建线程，示例如下：
 ```python
 from threading import Thread  
@@ -744,7 +1207,7 @@ print("Main threads is end")
 - 主线程需要等到所有非守护线程结束才能结束（默认创建的为非守护线程）
 - 守护线程一般用于执行后台任务和服务，如日志记录、监控、定时任务等
 
-### 2.7.2 线程安全队列
+## 7.2 线程安全队列
 queue模块中的Queue类提供了线程安全队列功能：
 1. queue.put(item, block=False)  非阻塞写入数据到队列
 2. queue.put(item, timeout=3)    阻塞超时3s
@@ -802,7 +1265,7 @@ for t in threads:
 
 以上消费者线程设置为了守护线程，会等到所有生产者线程和主线程结束后，自动结束。run函数表示线程要执行的逻辑，主线程中创建了3个生产者线程和2个消费者线程。
 
-### 2.7.3 线程锁
+## 7.3 线程锁
 使用Lock让线程顺序执行：
 
 ```python
@@ -860,7 +1323,7 @@ class SafeQueue:
 ```
 
 
-### 2.7.4 线程池
+## 7.4 线程池
 线程的创建和销毁相对比较昂贵，频繁的创建和销毁线程不利于高性能。
 
 ```python
@@ -918,3 +1381,71 @@ def download_all(sites):
             future.result()
 ```
 以上使用 `concurrent.futures.as_completed` 函数处理多个并发任务的结果。它的作用是返回一个生成器，该生成器在任务完成时生成任务的 Future 对象，而不是按照它们完成的顺序。这使你可以处理任何任务的结果，而不必等待它们按照提交的顺序完成。
+
+## 7.5 多线程还是Asyncio
+**多线程和Asyncio的区别：**
+多线程：
+- 多线程是使用标准的线程和锁机制来实现并发的方式。
+- 在多线程中，每个线程都是一个独立的执行单元，可以并发执行不同的任务。
+- 多线程由于 Python 的 GIL（全局解释器锁）的限制，在同一时刻只能执行一个线程
+
+Asyncio（协程）：
+- asyncio 使用单线程和事件循环来管理异步协程任务。
+- 在 asyncio 中，多个协程可以在同一线程中并发执行，但在某一时刻只有一个协程在执行，而不会涉及线程切换。
+- asyncio 适用于 I/O 密集型任务，如网络通信和文件操作。由于避免了线程切换的开销，它通常比多线程更高效。
+
+Asyncio（协程）可以通过编程控制协程切换，本质是一个线程在异步执行都个协程任务，避免了线程协换的开销，比多线程更加高效。
+
+**多线程和Asyncio的选择：**
+
+- 如果是 I/O bound，并且 I/O 操作很慢，需要很多任务 / 线程协同实现，那么使用 Asyncio 更合适。
+- 如果是 I/O bound，但是 I/O 操作很快，只需要有限数量的任务 / 线程，那么使用多线程就可以了。
+- 如果是 CPU bound，则需要使用多进程来提高程序运行效率，使用多线程是无效的。
+
+
+# 2.8  GIL（全局解释器锁）
+## 8.1 什么是GIL
+GIL，是最流行的 Python 解释器 CPython 中的一个技术术语。它的意思是全局解释器锁，本质上是类似操作系统的 Mutex。每一个 Python 线程，在 CPython 解释器中执行时，都会先锁住自己的线程，阻止别的线程执行。CPython会轮流执行Python线程，这样一来，用户看到的就是“伪并行”——Python 线程在交错执行，来模拟真正并行的线程。
+
+- 为什么需要GIL？
+
+CPython 使用引用计数来管理内存，所有 Python 脚本中创建的实例，都会有一个引用计数，来记录有多少个指针指向它。当引用计数只有 0 时，则会自动释放内存。
+
+```python
+>>> import sys
+>>> a = []
+>>> b = a
+>>> sys.getrefcount(a)
+3
+```
+a 的引用计数是 3，因为有 a、b 和作为参数传递的 getrefcount 这三个地方，都引用了一个空列表。
+这样一来，如果有两个 Python 线程同时引用了 a，就会造成引用计数的 race condition，引用计数可能最终只增加 1，这样就会造成内存被污染。因为第一个线程结束时，会把引用计数减少 1，这时可能达到条件释放内存，当第二个线程再试图访问 a 时，就找不到有效的内存了。
+
+CPython 引进 GIL 其实主要就是这么两个原因：
+- 一是设计者为了规避类似于内存管理这样的复杂的竞争风险问题（race condition）；
+- 二是因为 CPython 大量使用 C 语言库，但大部分 C 语言库都不是原生线程安全的（线程安全会降低性能和增加复杂度）。
+
+## 8.2 GIL如何工作的
+下面这张图，就是一个 GIL 在 Python 程序的工作示例。其中，Thread 1、2、3 轮流执行，每一个线程在开始执行时，都会锁住 GIL，以阻止别的线程执行；同样的，每一个线程执行完一段后，会释放 GIL，以允许别的线程开始利用资源。
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20231024092005.png)
+
+CPython 中还有一个check_interval机制，CPython 解释器会去轮询检查线程 GIL 的锁住情况。每隔一段时间，Python 解释器就会强制当前线程去释放 GIL，这样别的线程才能有执行的机会。
+
+- Python的线程安全
+
+有了GIL并不代表Python就不需要考虑线程安全了，因为有check interval这种抢占机制。
+
+## 8.3 如何绕过GIL
+Python 的 GIL，是通过 CPython 的解释器加的限制。如果你的代码并不需要 CPython 解释器来执行，就不再受 GIL 的限制。
+事实上，很多高性能应用场景都已经有大量的 C 实现的 Python 库，例如 NumPy 的矩阵运算，就都是通过 C 来实现的，并不受 GIL 影响。
+**绕过 GIL 的大致思路有这么两种：**
+1. 绕过 CPython，使用 JPython（Java 实现的 Python 解释器）等别的实现；
+3. 把关键性能代码，放到别的语言（一般是 C++）中实现。
+
+# 9 并发编程--多进程
+
+# 10 Python垃圾回收机制
+- 计数引用
+- 循环引用
+
+调试内存泄漏的工具：objgraph

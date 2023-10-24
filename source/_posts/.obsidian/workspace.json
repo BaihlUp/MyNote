@@ -14,7 +14,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "220 - 程序设计/223 - Go & Python/Python核心技术与实战.md",
+                "file": "220 - 程序设计/223 - Go & Python/02 - Python--进阶篇.md",
                 "mode": "source",
                 "source": true
               }
@@ -34,7 +34,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "220 - 程序设计/223 - Go & Python/Python核心技术与实战.md",
+                "file": "220 - 程序设计/223 - Go & Python/02 - Python--进阶篇.md",
                 "mode": "preview",
                 "source": false
               }
@@ -91,8 +91,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 242.49999618530273,
-    "collapsed": true
+    "width": 273.5
   },
   "right": {
     "id": "df408e6434c90015",
@@ -108,7 +107,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "220 - 程序设计/223 - Go & Python/Python核心技术与实战.md",
+                "file": "220 - 程序设计/223 - Go & Python/02 - Python--进阶篇.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -125,7 +124,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "220 - 程序设计/223 - Go & Python/Python核心技术与实战.md",
+                "file": "220 - 程序设计/223 - Go & Python/02 - Python--进阶篇.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -148,7 +147,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "220 - 程序设计/223 - Go & Python/Python核心技术与实战.md"
+                "file": "220 - 程序设计/223 - Go & Python/02 - Python--进阶篇.md"
               }
             }
           },
@@ -181,12 +180,17 @@
   },
   "active": "6216b66d7de66960",
   "lastOpenFiles": [
+    "220 - 程序设计/223 - Go & Python/01 - Python--基础篇.md",
+    "220 - 程序设计/223 - Go & Python/02 - Python--进阶篇.md",
+    "220 - 程序设计/目录.md",
+    "220 - 程序设计/223 - Go & Python/03 - Python--分布式爬虫.md",
+    "220 - 程序设计/223 - Go & Python/01 - Python程序设计/01 - 基础篇.md",
+    "220 - 程序设计/223 - Go & Python/01 - Python程序设计/03 - 分布式爬虫.md",
+    "220 - 程序设计/223 - Go & Python/01 - Python程序设计/02 - 进阶篇.md",
+    "220 - 程序设计/223 - Go & Python/01 - Python程序设计",
     "Pasted image 20231023095714.png",
     "Pasted image 20231023095654.png",
-    "220 - 程序设计/223 - Go & Python/零基础学 Python.md",
-    "220 - 程序设计/223 - Go & Python/Python核心技术与实战.md",
     "截屏2023-10-22 18.15.17.png",
-    "220 - 程序设计/223 - Go & Python/Python爬虫学习.md",
     "250 - 虚拟化&云计算/251 - 学习笔记/Kubernetes中的Calico网络.md",
     "250 - 虚拟化&云计算/251 - 学习笔记/Kubernetes-v1.26.1部署指南.md",
     "source/_posts/200 - 我的百宝箱/204 - 工具使用/Obsidian的使用.md",
@@ -204,7 +208,6 @@
     "source/_posts/200 - 我的百宝箱/203 - 知识管理",
     "source/_posts/200 - 我的百宝箱/201 - 学习笔记",
     "source/_posts/200 - 我的百宝箱",
-    "source/_posts/200 - 杂项/204 - 工具使用",
     "source/_posts/250 - 虚拟化&云计算/Kubernetes-v1.26.1部署指南.md",
     "source/_posts/Kubernetes-v1.26.1部署指南.md",
     "source/_posts/250 - 虚拟化&云计算/Kubernetes中的Calico网络.md",
