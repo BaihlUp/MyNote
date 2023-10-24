@@ -1,5 +1,5 @@
 # 0 参考资料
-- Python核心技术与实战 -- Geek
+- [Python核心技术与实战 -- Geek](https://time.geekbang.org/column/intro/100026901)
 
 # 1 Python对象的比较、拷贝
 ## 1.1 比较
@@ -1443,6 +1443,72 @@ Python 的 GIL，是通过 CPython 的解释器加的限制。如果你的代码
 3. 把关键性能代码，放到别的语言（一般是 C++）中实现。
 
 # 9 并发编程--多进程
+## 9.1 多进程
+基于`multiprocessing`包，`multiprocessing.Process` 类：
+- `Process` 类用于创建新的进程。
+- 使用 `target` 参数指定要在新进程中运行的函数。
+- 使用 `args` 参数传递给目标函数的参数。
+- 通过调用 `start()` 方法启动新进程。
+- 通过调用 `join()` 方法等待新进程执行完成。
+
+```python
+import multiprocessing  
+import time  
+  
+  
+def task(name: str, count: int):  
+    print(f"{name} - start\n", end='')  
+    result = 0  
+    for n in range(count):  
+        result += n + 1  
+    time.sleep(1)  
+    print(f"{name} - end with {result}")  
+  
+  
+def start_process_1():  
+    process = multiprocessing.Process(target=task, args=["A", 100])  
+  
+    process.start()  
+  
+    process.join()  
+  
+    print("Main process over")  
+  
+  
+def start_process_2():  
+    args_list = [("A", 100), ("B", 99), ("C", 98)]  
+    processes = [multiprocessing.Process(target=task, args=[name, count]) for name, count in args_list]  
+  
+    for p in processes:  
+        p.start()  
+  
+    for p in processes:  
+        p.join()  
+  
+  
+if __name__ == "__main__":  
+    start_process_2()
+```
+在使用多进程时需要 把代码放在 `__name__ == "__main__"` 中。
+
+## 9.2 进程池
+Python中实现多进程的包与多线程的类似，都可以使用futures包，示例如下：
+
+```python
+import concurrent.futures
+
+def worker_function(x):
+    return x * x
+
+if __name__ == "__main__":
+    numbers = [1, 2, 3, 4, 5]
+
+    with concurrent.futures.ProcessPoolExecutor() as executor:
+        results = list(executor.map(worker_function, numbers))
+
+    print(results)
+```
+
 
 # 10 Python垃圾回收机制
 - 计数引用

@@ -14,7 +14,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "220 - 程序设计/00 - 目录.md",
+                "file": "220 - 程序设计/223 - Go & Python/02 - Python--进阶篇.md",
                 "mode": "source",
                 "source": true
               }
@@ -34,7 +34,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "220 - 程序设计/00 - 目录.md",
+                "file": "220 - 程序设计/223 - Go & Python/02 - Python--进阶篇.md",
                 "mode": "preview",
                 "source": false
               }
@@ -91,7 +91,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 273.5
+    "width": 273.5,
+    "collapsed": true
   },
   "right": {
     "id": "df408e6434c90015",
@@ -107,7 +108,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "220 - 程序设计/00 - 目录.md",
+                "file": "220 - 程序设计/223 - Go & Python/02 - Python--进阶篇.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -124,7 +125,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "220 - 程序设计/00 - 目录.md",
+                "file": "220 - 程序设计/223 - Go & Python/02 - Python--进阶篇.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -147,7 +148,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "220 - 程序设计/00 - 目录.md"
+                "file": "220 - 程序设计/223 - Go & Python/02 - Python--进阶篇.md"
               }
             }
           },
@@ -178,12 +179,12 @@
       "command-palette:打开命令面板": false
     }
   },
-  "active": "6216b66d7de66960",
+  "active": "2ca5f68388f44b5d",
   "lastOpenFiles": [
-    "220 - 程序设计/223 - Go & Python/01 - Python--基础篇.md",
-    "220 - 程序设计/00 - 目录.md",
-    "220 - 程序设计/223 - Go & Python/02 - Python--进阶篇.md",
     "220 - 程序设计/223 - Go & Python/03 - Python--分布式爬虫.md",
+    "220 - 程序设计/00 - 目录.md",
+    "220 - 程序设计/223 - Go & Python/01 - Python--基础篇.md",
+    "220 - 程序设计/223 - Go & Python/02 - Python--进阶篇.md",
     "220 - 程序设计/223 - Go & Python/01 - Python程序设计/01 - 基础篇.md",
     "220 - 程序设计/223 - Go & Python/01 - Python程序设计/03 - 分布式爬虫.md",
     "220 - 程序设计/223 - Go & Python/01 - Python程序设计/02 - 进阶篇.md",
