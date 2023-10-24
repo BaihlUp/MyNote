@@ -1,0 +1,131 @@
+/*
+ @Author   : coffeebean
+ @contact  : https://obsidian.vip/
+ @File     : coffeebean-prism-source-view.css
+ @Software : vscode
+ @Date     :  2022-04-09
+ @update   :  2023-02-25
+ @Desc     : 调整了一下代码块的样式，暗黑主题
+ */
+
+/* PrismJS 1.27.0
+https://prismjs.com/download.html#themes=prism-okaidia&languages=markup+css+clike+javascript+abap+abnf+actionscript+ada+agda+al+antlr4+apacheconf+apex+apl+applescript+aql+arduino+arff+armasm+arturo+asciidoc+aspnet+asm6502+asmatmel+autohotkey+autoit+avisynth+avro-idl+awk+bash+basic+batch+bbcode+bicep+birb+bison+bnf+brainfuck+brightscript+bro+bsl+c+csharp+cpp+cfscript+chaiscript+cil+clojure+cmake+cobol+coffeescript+concurnas+csp+cooklang+coq+crystal+css-extras+csv+cue+cypher+d+dart+dataweave+dax+dhall+diff+django+dns-zone-file+docker+dot+ebnf+editorconfig+eiffel+ejs+elixir+elm+etlua+erb+erlang+excel-formula+fsharp+factor+false+firestore-security-rules+flow+fortran+ftl+gml+gap+gcode+gdscript+gedcom+gettext+gherkin+git+glsl+gn+linker-script+go+go-module+graphql+groovy+haml+handlebars+haskell+haxe+hcl+hlsl+hoon+http+hpkp+hsts+ichigojam+icon+icu-message-format+idris+ignore+inform7+ini+io+j+java+javadoc+javadoclike+javastacktrace+jexl+jolie+jq+jsdoc+js-extras+json+json5+jsonp+jsstacktrace+js-templates+julia+keepalived+keyman+kotlin+kumir+kusto+latex+latte+less+lilypond+liquid+lisp+livescript+llvm+log+lolcode+lua+magma+makefile+markdown+markup-templating+mata+matlab+maxscript+mel+mermaid+mizar+mongodb+monkey+moonscript+n1ql+n4js+nand2tetris-hdl+naniscript+nasm+neon+nevod+nginx+nim+nix+nsis+objectivec+ocaml+odin+opencl+openqasm+oz+parigp+parser+pascal+pascaligo+psl+pcaxis+peoplecode+perl+php+phpdoc+php-extras+plant-uml+plsql+powerquery+powershell+processing+prolog+promql+properties+protobuf+pug+puppet+pure+purebasic+purescript+python+qsharp+q+qml+qore+r+racket+cshtml+jsx+tsx+reason+regex+rego+renpy+rest+rip+roboconf+robotframework+ruby+rust+sas+sass+scss+scala+scheme+shell-session+smali+smalltalk+smarty+sml+solidity+solution-file+soy+sparql+splunk-spl+sqf+sql+squirrel+stan+stata+iecst+stylus+supercollider+swift+systemd+t4-templating+t4-cs+t4-vb+tap+tcl+tt2+textile+toml+tremor+turtle+twig+typescript+typoscript+unrealscript+uorazor+uri+v+vala+vbnet+velocity+verilog+vhdl+vim+visual-basic+warpscript+wasm+web-idl+wiki+wolfram+wren+xeora+xml-doc+xojo+xquery+yaml+yang+zig */
+/* 样式化Markdown文档在阅读视图中的外观 */
+
+/* 代码块和预格式化文本块的通用样式 */
+.markdown-reading-view code[class*=language-],
+.markdown-reading-view pre[class*=language-] {
+    color: #f8f8f2; /* 文本颜色为浅灰色 */
+    background: 0 0; /* 背景透明 */
+    text-shadow: 0 1px rgba(0, 0, 0, .3); /* 添加文本的轻微阴影，使其更加清晰 */
+    font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace; /* 设置字体族为等宽字体 */
+    font-size: 0.9em; /* 字体大小为1em */
+    text-align: left; /* 文本左对齐 */
+    white-space: pre; /* 保留文本中的空白字符 */
+    word-spacing: normal; /* 词间距正常 */
+    word-break: normal; /* 不允许词中断 */
+    word-wrap: normal; /* 不允许词换行 */
+    line-height: 1.5; /* 行高为1.5 */
+    -moz-tab-size: 4; -o-tab-size: 4; tab-size: 4; /* 制表符宽度为4个字符 */
+    -webkit-hyphens: none; -moz-hyphens: none; -ms-hyphens: none; hyphens: none; /* 禁用断词 */
+}
+
+/* 进一步定制预格式化文本块的样式 */
+.markdown-reading-view pre[class*=language-] {
+    padding: 1em; /* 内边距为1em */
+    margin: .5em 0; /* 外边距为0.5em顶部和底部 */
+    overflow: auto; /* 滚动 */
+    border-radius: .3em; /* 边框圆角 */
+}
+
+/* 非<code>标签中的代码块和预格式化文本块的背景颜色 */
+.markdown-reading-view :not(pre)>code[class*=language-],
+.markdown-reading-view pre[class*=language-] {
+    background: #272822; /* 背景颜色为深灰色 */
+}
+
+/* 非<code>标签中的代码块的样式 */
+.markdown-reading-view :not(pre)>code[class*=language-] {
+    padding: .1em; /* 内边距为0.1em */
+    border-radius: .3em; /* 边框圆角 */
+    white-space: normal; /* 正常文本换行 */
+}
+
+/* 不同类型的代码标记的文本颜色 */
+.markdown-reading-view .token.cdata,
+.markdown-reading-view .token.comment,
+.markdown-reading-view .token.doctype,
+.markdown-reading-view .token.prolog {
+    color: #8292a2; /* 注释和文档声明的文本颜色 */
+}
+
+.markdown-reading-view .token.punctuation {
+    color: #f8f8f2; /* 标点符号的文本颜色 */
+}
+
+.markdown-reading-view .token.namespace {
+    opacity: .7; /* 命名空间文本的不透明度 */
+}
+
+.markdown-reading-view .token.constant,
+.markdown-reading-view .token.deleted,
+.markdown-reading-view .token.property,
+.markdown-reading-view .token.symbol,
+.markdown-reading-view .token.tag {
+    color: #f92672; /* 常量、删除、属性、符号和标签的文本颜色 */
+}
+
+.markdown-reading-view .token.boolean,
+.markdown-reading-view .token.number {
+    color: #ae81ff; /* 布尔值和数字的文本颜色 */
+}
+
+.markdown-reading-view .token.attr-name,
+.markdown-reading-view .token.builtin,
+.markdown-reading-view .token.char,
+.markdown-reading-view .token.inserted,
+.markdown-reading-view .token.selector,
+.markdown-reading-view .token.string {
+    color: #a6e22e; /* 属性名、内置、字符、插入、选择器和字符串的文本颜色 */
+}
+
+.markdown-reading-view .language-css .token.string,
+.markdown-reading-view .style .token.string,
+.markdown-reading-view .token.entity,
+.markdown-reading-view .token.operator,
+.markdown-reading-view .token.url,
+.markdown-reading-view .token.variable {
+    color: #f8f8f2; /* CSS字符串、实体、运算符、URL和变量的文本颜色 */
+}
+
+.markdown-reading-view .token.atrule,
+.markdown-reading-view .token.attr-value,
+.markdown-reading-view .token.class-name,
+.markdown-reading-view .token.function {
+    color: #e6db74; /* 属性规则、属性值、类名和函数的文本颜色 */
+}
+
+.markdown-reading-view .token.keyword {
+    color: #66d9ef; /* 关键字的文本颜色 */
+}
+
+.markdown-reading-view .token.important,
+.markdown-reading-view .token.regex {
+    color: #fd971f; /* 重要信息和正则表达式的文本颜色 */
+}
+
+/* 加粗文本的字体加粗 */
+.markdown-reading-view .token.bold,
+.markdown-reading-view .token.important {
+    font-weight: 700;
+}
+
+/* 斜体文本的字体样式 */
+.markdown-reading-view .token.italic {
+    font-style: italic;
+}
+
+/* 实体文本的鼠标光标样式 */
+.markdown-reading-view .token.entity {
+    cursor: help;
+}
