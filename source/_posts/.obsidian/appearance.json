@@ -2,5 +2,6 @@
   "accentColor": "",
   "theme": "moonstone",
   "cssTheme": "Things",
-  "translucency": false
+  "translucency": false,
+  "enabledCssSnippets": []
 }

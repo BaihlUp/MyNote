@@ -391,7 +391,7 @@ def repeat(num):
     return my_decorator
  
  
-@repeat(4)
+@repeat(4)  # 先执行 repeat(4) 函数，返回的是一个装饰器
 def greet(message):
     print(message)
  
@@ -408,7 +408,7 @@ wrapper of decorator
 hello world
 ```
 
-- **原函数还是原函数吗？**
+- **保留原函数**
 
 ```python
 greet.__name__
@@ -788,8 +788,102 @@ def check(param1, param2, ...) # 检查用户设备类型，版本号等等
 通过使用 `lru_cache` 提升斐波那契数列计算时间
 ![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/202309221129781.png)
 
-# 4 metaclass**
-没看懂，需要再研究
+# 4 metaclass
+## 4.1 type类
+所有的 Python 的用户定义类，都是 type 这个类的实例，在Python中type这个类就是造物的上帝，可以通过如下代码查看：
+
+```python
+# Python 3 和 Python 2 类似
+class MyClass:
+  pass
+ 
+instance = MyClass()
+ 
+type(instance)
+# 输出
+<class '__main__.C'>
+ 
+type(MyClass)
+# 输出
+<class 'type'>
+```
+
+- **用户自定义类，只不过是 type 类的`__call__`运算符重载**
+
+当我们定义一个类的语句结束时，真正发生的情况，是 Python 调用 type 的`__call__`运算符。
+
+```python
+class MyClass:
+  data = 1
+```
+Python真正执行的是下面的代码：
+```python
+class = type(classname, superclasses, attributedict)
+```
+
+这里等号右边的`type(classname, superclasses, attributedict)`，就是 type 的`__call__`运算符重载，它会进一步调用：
+```python
+type.__new__(typeclass, classname, superclasses, attributedict)
+type.__init__(class, classname, superclasses, attributedict)
+```
+
+通过type定义MyClass类：
+```python
+class MyClass:
+  data = 1
+  
+instance = MyClass()
+MyClass, instance
+# 输出
+(__main__.MyClass, <__main__.MyClass instance at 0x7fe4f0b00ab8>)
+instance.data
+# 输出
+1
+ 
+MyClass = type('MyClass', (), {'data': 1})
+instance = MyClass()
+MyClass, instance
+# 输出
+(__main__.MyClass, <__main__.MyClass at 0x7fe4f0aea5d0>)
+ 
+instance.data
+# 输出
+1
+```
+
+通过上面可以看到，正常的 MyClass 定义，和手工去调用 type 运算符的结果是完全一样的。
+
+**示例：**
+
+```python
+class_body = """
+def greeting(self):
+    print('Hello customer')
+    
+def jump(self):
+    print('jump')
+"""
+class_dict = {}
+exec(class_body, globals(), class_dict)
+
+# type的第三个参数是具体类的属性，是一个字典
+Customer = type("Customer", (object,), class_dict)
+
+c = Customer()
+c.greeting()
+c.jump()
+```
+输出：
+
+```shell
+Hello customer
+jump
+```
+以上代码，通过type类实现了一个`Customer`类，通过字符串内容定义了类的属性，使用此方法，可以实现动态定义类。
+
+## 4.2 metaclass的使用
+
+
 
 # 5 迭代器和生成器
 ## 5.1 迭代器
@@ -888,6 +982,7 @@ after sum called memory used: 4.609375 MB
 相对迭代器，使用生成器省掉更多的内存。
 
 ### 5.2.2 生成器更多用法
+含有yield的函数，会返回一个生成器，每次执行到yield，会把对应的值返回出去，并且函数暂停，等待下次被唤醒。
 ```python
 def generator(k):  
     i = 1  
@@ -1515,3 +1610,144 @@ if __name__ == "__main__":
 - 循环引用
 
 调试内存泄漏的工具：objgraph
+
+# 11 上下文管理器和With语句
+## 11.1 With语句的使用
+- **使用with语句自动关闭文件**
+
+```python
+for x in range(10000000):
+    with open('test.txt', 'w') as f:
+        f.write('hello')
+```
+
+通过使用以上的With语句方式，不再需要写关闭文件的操作。
+
+- **自动释放锁**
+
+```python
+some_lock = threading.Lock()
+with somelock:
+    ...
+```
+
+## 11.2 上下文管理器的实现
+### 11.2.1 基于类的上下文管理器
+当我们用类来创建上下文管理器时，必须保证这个类包括方法`”__enter__()”`和方法`“__exit__()”`。其中，方法`“__enter__()”`返回需要被管理的资源，方法`“__exit__()”`里通常会存在一些释放、清理资源的操作，比如这个例子中的关闭文件等等。
+
+```python
+class FileManager:
+    def __init__(self, name, mode):
+        print('calling __init__ method')
+        self.name = name
+        self.mode = mode 
+        self.file = None
+        
+    def __enter__(self):
+        print('calling __enter__ method')
+        self.file = open(self.name, self.mode)
+        return self.file  # 赋值给with语句中as后边的变量
+ 
+ 
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        print('calling __exit__ method')
+        if self.file:
+            self.file.close()
+            
+with FileManager('test.txt', 'w') as f:
+    print('ready to write to file')
+    f.write('hello world')
+    
+## 输出
+calling __init__ method
+calling __enter__ method
+ready to write to file
+calling __exit__ method
+```
+
+以上with语句执行逻辑：
+1. 1. 方法`“__init__()”`被调用，程序初始化对象 FileManager，使得文件名（name）是`"test.txt"`，文件模式 (mode) 是`'w'`；
+2. with语句自动调用方法`“__enter__()”`，文件`“test.txt”`以写入的模式被打开，并且返回 FileManager 对象赋予变量 f；
+3. 字符串`“hello world”`被写入文件`“test.txt”`；
+4. 方法`“__exit__()”`被调用，负责关闭之前打开的文件流。
+
+方法`“__exit__()”`中的参数`“exc_type, exc_val, exc_tb”`，分别表示 exception_type、exception_value 和 traceback。当执行含有上下文管理器的 with 语句时，如果有异常抛出，异常的信息就会包含在这三个变量中，传入方法`“__exit__()”`。
+
+```python
+class Foo:
+    def __init__(self):
+        print('__init__ called')        
+ 
+    def __enter__(self):
+        print('__enter__ called')
+        return self
+    
+    def __exit__(self, exc_type, exc_value, exc_tb):
+        print('__exit__ called')
+        if exc_type:
+            print(f'exc_type: {exc_type}')
+            print(f'exc_value: {exc_value}')
+            print(f'exc_traceback: {exc_tb}')
+            print('exception handled')
+        return True
+    
+with Foo() as obj:
+    raise Exception('exception raised').with_traceback(None)
+ 
+# 输出
+__init__ called
+__enter__ called
+__exit__ called
+exc_type: <class 'Exception'>
+exc_value: exception raised
+exc_traceback: <traceback object at 0x1046036c8>
+exception handled
+```
+
+在 with 语句中手动抛出了异常“exception raised”，你可以看到，`“__exit__()”`方法中异常，被顺利捕捉并进行了处理。不过需要注意的是，如果方法`“__exit__()”`没有返回 True，异常仍然会被抛出。因此，如果你确定异常已经被处理了，请在`“__exit__()”`的最后，加上`“return True”`这条语句。
+
+- **示例代码：（用上下文管理器，实现数据库连接）**
+
+```python
+class DBConnectionManager: 
+    def __init__(self, hostname, port): 
+        self.hostname = hostname 
+        self.port = port 
+        self.connection = None
+  
+    def __enter__(self): 
+        self.connection = DBClient(self.hostname, self.port) 
+        return self
+  
+    def __exit__(self, exc_type, exc_val, exc_tb): 
+        self.connection.close() 
+  
+with DBConnectionManager('localhost', '8080') as db_client: 
+```
+
+完了 DBconnectionManager 这个类，那么在程序每次连接数据库时，只需要简单地调用 with 语句即可，并不需要关心数据库的关闭、异常等等，显然大大提高了开发的效率。
+
+
+### 11.2.2 基于生成器的上下文管理器
+可以使用装饰器 contextlib.contextmanager，来定义自己所需的基于生成器的上下文管理器，用以支持 with 语句。
+```python
+from contextlib import contextmanager
+ 
+@contextmanager
+def file_manager(name, mode):
+    try:
+        f = open(name, mode)
+        yield f
+    finally:
+        f.close()
+        
+with file_manager('test.txt', 'w') as f:
+    f.write('hello world')
+```
+函数 file_manager() 是一个生成器，当执行 with 语句时，便会打开文件，并返回文件对象 f；当 with 语句执行完后，finally block 中的关闭文件操作便会执行。
+使用基于生成器的上下文管理器时，我们不再用定义`“__enter__()”`和`“__exit__()”`方法，但请务必加上装饰器 @contextmanager。
+
+**总结：**
+
+- 基于类的上下文管理器更加 flexible，适用于大型的系统开发；
+- 而基于生成器的上下文管理器更加方便、简洁，适用于中小型程序。
