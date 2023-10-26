@@ -562,7 +562,6 @@ MyClass.increment_class_variable()
 print(MyClass.class_variable)  # 1
 ```
 
-
 ### 3.2.3 staticmethod 装饰器
 - **用途：** `staticmethod` 用于定义静态方法，静态方法与类相关联，但不依赖于类的实例。它们不能访问类级别的属性或实例级别的属性。通常用于实现与类相关但不需要访问实例状态的功能。
 - **调用方式：** 静态方法没有特殊的参数，可以通过类名或类的实例调用。
@@ -572,6 +571,8 @@ class MathUtils:
     @staticmethod
     def add(x, y):
         return x + y
+	def func(self):
+		return self.add(1, 2) # 实例方法可以直接调用静态方法和类方法
 
 # 使用静态方法
 result = MathUtils.add(5, 3)  # 8

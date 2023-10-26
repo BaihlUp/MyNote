@@ -1,6 +1,6 @@
 
-# 6 类
-## 6.1 类的定义和使用
+# 1 类
+## 1.1 类的定义和使用
 ```python
  class Dog:
      """一次模拟小狗的简单尝试。"""
@@ -28,7 +28,7 @@ my_dog.roll_over()
 
 创建实例时，有些属性无须通过形参来定义，可在方法__init__() 中为其指定默认值。
 
-## 6.2 `__init__` 方法
+## 1.2 `__init__` 方法
 `__init__` 方法是类的特殊方法之一，它用于初始化类的实例。
 - 通过默认参数给属性提供默认值
 
@@ -62,7 +62,97 @@ file_handler.close()
 ```
 以上示例中在 `__init__` 方法中进行文件打开。
 
-## 6.2 继承和混入
+## 1.3 类变量
+属于类本身这个对象的属性，所有该类的对象都共享类变量。
+
+```python
+from pprint import pprint  
+  
+class Student:  
+    student_count = 8  # 类变量  
+  
+def main():  
+    print(Student.__name__)  # Student
+  
+    print(Student.student_count)  
+    print(getattr(Student, "student_count"))  
+    # print(Student.unknown)  
+    # 获取不存在的类变量，返回默认值  
+    print(getattr(Student, "unknown", "10"))  
+  
+    Student.student_count = 89  
+    setattr(Student, "student_count", 100)  
+    print(Student.student_count)  
+  
+    Student.newattribute = "hello"  
+    print(Student.newattribute)  
+  
+    # del Student.newattribute  
+    # 删除类变量  
+    delattr(Student, "newattribute")  
+    # print(Student.newattribute)  
+  
+    s1 = Student()  
+    s2 = Student()  
+    Student.student_count = 4  
+    print(s1.student_count)  
+    print(s2.student_count)  
+  
+    # 类变量都存储在类的 __dict__ 中  
+    pprint(Student.__dict__)  
+  
+if __name__ == '__main__':  
+    main()
+```
+
+## 1.4 实例变量与函数
+**定义实例变量与函数：**
+
+```python
+class Student:  
+    def __init__(self, name: str):  
+        self.name = name  
+  
+    def say_hello(self, msg: str):  
+        print(f"Hello {msg}, {self.name}")  
+
+def main():  
+    # 1. create a physical object  
+    # 2. call __init__() to initialize this object    s1 = Student("Jack")  
+    s2 = Student("Tom")  
+  
+    s1.say_hello("1111")  
+    s2.say_hello("2222")  
+  
+    s1.gender = 'Male'  # 类似定义类变量，定义实例变量  
+    print(s1.gender)  
+    print(s2.gender)  # 报错：s2中没有gender属性
+```
+
+## 1.5 私有属性与函数
+在Python中并没有严格的权限限定符去进行限制，主要通过命名来进行区分。
+
+```python
+class Student:  
+    def __init__(self, name: str):  
+        self.__name = name # 私有属性  
+  
+    def __say_hello(self, msg: str):  
+        print(f"Hello {msg}, {self.__name}")  
+  
+def main():  
+    s1 = Student("Jack")  
+    print(s1.__name)  # 报错 无法使用私有属性，需要用下边的方式  
+    print(s1._Student__name)   # _classname__attribute  
+  
+    s1._Student__say_hello("1111")  
+  
+if __name__ == '__main__':  
+    main()
+```
+
+
+# 2 继承和混入
 - **子类调用父类使用 `super()`**
 
 ```python
