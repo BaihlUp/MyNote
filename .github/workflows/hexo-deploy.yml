@@ -47,7 +47,7 @@ jobs:
         with:
           repository: ${{ env.THEME_REPO }}
           ref: ${{ env.THEME_BRANCH }}
-          path: themes/butterfly
+          path: themes/butterfly1
 
       # - name: Checkout deploy repo
       #   uses: actions/checkout@v3
