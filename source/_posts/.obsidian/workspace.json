@@ -6,40 +6,38 @@
       {
         "id": "3a3f8dc1c882a8b7",
         "type": "tabs",
-        "dimension": 52.41116751269036,
         "children": [
           {
-            "id": "6216b66d7de66960",
+            "id": "66afeae15dc351c0",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "220 - 程序设计/223 - Go & Python/03 - Python--分布式爬虫.md",
+                "file": "220 - 程序设计/223 - Go & Python/02 - Python--面向对象.md",
                 "mode": "source",
-                "source": true
+                "source": false
               }
             },
-            "group": "1e945d371352e4cd"
+            "group": "dc37f5e917011804"
           }
         ]
       },
       {
-        "id": "589b16bb08aeb3e5",
+        "id": "debb528c41de473d",
         "type": "tabs",
-        "dimension": 47.588832487309645,
         "children": [
           {
-            "id": "2ca5f68388f44b5d",
+            "id": "a273d15110ddda34",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "220 - 程序设计/223 - Go & Python/03 - Python--分布式爬虫.md",
-                "mode": "preview",
+                "file": "220 - 程序设计/223 - Go & Python/02 - Python--面向对象.md",
+                "mode": "source",
                 "source": false
               }
             },
-            "group": "1e945d371352e4cd"
+            "group": "dc37f5e917011804"
           }
         ]
       }
@@ -91,8 +89,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 273.5,
-    "collapsed": true
+    "width": 273.5
   },
   "right": {
     "id": "df408e6434c90015",
@@ -108,7 +105,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "220 - 程序设计/223 - Go & Python/03 - Python--分布式爬虫.md",
+                "file": "220 - 程序设计/223 - Go & Python/02 - Python--面向对象.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -125,7 +122,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "220 - 程序设计/223 - Go & Python/03 - Python--分布式爬虫.md",
+                "file": "220 - 程序设计/223 - Go & Python/02 - Python--面向对象.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -148,7 +145,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "220 - 程序设计/223 - Go & Python/03 - Python--分布式爬虫.md"
+                "file": "220 - 程序设计/223 - Go & Python/02 - Python--面向对象.md"
               }
             }
           },
@@ -179,16 +176,16 @@
       "command-palette:打开命令面板": false
     }
   },
-  "active": "6216b66d7de66960",
+  "active": "66afeae15dc351c0",
   "lastOpenFiles": [
-    "220 - 程序设计/223 - Go & Python/Pasted image 20231024191715.png",
-    "220 - 程序设计/223 - Go & Python/Pasted image 20231024190906.png",
-    "220 - 程序设计/223 - Go & Python/Pasted image 20231024200047.png",
-    "220 - 程序设计/223 - Go & Python/02 - Python--进阶篇.md",
-    "200 - 我的百宝箱/204 - 工具使用/Obsidian的使用.md",
-    "220 - 程序设计/223 - Go & Python/03 - Python--分布式爬虫.md",
-    "220 - 程序设计/00 - 目录.md",
     "220 - 程序设计/223 - Go & Python/01 - Python--基础篇.md",
+    "220 - 程序设计/223 - Go & Python/02 - Python--面向对象.md",
+    "220 - 程序设计/223 - Go & Python/03 - Python--进阶篇.md",
+    "220 - 程序设计/223 - Go & Python/05 - Python--分布式爬虫.md",
+    "220 - 程序设计/223 - Go & Python/Pasted image 20231024200047.png",
+    "220 - 程序设计/223 - Go & Python/Pasted image 20231024190906.png",
+    "220 - 程序设计/223 - Go & Python/Pasted image 20231024191715.png",
+    "220 - 程序设计/00 - 目录.md",
     "220 - 程序设计/223 - Go & Python/01 - Python程序设计/01 - 基础篇.md",
     "220 - 程序设计/223 - Go & Python/01 - Python程序设计/03 - 分布式爬虫.md",
     "220 - 程序设计/223 - Go & Python/01 - Python程序设计/02 - 进阶篇.md",
