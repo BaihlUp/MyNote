@@ -882,7 +882,29 @@ jump
 以上代码，通过type类实现了一个`Customer`类，通过字符串内容定义了类的属性，使用此方法，可以实现动态定义类。
 
 ## 4.2 metaclass的使用
+把一个类型 MyClass 的 metaclass 设置成 MyMeta，MyClass 就不再由原生的 type 创建，而是会调用 MyMeta 的`__call__`运算符重载。
 
+**自定义metaclass类创建类：**
+
+```python
+class Human(type):  
+    @staticmethod  
+    def __new__(mcs, *args, **kwargs):  
+        class_ = super().__new__(mcs, *args)  
+        # class_.freedom = True  
+        if kwargs:  
+            for name, value in kwargs.items():  
+                setattr(class_, name, value)  
+        return class_  
+  
+  
+class Student(object, metaclass=Human, country="China", freedom=True):  
+    pass  
+  
+  
+print(Student.country)  # China
+print(Student.freedom)  # True
+```
 
 
 # 5 迭代器和生成器
