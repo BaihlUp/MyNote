@@ -15,7 +15,7 @@
               "state": {
                 "file": "220 - 程序设计/223 - Go & Python/02 - Python--面向对象.md",
                 "mode": "source",
-                "source": false
+                "source": true
               }
             },
             "group": "dc37f5e917011804"
@@ -33,7 +33,7 @@
               "type": "markdown",
               "state": {
                 "file": "220 - 程序设计/223 - Go & Python/02 - Python--面向对象.md",
-                "mode": "source",
+                "mode": "preview",
                 "source": false
               }
             },
@@ -150,6 +150,14 @@
             }
           },
           {
+            "id": "cbbbefa580258cfa",
+            "type": "leaf",
+            "state": {
+              "type": "quiet-outline",
+              "state": {}
+            }
+          },
+          {
             "id": "2c618cb86f0020fb",
             "type": "leaf",
             "state": {
@@ -160,7 +168,7 @@
             }
           }
         ],
-        "currentTab": 3
+        "currentTab": 4
       }
     ],
     "direction": "horizontal",
@@ -176,7 +184,7 @@
       "command-palette:打开命令面板": false
     }
   },
-  "active": "66afeae15dc351c0",
+  "active": "a273d15110ddda34",
   "lastOpenFiles": [
     "220 - 程序设计/223 - Go & Python/01 - Python--基础篇.md",
     "220 - 程序设计/223 - Go & Python/02 - Python--面向对象.md",
