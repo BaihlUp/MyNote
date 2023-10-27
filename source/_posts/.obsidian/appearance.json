@@ -3,5 +3,6 @@
   "theme": "moonstone",
   "cssTheme": "Things",
   "translucency": false,
-  "enabledCssSnippets": []
+  "enabledCssSnippets": [],
+  "baseFontSize": 15
 }
