@@ -634,6 +634,7 @@ print(circle.radius)
 circle.radius = 10
 print(circle.radius)
 ```
+定义`@property`和`@radius.setter`是配对出现，不可直接定义`@radius.setter`。
 
 3. **创建可删除属性**
 

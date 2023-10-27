@@ -63,7 +63,7 @@ file_handler.close()
 以上示例中在 `__init__` 方法中进行文件打开。
 
 ## 1.3 类变量
-属于类本身这个对象的属性，所有该类的对象都共享类变量。
+属于类本身这个对象的属性，所有该类的对象都共享类变量。类变量可以通过类名、对象名调用。
 
 ```python
 from pprint import pprint  
@@ -135,7 +135,7 @@ def main():
 ```python
 class Student:  
     def __init__(self, name: str):  
-        self.__name = name # 私有属性  
+        self.__name = name # 私有属性（双下划线）
   
     def __say_hello(self, msg: str):  
         print(f"Hello {msg}, {self.__name}")  
