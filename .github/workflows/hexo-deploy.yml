@@ -2,11 +2,11 @@ name: Hexo deploy
 
 on: 
   push:
-    branches:
-      - main  # main分支有push操作时自动触发这个action
-    paths-ignore:  # 忽略指定的目录
-      - 'source/_drafts/**'
-      - '.github/**'
+    # branches:
+    #   - main  # main分支有push操作时自动触发这个action
+    # paths-ignore:  # 忽略指定的目录
+    #   - 'source/_drafts/**'
+    #   - '.github/**'
 env:
   GIT_USER: BaihlUp
   GIT_EMAIL: 2677443264@qq.com
