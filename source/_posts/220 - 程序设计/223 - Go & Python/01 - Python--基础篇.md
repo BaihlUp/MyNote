@@ -495,7 +495,7 @@ dict1 = MyDict()
 dict1['a'] = 1
 dict1['a'] = 2   # 字典里已经有key a ,不能覆盖
 ```
-以上程序通过重新实现 字典的 `__setitem__` 方法，实现了在赋值是的检查，如果key已存在，则不覆盖。
+以上程序通过重新实现 字典的 `__setitem__` 方法，实现了在赋值时的检查，如果key已存在，则不覆盖。
 
 更多容器数据类型可以查看文档：[https://docs.python.org/zh-cn/3.11/library/collections.html](https://docs.python.org/zh-cn/3.11/library/collections.html)
 
