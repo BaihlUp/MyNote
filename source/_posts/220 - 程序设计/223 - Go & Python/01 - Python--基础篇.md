@@ -1,4 +1,11 @@
-[toc]
+---
+title: Python编程语言--基础篇
+date: 2023-10-16 16:27:41
+tags:
+  - 程序设计
+  - Python
+---
+
 # 0 参考资料
 ![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230919102400.png)
 
