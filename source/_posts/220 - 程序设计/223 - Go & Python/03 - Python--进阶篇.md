@@ -1690,7 +1690,7 @@ calling __exit__ method
 ```
 
 以上with语句执行逻辑：
-1. 1. 方法`“__init__()”`被调用，程序初始化对象 FileManager，使得文件名（name）是`"test.txt"`，文件模式 (mode) 是`'w'`；
+1. 方法`“__init__()”`被调用，程序初始化对象 FileManager，使得文件名（name）是`"test.txt"`，文件模式 (mode) 是`'w'`；
 2. with语句自动调用方法`“__enter__()”`，文件`“test.txt”`以写入的模式被打开，并且返回 FileManager 对象赋予变量 f；
 3. 字符串`“hello world”`被写入文件`“test.txt”`；
 4. 方法`“__exit__()”`被调用，负责关闭之前打开的文件流。
@@ -1749,7 +1749,7 @@ class DBConnectionManager:
 with DBConnectionManager('localhost', '8080') as db_client: 
 ```
 
-完了 DBconnectionManager 这个类，那么在程序每次连接数据库时，只需要简单地调用 with 语句即可，并不需要关心数据库的关闭、异常等等，显然大大提高了开发的效率。
+实现了 DBconnectionManager 这个类，那么在程序每次连接数据库时，只需要简单地调用 with 语句即可，并不需要关心数据库的关闭、异常等等，显然大大提高了开发的效率。
 
 
 ### 11.2.2 基于生成器的上下文管理器

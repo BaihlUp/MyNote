@@ -979,6 +979,8 @@ describe_pet(animal_type='hamster', pet_name='harry')
 describe_pet(pet_name='harry', animal_type='hamster')
 ```
 
+> 位置实参需要位于关键字参数前边
+
 ### 5.1.3 等效的函数调用
 鉴于可混合使用位置实参、关键字实参和默认值，通常有多种等效的函数调用方式。请看下面对函数describe_pet() 的定义，其中给一个形参提供了默认值：
 ```python
@@ -1009,6 +1011,7 @@ def address_book(name, *telphone, alias_name=None, **custom):
 * * 接收关键字参数
 ```
 
+位置形参需要在关键子形参前边。
 ```python
 address_book("wilson")
 ```
@@ -1152,7 +1155,7 @@ reduce(lambda x, y: x+y, [1, 2, 3, 4, 5])
 ```
 
 ### 5.4.5 闭包
-数的返回值也可以是函数对象（闭包）
+函数的返回值也可以是函数对象（闭包）
 ```python
 def func_closure():
     def get_message(message):
@@ -1369,33 +1372,6 @@ except NameError as ne:
 名字不允许使用 jerry
 ```
 
-## 9.4 with语句
-`__enter__()` 和 `__exit()` 分别在with 语句创建类实例和with语句退出时执行。
-```python
-class MyClass:
-    def __init__(self, name):
-        self.name = name
-
-    def __enter__(self):
-        print("enter with")
-        return self
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        print("exit with")
-
-    def func(self):
-        return self.name
-
-# 使用 with 语句来创建上下文管理器
-with MyClass("hello") as mc:
-    print(mc.func())
-``` 
-输出：
-```shell
-enter with
-hello
-exit with
-```
 
 # 10 Python和C++混合编程
 1. 使用ctypes库加载 C++ 编写的动态链接库：[https://docs.python.org/zh-cn/3.10/library/ctypes.html](https://docs.python.org/zh-cn/3.10/library/ctypes.html)
