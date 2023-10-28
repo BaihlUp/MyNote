@@ -921,8 +921,8 @@ with open("demo4.txt", mode="w") as f:
 ## 5.0 函数定义
 ```python
 def foo():  
-print("foo")  
-print("is a function")  
+	print("foo")  
+	print("is a function")  
   
 print("aaaaa")
 ```

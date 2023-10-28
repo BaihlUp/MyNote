@@ -3,6 +3,8 @@
   "theme": "moonstone",
   "cssTheme": "Things",
   "translucency": false,
-  "enabledCssSnippets": [],
+  "enabledCssSnippets": [
+    "coffebean-代码块着色黑色okaidia主题"
+  ],
   "baseFontSize": 15
 }
