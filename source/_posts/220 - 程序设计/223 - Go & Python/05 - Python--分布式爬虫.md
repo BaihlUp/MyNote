@@ -437,3 +437,63 @@ EasyDL
 ![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/Pasted%20image%2020231024200047.png)
 
 
+## 8.2 代理IP池实现
+代理IP实现：
+`crawl_xici_ip.py`
+
+scrapy_proxies
+
+scrapy-crawlera 开源库，IP代理，一款收费的IP代理，购买后分配一个API key
+tor 洋葱网络，隐藏网络
+
+
+## 8.3 验证码识别
+
+在线打码：云打码平台（收费，验证码识别平台）
+
+
+
+人工打码
+
+
+## 8.4 spider的setting
+```python
+# cookie禁用
+COOKIES_ENABLED = False
+# 下载延迟类配置
+AUTOTHROTTLE_MAX_DELAY = 3
+```
+
+
+# 14 Elasticsearch搜索引擎的使用
+## 14.1 Elasticsearch
+Elasticsearch-rtf  
+
+Elasticsearch-head插件 -- ES的可视化插件
+kibana
+
+cnpm 加快npm的安装
+
+
+- **elasticsearch概念解释**
+
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/Pasted%20image%2020231029141203.png)
+
+- **elasticsearch常用请求方式**
+
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/Pasted%20image%2020231029141437.png)
+
+
+elasticsearch-dsl-py
+
+## 15 django搭建搜索网站
+
+
+通过django管理scrapy：https://github.com/holgerd77/django-dynamic-scraper
+
+## 16 scrapyd部署scrapy项目
+
+https://github.com/scrapy/scrapyd
+
+1. 在虚拟环境中安装scrapyd
+2. 安装scrapyd-client
