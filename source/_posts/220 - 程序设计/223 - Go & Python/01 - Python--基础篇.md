@@ -1280,6 +1280,42 @@ index-url = http://mirrors.aliyun.com/pypi/simple
 trusted-host=mirrors.aliyun.com
 ```
 
+- **pip命令使用**
+
+```shell
+pip freeze > requirements.txt # 导出当前环境的包
+pip install -r requriements.txt # 导入指定的包
+```
+
+- **pipreqs工具**
+
+这个工具的好处是可以通过对项目目录的扫描，自动发现使用了那些类库，自动生成依赖清单。
+
+```bash
+pipreqs . --encoding=utf8 --force
+
+```
+1. “.” 指的是将导出依赖包的文件放在当前目录下
+2. “--encoding=utf8” 指的是存放文件的编码为utf-8,否则会报错
+3. “--force” --force 强制执行，当 生成目录下的requirements.txt存在时强子覆盖
+
+**pipreqs常见参数：**
+
+```bash
+选项：  
+--use-local仅使用本地包信息而不是查询PyPI  
+--pypi-server <url>使用自定义PyPi服务器  
+--proxy <url>使用Proxy，参数将传递给请求库。你也可以设置  
+--debug打印调试信息  
+--ignore <dirs> ...忽略额外的目录  
+--encoding <charset>使用编码参数打开文件  
+--savepath <file>保存给定文件中的需求列表  
+--print输出标准输出中的需求列表  
+--force覆盖现有的requirements.txt  
+--diff <file>将requirements.txt中的模块与项目导入进行比较。  
+--clean <file>通过删除未在项目中导入的模块来清理requirements.txt。
+```
+
 
 # 9 异常
 ## 9.1 异常分类
