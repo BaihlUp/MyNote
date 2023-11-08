@@ -173,7 +173,7 @@ for attr in lang_attr:
 
 ## 2.2 CSS 选择器
 
-## 2.3 Selenium 使用
+# 3 Selenium 使用
 一个用于自动化浏览器操作的工具，常用于网站测试和网页数据抓取。Selenium可以基于对应的浏览器driver自动化操作浏览器，比如使用 chromedriver 操作chrome浏览器，需要先下载与本地安装的chrome版本对应的 chromedriver，否则无法使用。
 ```python
 pip install selenium
@@ -201,7 +201,43 @@ if __name__ == "__main__":
 
 
 
-# 3 Scrapy 的应用
+# 4 登录验证码破解
+## 4.1 人机验证码破解
+下边是https://account.cnblogs.com/ 对应的登陆界面，点击登录后需要再点击验证按钮，验证通过则可以登录。
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/202311071126798.png)
+使用默认的Selenium模拟登录时发现，点击验证按钮后，验证失败。需要使用 `undetected_chromedriver` 解决。
+
+```python
+import undetected_chromedriver as uc
+
+driver_executable_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "chromedriver-mac-arm64/chromedriver")  
+options = Options()  
+options.headless = False  
+browser = uc.Chrome(options=options, driver_executable_path=driver_executable_path, version_main=119)
+```
+源码地址：[https://github.com/BaihlUp/spider-tools/blob/main/tools/selenium_login.py](https://github.com/BaihlUp/spider-tools/blob/main/tools/selenium_login.py)
+
+## 4.2 滑块验证码破解
+滑块验证破解通过 https://www.zhihu.com/#signin 网站验证。
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/202311071138454.png)
+
+实现分为两种方式：1. OpenCV库 2. 机器学习
+
+在平台上[https://ai.baidu.com/easydl/](https://ai.baidu.com/easydl/)通过上传数据集训练识别滑块验证码的模型。
+训练完后，通过 AK/SK 调用模型进行滑块验证码的识别，会返回一个需要滑动的距离。
+
+
+源码地址：[https://github.com/BaihlUp/spider-tools/blob/main/tools/captcha_crack.py](https://github.com/BaihlUp/spider-tools/blob/main/tools/captcha_crack.py)
+
+## 4.3 字符验证码识别
+
+
+## 4.4 云打码平台识别
+使用云打码平台识别验证码
+
+
+
+# 7 Scrapy 的应用
 **Scrapy使用手册：** [https://www.osgeo.cn/scrapy/](https://www.osgeo.cn/scrapy/)
 ## 3.1 安装配置
 - **Ubuntu安装方式**
