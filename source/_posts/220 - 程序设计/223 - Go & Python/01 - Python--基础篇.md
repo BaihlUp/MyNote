@@ -11,7 +11,7 @@ tags:
 
 ## 0.1 文档
 [官方文档](https://docs.python.org/zh-cn/3.11/tutorial/index.html)
-
+[PyCharm使用手册](https://www.imooc.com/wiki/pycharmlesson)
 
 # 1 基础类型
 ## 1.1 数字
