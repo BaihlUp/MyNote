@@ -4,28 +4,57 @@
 
 **uiautomator2**：https://github.com/openatx/uiautomator2
 
+## 0.2 工具
+模拟器：夜神模拟器
+抓包工具：
+
 ## Android调试桥（adb）
+使用adb工具可以连接手机，通过PC操作手机，进行调试。
 
 adb clilent
 adb server：ADB Server是运行在PC上的一个后台进程
 adb devices：展示adb中连接的手机
 adb shell pm list packages：展示手机中安装的包
 adb install/uninstall ：使用adb在手机中安装apk
+adb -s [设备号] shell ：进入手机底层系统
+adb push [文件路径] [手机存储位置] ：从PC传文件到手机
+adb pull [手机存储位置] [文件路径] ：从手机传文件到PC
+adb screencap /sdcard/test.png ：手机截图
 
+ 
 > 如果使用adb失败，需要在手机中打开开发者模式
 
 
-### ubuntu安装Adb工具
+- ubuntu安装Adb工具
 
 `adb tcpip 5555` 设置tcp连接
 `adb connect  192.168.1.8` 连接手机
 
 
 ## Uiautomator2连接手机
+包括uiautomatorviewer、uiautomator
+用来做UI测试，点击控件看是否符合预期。
+
+可以定位手机界面的元素
+
+替换使用：高级版uiautomatorviewer-master
+
+可以使用uiautomatorviewer定位手机的元素
 
 
+## Appium移动端自动化工具
+appium类库封装了标准Selenium客户端类库。是一个开源测试自动化框架
+是个C/S架构
 
+bootstrap.jar
 
+- inspector菜单
+	Automatic Server
+	desired capability 
+	
+获取appPackage、appActivity
+执行：`aapt.exe dump badging [APP安装包]`
+使用adb shell获取
 
 
 
@@ -122,20 +151,34 @@ mitm.it进行证书下载
 运行在手机上的app，可以捕获http/https网络流量
 
 
-## Appium移动端自动化测试工具
-appium类库封装了标准Selenium客户端类库。
+
+
+
+## App应用数据抓取
+使用Fiddler抓包，然后进行分析
+编写Python脚本，爬取数据
+测试APP为 豆果美食
+
+代码地址：
+
+## 移动端自动化控制工具
+1. 安装JDK环境
+2. 安装Android 开发工具：
+
+Android SDK Tools
+
+
+Extras
+
+[adb工具详讲1]
+adb start-server
+> 如果出现错误，PC上的跟手机上的adb工具版本不一致，可以使用PC中的adb覆盖模拟器的adb
 
 
 
 
-
-
-
-
-
-
-
-
+# 实战项目
+## 抓取抖音数据
 
 
 

@@ -1,0 +1,152 @@
+{
+  "main": {
+    "id": "ec662a39662b1a21",
+    "type": "split",
+    "children": [
+      {
+        "id": "f8dd00cd3fa954d1",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "b390f18099d3f9c1",
+            "type": "leaf",
+            "state": {
+              "type": "empty",
+              "state": {}
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "a62937147a4b7d09",
+    "type": "mobile-drawer",
+    "children": [
+      {
+        "id": "0e437a0c29664e52",
+        "type": "leaf",
+        "state": {
+          "type": "file-explorer",
+          "state": {
+            "sortOrder": "alphabetical"
+          }
+        }
+      },
+      {
+        "id": "9cc233c8e1f5b4c8",
+        "type": "leaf",
+        "state": {
+          "type": "search",
+          "state": {
+            "query": "",
+            "matchingCase": false,
+            "explainSearch": false,
+            "collapseAll": false,
+            "extraContext": false,
+            "sortOrder": "alphabetical"
+          }
+        }
+      },
+      {
+        "id": "159d1abaeafa8747",
+        "type": "leaf",
+        "state": {
+          "type": "tag",
+          "state": {
+            "sortOrder": "frequency",
+            "useHierarchy": true
+          }
+        }
+      },
+      {
+        "id": "5448515d0eca842c",
+        "type": "leaf",
+        "state": {
+          "type": "bookmarks",
+          "state": {}
+        }
+      }
+    ],
+    "currentTab": 0
+  },
+  "right": {
+    "id": "528e70a73abed2ea",
+    "type": "mobile-drawer",
+    "children": [
+      {
+        "id": "9e1ca15d18e96226",
+        "type": "leaf",
+        "state": {
+          "type": "backlink",
+          "state": {
+            "collapseAll": false,
+            "extraContext": false,
+            "sortOrder": "alphabetical",
+            "showSearch": false,
+            "searchQuery": "",
+            "backlinkCollapsed": false,
+            "unlinkedCollapsed": true
+          }
+        }
+      },
+      {
+        "id": "589c242652fef3da",
+        "type": "leaf",
+        "state": {
+          "type": "outgoing-link",
+          "state": {
+            "linksCollapsed": false,
+            "unlinkedCollapsed": true
+          }
+        }
+      },
+      {
+        "id": "f42b6eb749cbeb22",
+        "type": "leaf",
+        "state": {
+          "type": "outline",
+          "state": {}
+        }
+      }
+    ],
+    "currentTab": 0
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:打开快速切换": false,
+      "graph:查看关系图谱": false,
+      "canvas:新建白板": false,
+      "daily-notes:打开/创建今天的日记": false,
+      "templates:插入模板": false,
+      "command-palette:打开命令面板": false,
+      "remotely-save:Remotely Save": false
+    }
+  },
+  "active": "0e437a0c29664e52",
+  "lastOpenFiles": [
+    "220 - 程序设计/00 - 目录.md",
+    "200 - 我的百宝箱/204 - 工具使用/Obsidian的使用.md",
+    "200 - 我的百宝箱/204 - 工具使用/JetBrains开发工具使用.md",
+    "220 - 程序设计/223 - Go & Python/07 - Python移动端爬虫.md",
+    "220 - 程序设计/223 - Go & Python/07 - Go--基础篇.md",
+    "250 - 虚拟化&云计算/251 - 学习笔记/Kubernetes中的Calico网络.md",
+    "220 - 程序设计/223 - Go & Python/03 - Python--进阶篇.md",
+    "220 - 程序设计/223 - Go & Python/01 - Python--基础篇.md",
+    "220 - 程序设计/223 - Go & Python/06 - Python--常用工具包.md",
+    "220 - 程序设计/223 - Go & Python/02 - Python--面向对象.md",
+    "250 - 虚拟化&云计算/251 - 学习笔记/Kubernetes-v1.26.1部署指南.md",
+    "220 - 程序设计/223 - Go & Python/05 - Python--分布式爬虫.md",
+    "290 - 信息安全/294 - 参考资料",
+    "290 - 信息安全/291 - 学习笔记",
+    "280 - 操作系统/285 - 参考资料",
+    "280 - 操作系统/281 - 参考资料",
+    "280 - 操作系统/284 - 系统调优",
+    "270 - 网络协议/279 - 参考资料",
+    "270 - 网络协议/271 - 学习笔记",
+    "220 - 程序设计/229 - 参考资料",
+    "220 - 程序设计/227 - 网络编程",
+    "220 - 程序设计/226 - 高级编程"
+  ]
+}

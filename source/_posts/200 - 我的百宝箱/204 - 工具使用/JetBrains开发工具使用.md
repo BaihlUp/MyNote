@@ -3,6 +3,14 @@
 参考资料：[PyCharm使用教程](https://www.imooc.com/wiki/pycharmlesson)
 
 ## 1.1 PyCharm 基本使用
+### 1.1.0 基本配置
+- 调节选中高亮
+
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/202311141231365.png)
+
+- 光标所在行
+
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/202311141233224.png)
 
 ### 1.1.1 常用插件
 
