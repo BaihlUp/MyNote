@@ -173,7 +173,8 @@ for attr in lang_attr:
 
 ## 2.2 CSS 选择器
 
-# 3 Selenium 使用
+# 3 Selenium 模拟登录
+## 3.1 Selenium 基本使用
 一个用于自动化浏览器操作的工具，常用于网站测试和网页数据抓取。Selenium可以基于对应的浏览器driver自动化操作浏览器，比如使用 chromedriver 操作chrome浏览器，需要先下载与本地安装的chrome版本对应的 chromedriver，否则无法使用。
 ```python
 pip install selenium
@@ -199,7 +200,10 @@ if __name__ == "__main__":
     browser.find_element(By.CSS_SELECTOR, ".view-signin input[name='password']").send_keys("admin125")
 ```
 
+## 3.2 Selenium 模拟登录
+使用Selenium控制浏览器实现模拟登录。
 
+代码地址：[https://github.com/BaihlUp/spider-tools/blob/main/tools/selenium_login.py](https://github.com/BaihlUp/spider-tools/blob/main/tools/selenium_login.py)
 
 # 4 登录验证码破解
 ## 4.1 人机验证码破解
@@ -235,7 +239,9 @@ browser = uc.Chrome(options=options, driver_executable_path=driver_executable_pa
 ## 4.4 云打码平台识别
 使用云打码平台识别验证码
 
+# 5 Cookie池系统设计
 
+# 6 IP代理池
 
 # 7 Scrapy 的应用
 **Scrapy使用手册：** [https://www.osgeo.cn/scrapy/](https://www.osgeo.cn/scrapy/)
