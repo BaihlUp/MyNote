@@ -639,6 +639,7 @@ if __name__ == '__main__':
 使用 Fiddler 抓包看接口，看抖音的数据接口，知道接口以后，编写python脚本，使用mitmdump执行脚本进行数据爬取。
 执行 `mitmdump.exe -s .\decode_douyin.py -p 8888`，指定代理端口 8888，在移动端浏览器输入 `mitm.it` 下载证书并加载。
 
+- decode_douyin.py
 ```python
 # 特别注意：
 # 在新版本的抖音中，已经加密，无法获取数据
