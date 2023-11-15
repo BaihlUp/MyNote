@@ -423,9 +423,10 @@ bootstrap.jar
 安装证书后，配置代理
 ![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/202311131750472.png)
 ![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/202311131754614.png)
-以上设置完Fiddler证书和代理配置后，浏览器中安装switchyOmega 代理软件，基于Fiddler代理访问，如果是手机模拟器中，需要先开启桥接模式，与本机PC处在同一网络，然后在手机中设置代理，指定为Fiddler。
+以上设置完Fiddler证书和代理配置后，重启Fiddler，浏览器中安装switchyOmega 代理软件，基于Fiddler代理访问，如果是手机模拟器中，需要先开启桥接模式，与本机PC处在同一网络，然后在手机中设置代理，指定为Fiddler。
 
-访问Fiddler:PORT（PC的IP和代理端口），会显示安装 Fiddler 证书的界面，正常安装证书，就可以访问HTTPS网站。
+手机浏览器中访问Fiddler:PORT（PC的IP和代理端口），会显示安装 Fiddler 证书的界面，正常安装证书，就可以访问HTTPS网站。
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/202311151753051.png)
 
 - Fiddler 工具栏
 
@@ -549,12 +550,130 @@ App中内置了证书，验证服务端的证书，导致无法进行中间人�
 ## 2.1 抓取抖音数据
 
 ### 2.1.1 操作APP
+1. 操作APP进行观看短视频
+2. 查看视频作者主页
+3. 操作返回
+4. 滑动到下一个视频
+5. 循环以上操作
+
+**代码如下：**
+```python
+import uiautomator2 as u2
+import time
+
+
+class Douyin(object):
+    # 在__init__方法里面连接设备
+    def __init__(self, serial="emulator-5554"):
+        self.d = u2.connect_usb(serial=serial)
+        self.start_app()
+        self.handle_watcher()
+        self.size = self.get_windowsize()
+        # 是用来获取一个初始时间
+        self.t0 = time.perf_counter()
+
+    def start_app(self):
+        """启动app"""
+        self.d.app_start(package_name="com.ss.android.ugc.aweme")
+
+    def stop_app(self):
+        """app退出逻辑"""
+        # 先关闭监视器
+        self.d.watcher.stop()
+        self.d.app_stop("com.ss.android.ugc.aweme")
+        self.d.app_clear("com.ss.android.ugc.aweme")
+
+    def stop_time(self):
+        """停止时间"""
+        # 时间是秒
+        if time.perf_counter() - self.t0 > 50:
+            return True
+
+    def handle_watcher(self):
+        """监视器"""
+        # 通知权限
+        self.d.watcher.when('//*[@resource-id="com.ss.android.ugc.aweme:id/a4r"]').click()
+        # 发现滑动查看更多
+        self.d.watcher.when('//*[@text="滑动查看更多"]').click()
+        # 添加一个监控器
+        self.d.watcher.when('//*[@text="快速进入TA的个人中心"]').click()
+        # 监控器写好之后，一定要记得启动
+        self.d.watcher.start(interval=1)
+
+    def get_windowsize(self):
+        """获取窗口大小"""
+        return self.d.window_size()
+
+    def swipe_douyin(self):
+        """滑动抖音视频和点击视频发布者头像的操作"""
+        # 来判断是否正常的进入到了视频页面，等待20s
+        if self.d(resourceId="com.ss.android.ugc.aweme:id/yy", text="我").exists(timeout=20):
+            while True:
+                # 到规定的时间停止循环
+                if self.stop_time():
+                    self.stop_app()
+                    return
+                # 查看是不是正常的发布者，头像下有个 + 号
+                if self.d(resourceId="com.ss.android.ugc.aweme:id/u0").exists:
+                    # 是正常的发布者，点击头像
+                    self.d(resourceId="com.ss.android.ugc.aweme:id/tw").click()
+                    # 返回
+                    self.d(resourceId="com.ss.android.ugc.aweme:id/et").click()
+
+                if self.d(resourceId="com.ss.android.ugc.aweme:id/yy", text="我").exists and \
+                        self.d(resourceId="com.ss.android.ugc.aweme:id/u0").exists:
+                    # 进入正常的视频页面,开始滑动
+                    x1 = int(self.size[0] * 0.5)
+                    y1 = int(self.size[1] * 0.9)
+                    y2 = int(self.size[1] * 0.15)
+                    self.d.swipe(x1, y1, x1, y2)
+
+
+if __name__ == '__main__':
+    d = Douyin()
+    d.swipe_douyin()
+```
+
 
 ### 2.1.2 解析数据
-使用fiddler通过抓包看接口，然后使用mitmdump执行
+使用 Fiddler 抓包看接口，看抖音的数据接口，知道接口以后，编写python脚本，使用mitmdump执行脚本进行数据爬取。
+执行 `mitmdump.exe -s .\decode_douyin.py -p 8888`，指定代理端口 8888，在移动端浏览器输入 `mitm.it` 下载证书并加载。
 
+```python
+# 特别注意：
+# 在新版本的抖音中，已经加密，无法获取数据
+# 当前使用的是10.0版本的抖音app，大家一定要注意
+# 使用抓包工具找到如下接口：
+# 个人信息页接口
+# https://aweme-eagle.snssdk.com/aweme/v1/user/?user_id
+# 滑动视频的接口
+# https://aweme-eagle.snssdk.com/aweme/v1/feed
 
+import json
 
+def response(flow):
+    """解析10版本抖音app返回数据"""
+    # 视频
+    if 'https://aweme-eagle.snssdk.com/aweme/v1/feed' in flow.request.url:
+        # 使用json来loadsresponse.text
+        video_response = json.loads(flow.response.text)
+        video_list = video_response.get("aweme_list", [])
+        for item in video_list:
+            print(item.get("desc"), "")
+    # 发布者页面
+    if 'https://aweme-eagle.snssdk.com/aweme/v1/user/?user_id' in flow.request.url:
+        person_response = json.loads(flow.response.text)
+        person_info = person_response.get("user", "")
+        if person_info:
+            info = {
+                'nickname': person_info.get("nickname", ""),
+                'total_favorited': person_info.get("total_favorited", 0),
+                'following_count': person_info.get("following_count", 0),
+                'douyin_id': person_info.get("unique_id", ""),
+                'follower_count': person_info.get("follower_count", 0)
+            }
+            print(info)
+```
 
 
 ## App应用数据抓取
