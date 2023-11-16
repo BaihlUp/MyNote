@@ -606,8 +606,6 @@ docker run --rm --privileged -v /dev/bus/usb:/dev/bus/usb --net host \
 
 ![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/202311161611982.png)
 
-
-
 ## 1.8 连接真实手机
 手机连接到PC后，可能需要安装驱动。连接上以后通过adb查看如果没有显示devices，撤销下USE调试模式，然后再次查看。
 
