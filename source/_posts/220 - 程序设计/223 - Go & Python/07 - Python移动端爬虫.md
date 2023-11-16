@@ -43,8 +43,8 @@ adb screencap /sdcard/test.png ：手机截图
 
 - **ubuntu安装Adb工具**
 
-`adb tcpip 5555` 设置tcp连接
-`adb connect 192.168.1.8` 连接手机，通过IP连接手机
+在PC上开启tcpip模式：`adb tcpip 5555` 设置tcp连接模式和端口
+在Ubuntu上进行连接：`adb connect 192.168.1.8:5555` 通过IP连接手机
 
 
 ## 1.3 Uiautomator2使用
@@ -415,6 +415,10 @@ bootstrap.jar
 使用adb shell获取
 
 
+使用docker部署 Appium
+在PC上通过命令 `adb -s [设备ID] tcpip 5555` 修改为网络连接模式
+
+
 ## 1.6 抓包工具
 ### 1.6.1 Fiddler安装和使用
 
@@ -535,7 +539,76 @@ App中内置了证书，验证服务端的证书，导致无法进行中间人�
 
 暂无解决方法，需要破解APP，进行逆向
 
-## 1.7 连接真实手机
+## 1.7 atxserver2 多设备管理
+### 1.7.1 介绍
+atxserver2 是一个移动设备管理平台，主要是 Python3+NodeJS+RethinkDB开发，项目地址：[https://github.com/openatx/atxserver2](https://github.com/openatx/atxserver2)
+
+通过多设备管理工具，可以同时在PC上实时控制多个手机，并且获取对应手机的信息。
+
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/202311161124217.png)
+1. RethinkDB：这是一个轻量级的数据库，用来存储数据
+2. atxserver2：主要负责处理数据，显示与用户的前端交互等等，单独运行atxserver2也可以看到效果
+3. atxserver2-android-provider：接入安卓系统必须启动的项目，主要负责安卓设备和平台交互
+4. atxserver2-ios-provider：接入IOS设备必须启动的项目，负责IOS设备和平台的交互工作
+
+> 也有很多开源的设备控制工具，实现手机的群控功能，如：[https://github.com/Genymobile/scrcpy](https://github.com/Genymobile/scrcpy)，可以多多参考
+
+**下边是部署过程：**
+
+1. 安装rethinkdb：[安装手册](https://rethinkdb.com/docs/install/)，修改rethinkdb配置文件 default.conf，bind配置监听 0.0.0.0，拷贝到 instance.id 目录下，通过 `rethinkdb --config-file [配置文件]`，启动后，通过浏览器访问 `http://[IP:8080]`
+2. 安装 atxserver2：github项目：[https://github.com/openatx/atxserver2](https://github.com/openatx/atxserver2)
+3. 安装 atxserver2-android-provider：依赖nodejs，Github项目：[https://github.com/openatx/atxserver2-android-provider](https://github.com/openatx/atxserver2-android-provider)
+4. atxserver2-android-provider 会通过adb track-devices自动发现已经接入的设备，推送以下安装包：
+	1. minicap
+	2. minitouch
+	3. atx-agent
+	4. app-uiautomator-[test].apk
+	5. whatsinput-apk
+5. 启动atxserver2：通过在项目中执行 `python main.py`，，默认监听4000
+6. 启动provider：在项目中执行 `python main.py --server [atxserver2监听地址]`
+
+> 官方测试，atxserver2可以同时控制约80台移动设备
+
+
+### 1.7.2 atxserver2 安装部署
+下边都是在Ubuntu环境下操作，所以首先要保证，在Ubuntu上是可以通过adb查看到移动设备的，如下：
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/202311161618803.png)
+
+下载项目源代码：[https://github.com/openatx/atxserver2](https://github.com/openatx/atxserver2)，项目目录执行如下命令：
+```python
+docker-compose up
+```
+执行完以上命令后，可以看到atxserver2监听在4000端口：
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/202311161619857.png)
+
+通过浏览器访问，此时设备列表为空：
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/202311161620713.png)
+
+
+### 1.7.3 atxserver2-android-provider 部署
+通过安装 atxserver2-android-provider 接入安卓设备，通过docker部署，如下：
+
+```shell
+SERVER_URL="http://192.168.170.137:4000" # 这个修改成自己的atxserver2地址
+IMAGE="codeskyblue/atxserver2-android-provider"
+docker pull $IMAGE
+docker run --rm --privileged -v /dev/bus/usb:/dev/bus/usb --net host \
+    ${IMAGE} python main.py --allow-remote --server ${SERVER_URL}
+```
+执行后如下：
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/202311161622672.png)
+可以看到发现一个移动设备 `10.164.17.39:5555`，并且输出了设备的信息。
+
+刷新浏览器可以看到有一个安卓移动端设备：
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/202311161623978.png)
+
+点击进去以后可以看到界面如下：
+
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/202311161611982.png)
+
+
+
+## 1.8 连接真实手机
 手机连接到PC后，可能需要安装驱动。连接上以后通过adb查看如果没有显示devices，撤销下USE调试模式，然后再次查看。
 
 连接真实手机后，使用adb操作，与操作模拟器中的手机一样。
