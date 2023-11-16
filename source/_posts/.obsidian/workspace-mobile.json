@@ -11,9 +11,30 @@
             "id": "b390f18099d3f9c1",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {}
+              "type": "markdown",
+              "state": {
+                "file": "220 - 程序设计/223 - Go & Python/03 - Python--进阶篇.md",
+                "mode": "preview",
+                "source": false
+              }
             }
+          }
+        ]
+      },
+      {
+        "id": "ee6a43bceecda487",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "f76aa741f7526d3d",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "220 - 程序设计/223 - Go & Python/06 - Python--常用工具包.md"
+              }
+            },
+            "group": "83ff4273de936be9"
           }
         ]
       }
@@ -81,15 +102,17 @@
         "state": {
           "type": "backlink",
           "state": {
-            "collapseAll": false,
+            "file": "220 - 程序设计/223 - Go & Python/06 - Python--常用工具包.md",
+            "collapseAll": true,
             "extraContext": false,
             "sortOrder": "alphabetical",
             "showSearch": false,
             "searchQuery": "",
             "backlinkCollapsed": false,
-            "unlinkedCollapsed": true
+            "unlinkedCollapsed": false
           }
-        }
+        },
+        "group": "83ff4273de936be9"
       },
       {
         "id": "589c242652fef3da",
@@ -97,6 +120,7 @@
         "state": {
           "type": "outgoing-link",
           "state": {
+            "file": "220 - 程序设计/223 - Go & Python/03 - Python--进阶篇.md",
             "linksCollapsed": false,
             "unlinkedCollapsed": true
           }
@@ -107,11 +131,13 @@
         "type": "leaf",
         "state": {
           "type": "outline",
-          "state": {}
+          "state": {
+            "file": "220 - 程序设计/223 - Go & Python/03 - Python--进阶篇.md"
+          }
         }
       }
     ],
-    "currentTab": 0
+    "currentTab": 2
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -124,20 +150,20 @@
       "remotely-save:Remotely Save": false
     }
   },
-  "active": "0e437a0c29664e52",
+  "active": "b390f18099d3f9c1",
   "lastOpenFiles": [
+    "220 - 程序设计/223 - Go & Python/05 - Python--分布式爬虫.md",
+    "220 - 程序设计/223 - Go & Python/06 - Python--常用工具包.md",
+    "220 - 程序设计/223 - Go & Python/07 - Python移动端爬虫.md",
+    "220 - 程序设计/223 - Go & Python/07 - Go--基础篇.md",
+    "220 - 程序设计/223 - Go & Python/01 - Python--基础篇.md",
+    "220 - 程序设计/223 - Go & Python/03 - Python--进阶篇.md",
     "220 - 程序设计/00 - 目录.md",
     "200 - 我的百宝箱/204 - 工具使用/Obsidian的使用.md",
     "200 - 我的百宝箱/204 - 工具使用/JetBrains开发工具使用.md",
-    "220 - 程序设计/223 - Go & Python/07 - Python移动端爬虫.md",
-    "220 - 程序设计/223 - Go & Python/07 - Go--基础篇.md",
     "250 - 虚拟化&云计算/251 - 学习笔记/Kubernetes中的Calico网络.md",
-    "220 - 程序设计/223 - Go & Python/03 - Python--进阶篇.md",
-    "220 - 程序设计/223 - Go & Python/01 - Python--基础篇.md",
-    "220 - 程序设计/223 - Go & Python/06 - Python--常用工具包.md",
     "220 - 程序设计/223 - Go & Python/02 - Python--面向对象.md",
     "250 - 虚拟化&云计算/251 - 学习笔记/Kubernetes-v1.26.1部署指南.md",
-    "220 - 程序设计/223 - Go & Python/05 - Python--分布式爬虫.md",
     "290 - 信息安全/294 - 参考资料",
     "290 - 信息安全/291 - 学习笔记",
     "280 - 操作系统/285 - 参考资料",
