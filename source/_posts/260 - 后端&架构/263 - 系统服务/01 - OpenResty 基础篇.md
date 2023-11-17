@@ -35,7 +35,7 @@ mkdir logs/ conf/
 3. 编写nginx.conf
 
 下边编写一个最简单的nginx.conf配置
-```
+```shell
 events {
     worker_connections 1024;
 }
@@ -358,7 +358,7 @@ $ resty -e 'local  _, end_pos = string.find("hello", "he")
 ```
 
 除了在返回值里使用，虚变量还经常用于循环中，比如下面这个例子：
-```
+```shell
 $ resty -e 'for _, v in ipairs({4,5,6}) do
      print(v)
  end'
@@ -381,7 +381,7 @@ OpenResty 的 worker 进程都是 fork master 进程而得到的， 其实， ma
 LuaJIT 除了兼容了Lua5.1的语法外，还紧密结合了 FFI（Foreign Function Interface），可以让你直接在 Lua 代码中调用外部的 C 函数和使用 C 的数据结构。
 
 示例：
-```
+```shell
 local ffi = require("ffi")
 ffi.cdef[[
 int printf(const char *fmt, ...);
