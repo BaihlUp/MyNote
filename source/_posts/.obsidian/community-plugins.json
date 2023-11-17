@@ -1,9 +1,11 @@
 [
   "file-explorer-note-count",
-  "quickadd",
   "editing-toolbar",
   "obsidian-git",
   "obsidian-quiet-outline",
   "chronology",
-  "remotely-save"
+  "remotely-save",
+  "darlal-switcher-plus",
+  "obsidian-better-command-palette",
+  "quickadd"
 ]
