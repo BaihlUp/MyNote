@@ -16,6 +16,11 @@ tags:
 **chromedriver地址**：[https://chromedriver.chromium.org/downloads](https://chromedriver.chromium.org/downloads)
 https://www.lfd.uci.edu/~gohlke/pythonlibs/
 
+
+## 1.2 开源工具
+
+OCR通用验证码识别：[https://github.com/sml2h3/ddddocr](https://github.com/sml2h3/ddddocr)
+
 # 2 基础知识
 ## 2.1 XPath 选择器
 ### 2.1.1 XPath 语法
