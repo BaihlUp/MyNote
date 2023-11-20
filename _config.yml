@@ -28,7 +28,7 @@ archive_dir: archives
 category_dir: categories
 code_dir: downloads/code
 i18n_dir: :lang
-skip_render: "_posts/*/*/*.md"
+skip_render:
 
 # Writing
 new_post_name: :title.md # File name of new posts
@@ -91,6 +91,8 @@ pagination_dir: page
 # Include / Exclude file(s)
 ## include:/exclude: options only apply to the 'source/' folder
 include:
+  # 包含 'source/css/_typing.css'
+  - "_posts/*/*/*-已发布.md"
 exclude:
 ignore:
 
