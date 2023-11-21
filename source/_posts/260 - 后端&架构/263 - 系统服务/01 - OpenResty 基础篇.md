@@ -1249,64 +1249,7 @@ probe end
 eBPF（extended BPF）则是最近几年 Linux 内核中新增的特性。相比 Systemtap，eBPF 有内核直接支持、不会死机、启动速度快等优点；同时，它并没有使用 DSL，而是直接使用了 C 语言的语法，所以也大大降低了它的上手难度。
 除了开源的解决方案外，Intel 出品的 VTune 也是神兵利器之一。它直观的界面操作和数据展示，可以让你不写代码也能分析出性能的瓶颈。
 
-#### 4.6.4 火焰图
-perf 和 Systemtap 等工具产生的数据，都可以通过火焰图的方式，来进行更加直观的展示。火焰图的示例：
-![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/202311171108702.png)
 
-在火焰图中，色块的颜色和深浅都是没有意义的，只是为了对不同的色块儿做出简单的区分。火焰图其实是把每次采样的数据进行叠加，所以，真正有意义的是色块的宽度和长度。
-对于 on CPU 火焰图来说，色块的宽度是函数占用的 CPU 时间百分比，色块越宽，则说明性能消耗越大。如果出现一个平顶的山峰，那它就是性能的瓶颈所在。而色块的长度，代表的是函数调用的深度，最顶端的框显示正在运行的函数，在它之下的都是这个函数的调用者。所以，在下面的函数是上面函数的父函数，山峰越高，则说明调用的函数层级越深。
-
-- 火焰图的类型
-
-常见的火焰图类型有 On-CPU，Off-CPU，还有 Memory，Hot/Cold，Differential 等等。他们分别适合处理什么样的问题呢？
-
-![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/202311171109198.png)
-
-- 火焰图分析技巧
-
-1. 纵轴代表调用栈的深度（栈桢数），用于表示函数间调用关系：下面的函数是上面函数的父函数。
-2. 横轴代表调用频次，一个格子的宽度越大，越说明其可能是瓶颈原因。
-3. 不同类型火焰图适合优化的场景不同，比如 on-cpu 火焰图适合分析 cpu 占用高的问题函数，off-cpu 火焰图适合解决阻塞和锁抢占问题。
-4. 无意义的事情：横向先后顺序是为了聚合，跟函数间依赖或调用关系无关；火焰图各种颜色是为方便区分，本身不具有特殊含义
-5. 多练习：进行性能优化有意识的使用火焰图的方式进行性能调优（如果时间充裕）
-
-- **安装 SystemTap**
-
-```bash
-yum install systemtap systemtap-runtime
-```
-
- - **SystemTap 脚本**
- 
-[https://github.com/openresty/openresty-systemtap-toolkit](https://github.com/openresty/openresty-systemtap-toolkit)
-[https://github.com/openresty/stapxx](https://github.com/openresty/stapxx)
-
-- **将统计数据转换成火焰图**
-
-[https://github.com/brendangregg/FlameGraph](https://github.com/brendangregg/FlameGraph)
-
-资料：[性能调优利器：火焰图](https://www.infoq.cn/article/a8kmnxdhbwmzxzsytlga)
-
-
-### 4.7 systemtap-toolkit和stapxx：如何用数据搞定“疑难杂症”？
-
-在 OpenResty 中有两个开源项目：openresty-systemtap-toolkit 和 stapxx 。它们是基于 Systemtap 封装好的工具集，用于 Nginx 和 OpenResty 的实时分析和诊断。它们可以覆盖 on CPU、off CPU、共享字典、垃圾回收、请求延迟、内存池、连接池、文件访问等常用的功能和调试场景。
-需要特别注意的是，OpenResty 的最新版本 1.15.8 默认开启了 [LuaJIT GC64 模式](https://blog.openresty.com.cn/cn/luajit-gc64-mode/)，但是 openresty-systemtap-toolkit 和 stapxx 并没有跟着做对应的修改，这就会导致里面的工具都无法正常使用。所以，你最好在 OpenResty 旧的 1.13 版本中来使用这些工具。
-> 现在[OpenResty XRay](https://openresty.com/en/xray/)同时支持LuaJIT GC64模式和非GC64模式[issue](https://github.com/openresty/stapxx/pull/48)
-
-**注意：** 由于1.13版本以后的openresty默认开启了LuaJIT GC64模式，所以在编译安装openresty是可以配置`--without-luajit-gc64  --with-luajit`，关闭LuaJIT GC64模式
-
-
-### 4.8 巧用wrk和火焰图，科学定位性能瓶颈
-使用如下项目练习使用火焰图定位性能瓶颈
-[https://github.com/iresty/lua-performance-demo](https://github.com/iresty/lua-performance-demo)
-
-使用wrk进行压测：
- 
-```
-wrk -c100 -t10 -d20s http://127.0.0.1:8080
-```
-压测20s，10个线程，100个连接
 
 ## 5 API网关篇
 
