@@ -1,3 +1,13 @@
+---
+title: OpenResty API篇
+date: 2023-11-21 16:27:41
+categories：
+  - 后端&架构
+tags:
+  - OpenResty
+published: false
+---
+
 ## 2 API 篇
 ### 2.1 OpenResty开发平台
 #### 2.1.1 协程和事件驱动

@@ -1,3 +1,13 @@
+---
+title:  重学C++
+date: 2023-11-21 16:27:41
+categories：
+  - C & C++
+tags:
+  - 程序设计
+  - C++
+published: false
+---
 
 ## C++程序存储区域划分
 存储区域划分为：

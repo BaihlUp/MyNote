@@ -1,3 +1,12 @@
+---
+title: OpenResty 基础篇
+date: 2023-11-21 16:27:41
+categories：
+  - 后端&架构
+tags:
+  - OpenResty
+published: false
+---
 
 ## 0 参考资料
 1. [nginx-lua-module 中文版](https://github.com/iresty/nginx-lua-module-zh-wiki)

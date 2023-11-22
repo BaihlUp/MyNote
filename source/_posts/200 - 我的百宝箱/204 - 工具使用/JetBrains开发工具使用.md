@@ -1,3 +1,13 @@
+---
+title:  JetBrains开发工具使用
+date: 2023-11-21 16:27:41
+categories：
+  - 工具使用
+tags:
+  - JetBrains
+published: false
+---
+
 # 1 PyCharm使用教程
 
 参考资料：[PyCharm使用教程](https://www.imooc.com/wiki/pycharmlesson)

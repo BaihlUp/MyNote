@@ -2,6 +2,7 @@
 title: Kubernetes-v1.26.1部署指南
 date: 2023-09-16 16:27:41
 tags: Kubernetes
+published: true
 ---
 
 ## 1 安装k8s前系统准备
