@@ -1,9 +1,9 @@
-----  
+---
 title: {{title}}
-date: {{date}} {{time}}
+date: {{date}}
 categories:
   - 
 tags:
   - 
 published: false
------  
+---
