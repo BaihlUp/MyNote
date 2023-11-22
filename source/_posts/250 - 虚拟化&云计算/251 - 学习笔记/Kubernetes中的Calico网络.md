@@ -1,6 +1,8 @@
 ---
 title: Kubernetes中的Calico网络
 date: 2023-09-18 16:27:41
+categories:
+  - 虚拟化&云计算
 tags:
   - Kubernetes
   - Calico

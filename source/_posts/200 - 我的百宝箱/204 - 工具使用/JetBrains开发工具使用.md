@@ -1,7 +1,7 @@
 ---
 title:  JetBrains开发工具使用
 date: 2023-11-21 16:27:41
-categories：
+categories:
   - 工具使用
 tags:
   - JetBrains

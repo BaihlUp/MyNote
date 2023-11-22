@@ -1,7 +1,7 @@
 ---
 title: Python实战--分布式爬虫
 date: 2023-10-26 16:27:41
-categories：
+categories:
   - Go & Python
 tags:
   - 程序设计

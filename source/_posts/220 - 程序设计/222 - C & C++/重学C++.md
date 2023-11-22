@@ -1,7 +1,7 @@
 ---
 title:  重学C++
 date: 2023-11-21 16:27:41
-categories：
+categories:
   - C & C++
 tags:
   - 程序设计

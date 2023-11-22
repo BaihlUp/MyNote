@@ -4,7 +4,7 @@ date: 2023-11-16 16:27:41
 tags:
   - 程序设计
   - Python
-categories：
+categories:
   - Go & Python
 published: false
 ---

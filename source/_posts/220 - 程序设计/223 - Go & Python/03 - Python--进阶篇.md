@@ -1,7 +1,7 @@
 ---
 title: Python编程语言--进阶篇
 date: 2023-10-20 16:27:41
-categories：
+categories:
   - Go & Python
 tags:
   - 程序设计

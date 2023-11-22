@@ -1,7 +1,7 @@
 ---
 title: OpenResty API篇
 date: 2023-11-21 16:27:41
-categories：
+categories:
   - 后端&架构
 tags:
   - OpenResty
