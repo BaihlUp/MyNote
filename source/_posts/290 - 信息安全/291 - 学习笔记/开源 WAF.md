@@ -28,3 +28,5 @@ published: false
 
 - [gotestwaf](https://github.com/wallarm/gotestwaf)：来自泰国的开源 WAF 测试工具
 - [blazehttp](https://github.com/chaitin/blazehttp)：来自长亭的开源 WAF 测试工具
+- 长亭WAF测试：[https://www.zhihu.com/question/27852451/answer/3128901439](https://www.zhihu.com/question/27852451/answer/3128901439)
+
