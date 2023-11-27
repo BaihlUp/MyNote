@@ -8,10 +8,6 @@ tags:
   - JavaScript
 published: false
 ---
-
-
-
-
 # 1 JavaScript 基础知识
 ## 1.1 JavaScript 数据类型
 
