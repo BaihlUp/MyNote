@@ -224,3 +224,4 @@ int main() {
 通过使用 weak_ptr ，程序正常执行了 析构函数。
 
 
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20231128194910.png)
