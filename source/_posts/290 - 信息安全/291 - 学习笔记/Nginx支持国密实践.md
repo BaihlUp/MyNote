@@ -38,6 +38,9 @@ TLCP 显著的特点是将 TLS 协议中使用的数字证书拆分成了加密�
 
 ## 4 客户端工具
 
+wrk+铜锁：[https://www.yuque.com/tsdoc/ts/kd16l0](https://www.yuque.com/tsdoc/ts/kd16l0)
+curl+铜锁：[https://www.yuque.com/tsdoc/ts/xuxk18ckbtpgvfdi](https://www.yuque.com/tsdoc/ts/xuxk18ckbtpgvfdi)
+
 
 
 ## 5 抓包分析
