@@ -85,7 +85,6 @@ git clone https://github.com/Tongsuo-Project/Tongsuo.git
 编译：
 ```bash
 ./config --prefix=/opt/tongsuo enable-ntls
-
 ```
 
 
@@ -391,10 +390,76 @@ curl+铜锁：[https://www.yuque.com/tsdoc/ts/xuxk18ckbtpgvfdi](https://www.yuqu
 
 
 
-### 5.2 双向认证
+## 5.2 双向认证
+### 5.2.1 客户端证书生成
 
+生成客户端证书和密钥：
+```bash
+openssl ecparam -genkey -name SM2 -out client_sign.key
+openssl ecparam -genkey -name SM2 -out client_enc.key
 
+openssl req -x509 -new -key client_sign.key -out client_sign.crt -subj /CN=client_sign/
+openssl req -x509 -new -key client_enc.key -out client_enc.crt -subj /CN=client_enc/
 
+cat client_sign.crt client_enc.crt > client_sign_enc.crt
+```
+以上的是生成自签名证书，如果需要使用已有的 CA证书进行签发，可以通过参数 `-CA` 和 `-CAkey` 选项指定签发证书所需的 CA 证书和对应的私钥。
+
+### 5.2.2 服务端配置
+
+生成的 `client_sign_enc.crt` 对客户端的两个证书进行合并，因为是自签名证书，可以直接把`client_sign_enc.crt` 配置到服务端，如下以 Nginx的配置为例：
+```conf
+server {
+    listen       8443 ssl;
+    server_name  _;
+
+    ssl_session_cache shared:SSL:1m;
+    ssl_session_timeout 1m;
+    ssl_session_tickets off;
+    ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+    ssl_ciphers HIGH:!aNULL:!MD5:!ADH:!RC4;
+    ssl_prefer_server_ciphers on;
+
+    enable_ntls  on;
+    # 国密双证书
+    ssl_sign_certificate        certs/gmtls/server_sign.crt;
+    ssl_sign_certificate_key    certs/gmtls/server_sign.key;
+    ssl_enc_certificate         certs/gmtls/server_enc.crt;
+    ssl_enc_certificate_key     certs/gmtls/server_enc.key;
+
+    #ssl_trusted_certificate certs/gmtls/chain-ca.crt;
+    # 指定 验证客户端的证书
+    ssl_client_certificate certs/gmtls/client_sign_enc.crt;
+    # 开启客户端认证
+    ssl_verify_client on;
+    ssl_verify_depth 2;
+
+    #ssl_certificate certs/server.crt;
+    #ssl_certificate_key certs/server.key;
+
+    location / {
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "Upgrade";
+        proxy_set_header host $host;
+
+        proxy_pass http://127.1.1.1:9090;
+        #return 200 "test hello\n";
+    }
+}
+
+```
+
+### 5.2.3 测试
+
+通过 openssl 命令行指定客户端证书，进行双向认证，发送HTTPS请求：
+```bash
+/bin/echo -e "GET / HTTP/1.0\r\n\r\n" |  openssl s_client -connect 192.168.170.137:8443 -CAfile chain-ca.crt -servername optional -quiet -sign_cert client_sign.crt -sign_key client_sign.key -enc_cert client_enc.crt -enc_key client_enc.key  -enable_ntls -ntls
+```
+可以通过 `-cipher ECDHE-SM2-SM4-GCM-SM3` 指定密码套件，其他使用方式如：
+- `-cipher 'ECDHE-RSA-AES256-GCM-SHA384,ECDHE-RSA-AES128-GCM-SHA256'` ：按照优先级指定多个加密套件。如果第一个不可用，将尝试使用下一个。
+- `-cipher 'AES256-*'` ：使用模式匹配，`AES256-*` 表示选择所有以 `AES256-` 开头的加密套件。
+- `-cipher 'AES256:!aNULL'`：`!` 表示排除指定类型的加密套件，例如 `!aNULL` 表示排除匿名加密套件。
 
 
 
