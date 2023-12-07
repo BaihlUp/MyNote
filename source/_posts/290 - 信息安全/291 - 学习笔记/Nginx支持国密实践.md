@@ -82,6 +82,12 @@ NTLS (TLCP and GM/T 0024) 基于 Tongsuo。
 git clone https://github.com/Tongsuo-Project/Tongsuo.git
 ```
 
+编译：
+```bash
+./config --prefix=/opt/tongsuo enable-ntls
+
+```
+
 
 2. 下载 Tengine
 
@@ -161,9 +167,215 @@ stream {
 }
 ```
 
-
 # 3 国密证书生成
 
+## 3.1 证书制作相关命令
+
+1. 生成一个 EC 密钥对（私钥和公钥），使用 SM2 曲线参数，保存私钥为 `server_sign.key` 文件：    
+
+```bash
+openssl genpkey -algorithm ec -pkeyopt ec_paramgen_curve:sm2 -out server_sign.key
+```
+
+2. 使用私钥生成一个证书签名请求（CSR），并将其保存为 `server_sign.csr` 文件。该请求使用 SM3 散列算法，并且采用给定的主题信息：
+
+```bash
+openssl req -config $CONF_DIR/subca.cnf -key server_sign.key -new -out server_sign.csr -sm3 -nodes -subj "/C=AA/ST=BB/O=CC/OU=DD/CN=server sign"
+```
+
+- `-config $CONF_DIR/subca.cnf`: 指定配置文件，包含了生成 CSR 所需的详细信息和设置。
+- `-key server_sign.key`: 指定用于生成 CSR 的私钥文件路径。
+- `-new`: 创建新的证书签名请求。
+- `-out server_sign.csr`: 指定生成的 CSR 文件名。
+- `-sm3`: 使用 SM3 散列算法。
+- `-nodes`: 生成的私钥不加密。
+- `-subj "/C=AA/ST=BB/O=CC/OU=DD/CN=server sign"`: 指定证书主题信息。
+
+3. 使用 CA 配置文件（假设为 `$CONF_DIR/subca.cnf`）中定义的设置和参数，通过 CA 签发证书，将上一步生成的 CSR 文件 `server_sign.csr` 作为输入。签发的证书输出到 `server_sign.crt` 文件中：
+
+```bash
+openssl ca -config $CONF_DIR/subca.cnf -extensions server_sign_req -days 3650 -in server_sign.csr -notext -out server_sign.crt -md sm3 -batch
+```
+
+- `-config $CONF_DIR/subca.cnf`: 指定用于签发证书的 CA 配置文件。
+- `-extensions server_sign_req`: 指定要应用的扩展名。
+- `-days 3650`: 设置证书有效期为 3650 天（约合 10 年）。
+- `-in server_sign.csr`: 指定输入的证书签名请求文件。
+- `-notext`: 生成的证书不包含文本。
+- `-out server_sign.crt`: 指定生成的证书文件名。
+- `-md sm3`: 使用 SM3 消息摘要算法进行签名。
+- `-batch`: 在执行证书签发过程中避免交互式操作。
+
+
+## 3.2 证书制作配置文件
+
+上边的 subca.cnf 指定了生成证书的相关配置信息和扩展配置：
+```bash
+[ ca ]
+# `man ca`
+default_ca = CA_default
+
+[ CA_default ]
+# Directory and file locations.
+dir               = ./
+certs             = $dir/certs
+crl_dir           = $dir/crl
+new_certs_dir     = $dir/newcerts
+database          = $dir/db/index
+unique_subject    = no
+serial            = $dir/db/serial
+RANDFILE          = $dir/private/random
+
+# The root key and root certificate.
+private_key       = $dir/subca.key
+certificate       = $dir/subca.crt
+
+# For certificate revocation lists.
+crlnumber         = $dir/crlnumber
+crl               = $dir/crl/ca.crl.pem
+crl_extensions    = crl_ext
+default_crl_days  = 30
+
+# SHA-1 is deprecated, so use SHA-2 instead.
+default_md        = sm3
+
+name_opt          = ca_default
+cert_opt          = ca_default
+default_days      = 365
+preserve          = no
+policy            = policy_strict
+
+[ policy_strict ]
+# The root CA should only sign intermediate certificates that match.
+# See the POLICY FORMAT section of `man ca`.
+countryName             = optional
+stateOrProvinceName     = optional
+organizationName        = optional
+organizationalUnitName  = optional
+commonName              = supplied
+emailAddress            = optional
+
+[ server_sign_req ]
+# Extensions to add to a certificate request
+basicConstraints = CA:FALSE
+keyUsage = nonRepudiation, digitalSignature
+# Add more items here, for instance:
+subjectAltName = @alt_names
+
+[ server_enc_req ]
+# Extensions to add to a certificate request
+basicConstraints = CA:FALSE
+keyUsage = keyAgreement, keyEncipherment, dataEncipherment
+# Add more items here, for instance:
+subjectAltName = @alt_names
+
+[ client_sign_req ]
+# Extensions to add to a certificate request
+basicConstraints = CA:FALSE
+keyUsage = nonRepudiation, digitalSignature
+
+[ client_enc_req ]
+# Extensions to add to a certificate request
+basicConstraints = CA:FALSE
+keyUsage = keyAgreement, keyEncipherment, dataEncipherment
+```
+
+## 3.3 脚本工具
+
+```bash
+#!/bin/env bash
+
+set -x 
+
+export PATH=/opt/tongsuo/bin:$PATH
+
+WORK_DIR=$(cd $(dirname $0);pwd)
+CONF_DIR=$WORK_DIR/conf
+
+function my_clean() {
+    rm -f *.key *.csr *.crt
+    rm -rf {newcerts,db,private,crl}
+}
+
+
+function begin() {
+    mkdir {newcerts,db,private,crl}
+    touch db/{index,serial}
+    echo 00 > db/serial
+}
+
+function gen_ca_certs() {
+    # sm2 ca
+    openssl genpkey -algorithm ec -pkeyopt ec_paramgen_curve:sm2 -out ca.key
+    openssl req -config $CONF_DIR/ca.cnf -new -key ca.key -out ca.csr -sm3 -nodes -subj "/C=AA/ST=BB/O=CC/OU=DD/CN=root ca"
+    openssl ca -selfsign -config $CONF_DIR/ca.cnf -in ca.csr -keyfile ca.key -extensions v3_ca -days 3650 -notext -out ca.crt -md sm3 -batch
+
+    # sm2 middle ca
+    openssl genpkey -algorithm ec -pkeyopt ec_paramgen_curve:sm2 -out subca.key
+    openssl req -config $CONF_DIR/ca.cnf -new -key subca.key -out subca.csr -sm3 -nodes -subj "/C=AA/ST=BB/O=CC/OU=DD/CN=sub ca"
+    openssl ca -config $CONF_DIR/ca.cnf -extensions v3_intermediate_ca -days 3650 -in subca.csr -notext -out subca.crt -md sm3 -batch
+
+    cat ca.crt subca.crt > chain-ca.crt
+}
+
+function gen_server_certs() {
+    # 服务端 国密双证书
+    openssl genpkey -algorithm ec -pkeyopt ec_paramgen_curve:sm2 -out server_sign.key
+    # 提交生成证书的信息，subca.cnf中包含证书信息
+    openssl req -config $CONF_DIR/subca.cnf -key server_sign.key -new -out server_sign.csr -sm3 -nodes -subj "/C=AA/ST=BB/O=CC/OU=DD/CN=server sign"
+    # 签发证书 指定扩展信息和配置
+    # openssl x509 -req -in server_sign.csr -CA your_ca.crt -CAkey your_ca.key -CAcreateserial -out server_sign.crt -days 365 -extfile your_config_file.conf -extensions req_ext
+    # 指定 -extensions 引用扩展配置
+    openssl ca -config $CONF_DIR/subca.cnf -extensions server_sign_req -days 3650 -in server_sign.csr -notext -out server_sign.crt -md sm3 -batch
+
+    openssl genpkey -algorithm ec -pkeyopt ec_paramgen_curve:sm2 -out server_enc.key
+    openssl req -config $CONF_DIR/subca.cnf -key server_enc.key -new -out server_enc.csr -sm3 -nodes -subj "/C=AA/ST=BB/O=CC/OU=DD/CN=server enc"
+    openssl ca -config $CONF_DIR/subca.cnf -extensions server_enc_req -days 3650 -in server_enc.csr -notext -out server_enc.crt -md sm3 -batch
+}
+
+function gen_client_certs() {
+    # 客户端 国密双证书
+    openssl genpkey -algorithm ec -pkeyopt ec_paramgen_curve:sm2 -out client_sign.key
+    openssl req -config $CONF_DIR/subca.cnf -key client_sign.key -new -out client_sign.csr -sm3 -nodes -subj "/C=AA/ST=BB/O=CC/OU=DD/CN=client sign"
+    openssl ca -config $CONF_DIR/subca.cnf -extensions client_sign_req -days 3650 -in client_sign.csr -notext -out client_sign.crt -md sm3 -batch
+
+    openssl genpkey -algorithm ec -pkeyopt ec_paramgen_curve:sm2 -out client_enc.key
+    openssl req -config $CONF_DIR/subca.cnf -key client_enc.key -new -out client_enc.csr -sm3 -nodes -subj "/C=AA/ST=BB/O=CC/OU=DD/CN=client enc"
+    openssl ca -config $CONF_DIR/subca.cnf -extensions client_enc_req -days 3650 -in client_enc.csr -notext -out client_enc.crt -md sm3 -batch
+}
+
+function end() {
+    rm -f *.csr
+    rm -rf {newcerts,db,private,crl}
+}
+
+function main() {
+    begin
+    case $1 in
+        gen_server_cert)
+        gen_ca_certs
+        gen_server_certs
+        ;;
+        gen_client_cert)
+        gen_ca_certs
+        gen_client_certs
+        ;;
+        gen_cert)
+        gen_ca_certs
+        gen_server_certs
+        gen_client_certs
+        ;;
+        clean)
+        my_clean
+        ;;
+        *)
+        echo "usage: $0 {gen_server_cert|gen_client_cert|gen_cert|clean}"
+    esac
+    end
+}
+
+main "$@"
+```
 
 
 # 4 客户端工具
