@@ -69,6 +69,17 @@ GMTLS1.1 协议主要参考了`TLS1.1`，并借鉴了`TLS1.2`的部分内容。�
 ![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/202312061013736.png)
 
 
+## 1.4 国际和商密对比
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20231210223758.png)
+
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20231210223834.png)
+
+
+## 1.5 证书对比
+
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20231210224021.png)
+
+
 
 # 2 基于铜锁（Tongsuo）部署国密服务端
 
