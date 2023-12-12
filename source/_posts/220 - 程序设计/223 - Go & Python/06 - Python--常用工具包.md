@@ -649,4 +649,29 @@ A1, A2 = np.vsplit(A, [2]) # 垂直分割
 A1, A2= np.hsplit(A, [2]) # 垂直分割
 ```
 
+## 2.3 numpy.array 中的聚合运算
+
+- np.percentile(big_array, q=50) ：百分位点，相当于求50%位点
+- np.var(big_array)：方差
+- np.std(big_array)：标准差
+- np.median(big_array)：中位数
+- np.mean()：平均数
+- np.bincount：众数
+- np.prod：大数
+- np.argmax()：返回最大值的索引
+- np.argmin()
+- np.random.shuffle(x)：乱序处理
+- np.sort(x)：排序，x 未修改
+- x.sort()：原地排序，x 被修改
+- np.sort(x, axis=0)：每行排序
+- np.sort(x, axis=1)：每列排序
+- np.argsort(x)：排序数组，返回的是元素索引
+- np.partition(x, 3)：快排中的partition逻辑，返回的数组中，3 前边的数据都小于3，3后边的元素都大于3
+- np.argpartition(x, 3)：与上边的一样，只是返回的索引
+
+## 2.4 FancyIndexing
+
+
+
+
 
