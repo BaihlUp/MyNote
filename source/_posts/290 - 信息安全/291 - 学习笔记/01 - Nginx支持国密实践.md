@@ -27,6 +27,7 @@ published: false
 
 TLCP 显著的特点是将 TLS 协议中使用的数字证书拆分成了加密和签名两种用途的证书，加密证书和签名证书以及对应私钥均需要进行配置使用，所以 TLCP 也俗称“国密双证书”协议。
 
+
 ## 1.1 密钥种类
 
 ### 1.1.1 概述
@@ -69,8 +70,10 @@ GMTLS1.1 协议主要参考了`TLS1.1`，并借鉴了`TLS1.2`的部分内容。�
 ![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/202312061013736.png)
 
 
-## 1.4 国际和商密对比
+## 1.4 国际和商密（SM）对比
 ![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20231210223758.png)
+
+**TLCP协议与TLS协议对比：**
 
 ![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20231210223834.png)
 
@@ -394,15 +397,10 @@ wrk+铜锁：[https://www.yuque.com/tsdoc/ts/kd16l0](https://www.yuque.com/tsdoc
 curl+铜锁：[https://www.yuque.com/tsdoc/ts/xuxk18ckbtpgvfdi](https://www.yuque.com/tsdoc/ts/xuxk18ckbtpgvfdi)
 
 
-
 # 5 测试
 
-### 5.1 国密双证书
-
-
-
-## 5.2 双向认证
-### 5.2.1 客户端证书生成
+## 5.1 国密双证书和双向认证
+### 5.1.1 客户端证书生成
 
 生成客户端证书和密钥：
 ```bash
@@ -416,7 +414,7 @@ cat client_sign.crt client_enc.crt > client_sign_enc.crt
 ```
 以上的是生成自签名证书，如果需要使用已有的 CA证书进行签发，可以通过参数 `-CA` 和 `-CAkey` 选项指定签发证书所需的 CA 证书和对应的私钥。
 
-### 5.2.2 服务端配置
+### 5.1.2 服务端配置
 
 生成的 `client_sign_enc.crt` 对客户端的两个证书进行合并，因为是自签名证书，可以直接把`client_sign_enc.crt` 配置到服务端，如下以 Nginx的配置为例：
 ```conf
@@ -461,7 +459,7 @@ server {
 
 ```
 
-### 5.2.3 测试
+### 5.1.3 测试
 
 通过 openssl 命令行指定客户端证书，进行双向认证，发送HTTPS请求：
 ```bash
@@ -471,7 +469,6 @@ server {
 - `-cipher 'ECDHE-RSA-AES256-GCM-SHA384,ECDHE-RSA-AES128-GCM-SHA256'` ：按照优先级指定多个加密套件。如果第一个不可用，将尝试使用下一个。
 - `-cipher 'AES256-*'` ：使用模式匹配，`AES256-*` 表示选择所有以 `AES256-` 开头的加密套件。
 - `-cipher 'AES256:!aNULL'`：`!` 表示排除指定类型的加密套件，例如 `!aNULL` 表示排除匿名加密套件。
-
 
 
 参考资料：# [TLS原理与实践（四）国密TLS](https://www.cnblogs.com/informatics/p/17594441.html)
