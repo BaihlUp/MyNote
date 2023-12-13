@@ -500,3 +500,153 @@ plt.show()
 ```
 
 
+# 2 Numpy 使用
+
+## 2.1 Ndarray对象
+
+NumPy 最重要的一个特点是其 N 维数组对象 ndarray，它是一系列同类型数据的集合，以 0 下标为开始进行集合中元素的索引。ndarray 对象是用于存放同类型元素的多维数组。ndarray 中的每个元素在内存中都有相同存储大小的区域。ndarray 内部由以下内容组成：
+
+- 一个指向数据（内存或内存映射文件中的一块数据）的指针。
+- 数据类型或 dtype，描述在数组中的固定大小值的格子。
+- 一个表示数组形状（shape）的元组，表示各维度大小的元组。
+- 一个跨度元组（stride），其中的整数指的是为了前进到当前维度下一个元素需要"跨过"的字节数。
+  
+**ndarray 的内部结构：**
+
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/202312131623123.png)
+
+1. **`np.array()` 函数**：使用 Python 列表或元组创建数组。
+3. **`np.zeros()` 和 `np.ones()` 函数**：创建特定形状的全零数组或全一数组。
+
+```python
+# 创建一个 3x4 的全零数组
+zeros_arr = np.zeros((3, 4))
+# 创建一个 2x3 的全一数组
+ones_arr = np.ones((3, 4))
+```
+
+3. **`np.empty()` 函数**：创建指定形状的未初始化数组。
+
+```python
+# 创建一个 2x2 的未初始化数组
+empty_arr = np.empty((2, 2))  
+```
+
+4. **`np.arange()` 函数**：类似于 Python 的 `range()` 函数，创建一个指定范围内的数组。
+
+```python
+# 创建一个从 0 到 10（不包括10），步长为2的数组
+arr_range = np.arange(0, 10, 2)  
+```
+
+2. **`np.linspace()` 函数**：创建指定范围内均匀间隔的数组。
+
+```python
+ # 创建一个从 0 到 10（包括10），共5个元素的数组
+arr_linspace = np.linspace(0, 10, 5) 
+```
+
+3. **`np.random` 模块**：生成随机数组。
+
+- **生成随机整数数组：**
+
+```python
+# 创建一个 3x3 的随机整数数组（范围为1到100）
+rand_int_arr = np.random.randint(1, 100, size=(3, 3))  
+```
+
+- **生成随机浮点数数组：**
+
+```python
+# 创建一个 2x2 的随机浮点数数组（范围在0到1之间）
+rand_float_arr = np.random.rand(2, 2) 
+```
+
+- **生成符合正态分布的随机数组：**
+
+```python
+# 创建一个 2x2 符合正态分布的随机数组
+rand_normal_arr = np.random.randn(2, 2)  
+
+# array([[ 2.0794976 , -1.64938592],
+#       [-0.17147869,  0.28570884]])
+```
+
+## 2.2 Ndarray 的操作方法
+
+- Ndarray的基本属性
+
+```python
+X = np.arange(15).reshape(3,5)
+# array([[ 0,  1,  2,  3,  4],
+#       [ 5,  6,  7,  8,  9],
+#       [10, 11, 12, 13, 14]])
+x = np.arange(10)
+# array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+
+# 矩阵维度
+x.ndim # 1
+X.ndim # 2
+
+# 数组维度
+x.shape # (10, )
+X.shape # (3,5)
+
+# 数组元素个数
+x.size  # 10
+X.size  # 15
+
+```
+
+- Ndarray 基本操作
+
+```python
+# 切片
+x[::2] # 2 表示步长
+# 二维数组可以使用元组方式，或者 逗号，行列维度通过逗号分隔
+X[ (1,1) ] # 6
+X[1,1] # 6
+
+X[:2, :3]  # 取前2行，前3列
+# array([[0, 1, 2],
+#       [5, 6, 7]])
+
+subarray = X[:2, :3]
+subarray[1][1] = 100  # 修改子矩阵，X 矩阵也会被修改
+subX = X[:2, :3].copy()  # 可以使用copy，修改subX，不会修改X
+
+a = np.arange(10)
+a.reshape(2,5) # 输出 2 维矩阵
+# array([[0, 1, 2, 3, 4],
+#       [5, 6, 7, 8, 9]])
+a.reshape(10,-1)  # 10指定行维度，-1 指定列维度由自动生成
+
+# 合并操作
+x = np.array([1,2,3])
+y = np.array([4,5,6])
+np.concatenate([x, y]) # array([1, 2, 3, 4, 5, 6])
+
+# np.concatenate 要求维度相同，否则合并报错
+
+# 垂直方向合并
+np.vstack([x, y]) 
+# array([[1, 2, 3],
+#       [4, 5, 6]])
+# 水平方向合并
+np.hstack([x, y]) # array([1, 2, 3, 4, 5, 6])
+
+x = np.arange(10)
+x1, x2, x3 = np.split(x, [3,7]) # 会把 x 划分为 0-3, 3-7, 7-end
+
+A = np.arange(16).reshape([4,4])
+# array([[ 0,  1,  2,  3],
+#       [ 4,  5,  6,  7],
+#       [ 8,  9, 10, 11],
+#       [12, 13, 14, 15]])
+A1, A2 = np.split(A, [2])  # 垂直分割，A1 是前两行，A2 是后两行
+A1, A2 = np.split(A, [2], axis=1) # 水平分割，A1 是前两列，A2 是后两列
+A1, A2 = np.vsplit(A, [2]) # 垂直分割
+A1, A2= np.hsplit(A, [2]) # 垂直分割
+```
+
+

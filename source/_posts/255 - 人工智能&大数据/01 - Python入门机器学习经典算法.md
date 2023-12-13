@@ -1,5 +1,5 @@
 ---
-title: 机器学习--基础篇
+title: Python入门机器学习经典算法
 date: 2023-09-18 16:27:41
 categories:
   - 人工智能&大数据
@@ -7,6 +7,9 @@ tags:
   - 机器学习
 published: false
 ---
+
+
+
 
 
 Anaconda 是一个方便的python包管理和环境管理软件
