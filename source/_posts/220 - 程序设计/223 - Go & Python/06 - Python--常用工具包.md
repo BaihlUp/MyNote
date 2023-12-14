@@ -671,7 +671,106 @@ A1, A2= np.hsplit(A, [2]) # 垂直分割
 
 ## 2.4 FancyIndexing
 
+```python
+X = np.arange(16).reshape(4,4)
+# array([[ 0,  1,  2,  3],
+#       [ 4,  5,  6,  7],
+#       [ 8,  9, 10, 11],
+#       [12, 13, 14, 15]])
+ind = np.array([[0,2],
+         [1,3]])
+X[ind] # 取出第0，2行 和 1，3行分别组成矩阵
+
+row = np.array([0,1,2])
+col = np.array([1,2,3])
+X[row, col] # 返回 (0,1)、(1,2)、(2,3) 的点
+
+# 通过bool数组选定值
+col = [True, False, True, True]
+X[1:3, col] # 输出第2、3行的数据，列受col控制
+
+```
 
 
+- numpy.array 的比较
+
+```python
+x = np.arange(16)
+# array([ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15])
+x < 3
+# array([ True,  True,  True, False, False, False, False, False, False,
+#       False, False, False, False, False, False, False])
+2 * x == 24-4 * x # x中那些值符合表达式
+#array([False, False, False, False,  True, False, False, False, False,
+#       False, False, False, False, False, False, False])
+
+# 二维数组类似
+X[X[:,2] > 3, :] # 取出第3列大于3的所有行
+np.sum(X>3) # 二维数组中大于3的个数
+np.sum(X > 3, axis=0) # array([3, 3, 3, 3]) 列维度上，每列大于3的个数都是3个
+np.sum(X > 3, axis=1) # array([0, 4, 4, 4]) 行维度上，每行大于3个数
+
+np.any(X < 0)  # X中没有小于0
+np.all(X < 0) # False 因为有一个数等于0
+np.sum((X>3) & (X < 10)) # 大于3小于10的个数
+np.sum(~(X==0)) # 不等于0的个数
+```
+
+# 3 Matplotlib 使用
+
+## 3.1 折线图
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+
+plt.plot(x, siny, color='red', linestyle='--', label='sin(y)') # 指定颜色和线条
+plt.plot(y, sinx, label='sin(x)')
+# plt.xlim(100, 200) # 指定x轴范围
+# plt.ylim(0, 1) # 指定y轴范围
+plt.axis([-1, 210, -2, 5]) # 指定 x 轴和y轴范围
+plt.legend() # 图中添加标签图示
+plt.xlabel("x siny") # 给X轴命名
+plt.ylabel("x sinx") # 给X轴命名
+plt.title("Welcome to the ML World!!") # 添加标题
+plt.show()
+```
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/202312141108094.png)
 
 
+## 3.2 散点图
+
+```python
+x = np.random.normal(0, 1, 10000)
+y = np.random.normal(0, 1, 10000)
+plt.scatter(x, y, alpha=0.1) # 透明度为0.1
+plt.show()
+```
+
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/202312141109617.png)
+
+# 4 数据加载和数据处理
+
+```python
+import numpy as np
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+from sklearn import datasets # 加载自带的一个数据集
+
+iris = datasets.load_iris()
+iris.keys() # 数据中包含的字段
+# dict_keys(['data', 'target', 'frame', 'target_names', 'DESCR', 'feature_names', 'filename', 'data_module'])
+iris.data  # 数据集
+iris.data.shape # （105，4）数据维度
+iris.target 
+```
+
+通过数据集绘图：
+```python
+X = iris.data
+y = iris.target
+plt.scatter(X[y==0,0], X[y==0,1], color='red', marker='o')
+plt.scatter(X[y==1,0], X[y==1,1], color='blue', marker='+')
+plt.scatter(X[y==2,0], X[y==2,1], color='green', marker='x')
+plt.show()
+```
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/202312141129223.png)
