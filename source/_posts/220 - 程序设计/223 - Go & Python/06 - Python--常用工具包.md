@@ -652,10 +652,11 @@ A1, A2= np.hsplit(A, [2]) # 垂直分割
 ## 2.3 numpy.array 中的聚合运算
 
 - np.percentile(big_array, q=50) ：百分位点，相当于求50%位点
-- np.var(big_array)：方差
-- np.std(big_array)：标准差
+- np.var(big_array)：方差，是每个样本值与全体样本值的平均数之差的平方值的平均数，即 `mean((x - x.mean())** 2)`。
+- np.std(big_array)：标准差，标准差是一组数据平均值分散程度的一种度量。标准差是方差的算术平方根。
 - np.median(big_array)：中位数
 - np.mean()：平均数
+- `numpy.average(a, axis=None, weights=None, returned=False)` ：函数根据在另一个数组中给出的各自的权重计算数组中元素的加权平均值。 
 - np.bincount：众数
 - np.prod：大数
 - np.argmax()：返回最大值的索引
@@ -668,6 +669,7 @@ A1, A2= np.hsplit(A, [2]) # 垂直分割
 - np.argsort(x)：排序数组，返回的是元素索引
 - np.partition(x, 3)：快排中的partition逻辑，返回的数组中，3 前边的数据都小于3，3后边的元素都大于3
 - np.argpartition(x, 3)：与上边的一样，只是返回的索引
+
 
 ## 2.4 FancyIndexing
 
@@ -714,6 +716,43 @@ np.any(X < 0)  # X中没有小于0
 np.all(X < 0) # False 因为有一个数等于0
 np.sum((X>3) & (X < 10)) # 大于3小于10的个数
 np.sum(~(X==0)) # 不等于0的个数
+```
+
+## 2.5 视图和副本
+副本是一个数据的完整的拷贝，如果我们对副本进行修改，它不会影响到原始数据，物理内存不在同一位置。
+视图是数据的一个别称或引用，通过该别称或引用亦便可访问、操作原有数据，但原有数据不会产生拷贝。如果我们对视图进行修改，它会影响到原始数据，物理内存在同一位置。
+
+**视图一般发生在：**
+- 1、numpy 的切片操作返回原数据的视图。
+- 2、调用 ndarray 的 view() 函数产生一个视图。
+
+**副本一般发生在：**
+- Python 序列的切片操作，调用deepCopy()函数。
+- 调用 ndarray 的 copy() 函数产生一个副本。
+
+
+视图示例：
+```python
+a = np.arange(6).reshape(3,2)
+b = a.view()
+print(a)
+# array([[0, 1],
+#       [2, 3],
+#       [4, 5]])
+# 修改 b 的形状，并不会修改 a
+b.shape = 2,3
+print(b)
+# array([[0, 1, 2],
+#       [3, 4, 5]])
+b[0][0] = 100 # 修改b后，a中对应位置也会被修改
+```
+
+副本示例：
+```python
+x = np.arange(6).reshape(2,3)
+y = x.copy()
+# 修改y不会影响x
+y[0][0]=100
 ```
 
 # 3 Matplotlib 使用
