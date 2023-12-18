@@ -11,6 +11,7 @@ published: false
 # 0 参考资料
 
 1. [Pandas中文文档](https://www.pypandas.cn/docs/getting_started/)
+2. [NumPy中文文档](https://www.numpy.org.cn/user/)
 # 1 Pandas 数据处理
 
 ## 1.1 Pandas 数据结构 - Series
