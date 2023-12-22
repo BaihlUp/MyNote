@@ -3457,7 +3457,7 @@ g2ListSup = new ArrayList<GrandParent>();
 //         List<? super Parent> g2ListSup11 = new ArrayList<? super Parent>();
 ```
 
-## 4.3 Iterator 接口
+### 4.3 Iterator 接口
 实现Iterable接口，就可以支持 forEach 循环。
 ```java
 // >> TODO 实现 Iterable 接口里定义的iterator接口
@@ -3481,7 +3481,7 @@ public Iterator<T> iterator() {
 }
 ```
 
-## 4.4 Map
+### 4.4 Map
 使用自己写的类作为key，必须保证hashCode和equals方法都实现的妥妥的，而且最好一定是不可变。如果作为key的对象是可变的，多可怕。
 ```java
 Map<String, String> map = new HashMap<>();
@@ -3560,3 +3560,112 @@ public class LearnMapAppMain {
 }
 
 ```
+
+### 4.5 注解
+
+注解的英文名叫做 annotation，是给类，方法以及成员变量等元素增加元数据的方式。
+以 `@` 开头
+
+
+
+### 4.6 
+
+## 5 工具使用
+### 5.1 Maven 
+
+Maven有两部分，首先是服务器端，加 maven repo，它将所有的jar包放在一个仓库里。
+所有jar包都发布到这个仓库，需要用到某个jar包，就去仓库下载。
+仓库里的jar包，都会有一个唯一的id，主要由三部分组成：group id，artifact id 和 version
+为了避免每次都从服务器下载 jar 包，maven 会把下载好的jar包放在本地文件夹，叫做 local repo。
+
+推荐的 maven repo 镜像：
+阿里云的 maven repo 镜像：[https://developer.aliyun.com/article/78124](https://developer.aliyun.com/article/78124)
+修改为阿里云的镜像：
+	1. 修改maven根目录下的conf文件夹中的setting.xml文件，内容如下：
+```xml
+<mirrors>
+    <mirror>
+      <id>alimaven</id>
+      <name>aliyun maven</name>
+      <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
+      <mirrorOf>central</mirrorOf>        
+    </mirror>
+</mirrors>
+```
+	2. IntelliJ 的 maven settings 配置 maven 路径
+	3. pom.xml 文件添加
+```xml
+<repositories>  
+        <repository>  
+            <id>alimaven</id>  
+            <name>aliyun maven</name>  
+            <url>http://maven.aliyun.com/nexus/content/groups/public/</url>  
+            <releases>  
+                <enabled>true</enabled>  
+            </releases>  
+            <snapshots>  
+                <enabled>false</enabled>  
+            </snapshots>  
+        </repository>  
+</repositories>  
+```
+
+
+- 相关命令：
+	maven 构建中的几个主要 phase：compile、test、package、install
+	mvn clean install 或者 mvn clean install -U
+	mvn dependency:tree ：查看jar包依赖
+
+- 插件：
+	maven 其实是一套框架，所有的具体任务都是插件完成的。除了核心的编译打包插件，还有很多其他插件。
+	如打出 fatjar 的插件，插件在 build->plugin 下：
+```xml
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                    <archive>
+                        <manifest>
+                            <mainClass>com.geekbang.ppttools.TOCGen</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+```
+### 5.2 Intellij 功能使用
+
+常用快捷功能：
+
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/202312221453559.png)
+
+### 5.3 常用类库
+
+**工具类库：**
+
+- 测试：junit、testng
+- 日志：slf4j + logback
+- 序列化：avro、protobuff
+- JSON处理：Jackson、Gson
+
+**框架类库：**
+- 应用开发框架：Spring + Spring Boot
+- REST API 开发：Swagger Codegen + Swagger UI + https://editor.swagger.io
+- 网络框架：Netty
+- ORM框架：Hibernate、MyBatis、iBatis
+
+
