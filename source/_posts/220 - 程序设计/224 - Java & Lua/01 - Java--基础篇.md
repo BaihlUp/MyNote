@@ -3690,6 +3690,7 @@ public class UseStreamAppMain {
 ## 5 工具使用
 ### 5.1 Maven 
 
+#### 5.1.1 Maven 介绍
 Maven有两部分，首先是服务器端，加 maven repo，它将所有的jar包放在一个仓库里。
 所有jar包都发布到这个仓库，需要用到某个jar包，就去仓库下载。
 仓库里的jar包，都会有一个唯一的id，主要由三部分组成：group id，artifact id 和 version
@@ -3727,13 +3728,53 @@ Maven有两部分，首先是服务器端，加 maven repo，它将所有的jar�
 </repositories>  
 ```
 
+#### 1.5.2 构建流程
+Maven的生命周期（lifecycle）由一系列阶段（phase）构成，以内置的生命周期`default`为例，它包含以下phase：
+- validate
+- initialize
+- generate-sources
+- process-sources
+- generate-resources
+- process-resources
+- compile
+- process-classes
+- generate-test-sources
+- process-test-sources
+- generate-test-resources
+- process-test-resources
+- test-compile
+- process-test-classes
+- test
+- prepare-package
+- package
+- pre-integration-test
+- integration-test
+- post-integration-test
+- verify
+- install
+- deploy
 
-- 相关命令：
-	maven 构建中的几个主要 phase：compile、test、package、install
-	mvn clean install 或者 mvn clean install -U
-	mvn dependency:tree ：查看jar包依赖
+**在实际开发过程中，经常使用的命令有：**
+- `mvn clean`：清理所有生成的class和jar；
+- `mvn clean compile`：先清理，再执行到`compile`；
+- `mvn clean test`：先清理，再执行到`test`，因为执行`test`前必须执行`compile`，所以这里不必指定`compile`；
+- `mvn clean package`：先清理，再执行到`package`。
+- maven 构建中的几个主要 phase：compile、test、package、install
+- mvn clean install 或者 mvn clean install -U
+- mvn dependency:tree ：查看jar包依赖
 
-- 插件：
+#### 1.5.3 依赖关系
+
+Maven定义了几种依赖关系，分别是`compile`、`test`、`runtime`和`provided`：
+
+|scope|说明|示例|
+|---|---|---|
+|compile|编译时需要用到该jar包（默认）|commons-logging|
+|test|编译Test时需要用到该jar包|junit|
+|runtime|编译时不需要，但运行时需要用到|mysql|
+|provided|编译时需要用到，但运行时由JDK或某个服务器提供|servlet-api|
+
+#### 1.5.4 插件
 	maven 其实是一套框架，所有的具体任务都是插件完成的。除了核心的编译打包插件，还有很多其他插件。
 	如打出 fatjar 的插件，插件在 build->plugin 下：
 ```xml
@@ -3764,6 +3805,134 @@ Maven有两部分，首先是服务器端，加 maven repo，它将所有的jar�
         </plugins>
     </build>
 ```
+
+列举了一些常用的插件：
+- maven-shade-plugin：打包所有依赖包并生成可执行jar；
+- cobertura-maven-plugin：生成单元测试覆盖率报告；
+- findbugs-maven-plugin：对Java源码进行静态分析以找出潜在问题。
+
+#### 1.5.5 模块管理
+
+Maven可以有效地管理多个模块，只需要把每个模块当作一个独立的Maven项目，它们有各自独立的`pom.xml`。
+示例3个模块：
+```ascii
+multiple-project
+├── pom.xml
+├── parent
+│   └── pom.xml
+├── module-a
+│   ├── pom.xml
+│   └── src
+├── module-b
+│   ├── pom.xml
+│   └── src
+└── module-c
+    ├── pom.xml
+    └── src
+```
+
+模块A和模块B，可以提取出共同部分作为`parent`：
+```xml
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.itranswarp.learnjava</groupId>
+    <artifactId>parent</artifactId>
+    <version>1.0</version>
+    <packaging>pom</packaging>
+
+    <name>parent</name>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <java.version>11</java.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.28</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.2.3</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.5.2</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>
+```
+
+parent的`<packaging>`是`pom`而不是`jar`，因为`parent`本身不含任何Java代码。编写`parent`的`pom.xml`只是为了在各个模块中减少重复的配置。
+
+- 模块A的 `pom.xml`：
+
+```xml
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.itranswarp.learnjava</groupId>
+        <artifactId>parent</artifactId>
+        <version>1.0</version>
+        <relativePath>../parent/pom.xml</relativePath>
+    </parent>
+
+    <artifactId>module-a</artifactId>
+    <packaging>jar</packaging>
+    <name>module-a</name>
+</project>
+```
+
+如果模块A依赖模块B，则模块A需要模块B的jar包才能正常编译，我们需要在模块A中引入模块B：
+```xml
+    ...
+    <dependencies>
+        <dependency>
+            <groupId>com.itranswarp.learnjava</groupId>
+            <artifactId>module-b</artifactId>
+            <version>1.0</version>
+        </dependency>
+    </dependencies>
+```
+
+- 在根目录创建一个`pom.xml`统一编译：
+```xml
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.itranswarp.learnjava</groupId>
+    <artifactId>build</artifactId>
+    <version>1.0</version>
+    <packaging>pom</packaging>
+    <name>build</name>
+
+    <modules>
+        <module>parent</module>
+        <module>module-a</module>
+        <module>module-b</module>
+        <module>module-c</module>
+    </modules>
+</project>
+```
+这样，在根目录执行`mvn clean package`时，Maven根据根目录的`pom.xml`找到包括`parent`在内的共4个`<module>`，一次性全部编译。
+
 ### 5.2 Intellij 功能使用
 
 常用快捷功能：
