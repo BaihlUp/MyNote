@@ -3197,7 +3197,7 @@ str4
 HashSet中的数据不会出现重复。
 
 ### 4.2 泛型
-### 4.2.1 泛型示例
+#### 4.2.1 泛型示例
 使用List里存储String类型的示例，如果不使用泛型，则每次读出数据就需要把结果强制类型转换为String，很是麻烦，可以直接定义一个存储String的List，格式如：`List<String>`
 ```java
 package com.geekbang.learngenerics;
@@ -3259,7 +3259,7 @@ public class UseGenericClassAppMain {
 }
 ```
 
-### 4.2.2 泛型的作用
+#### 4.2.2 泛型的作用
 1. 告诉编译器帮我们检查类型是否匹配，定义时泛型指定了类型。
 2. 在使用的地方，自动执行了类型强制转换。
 
@@ -3348,7 +3348,7 @@ public class DefineGenericTypesAppMain {
 
 ```
 
-定义泛型，就是把需要的类型定义在类后面的尖括号里，然后在类里面就可以把定义好的泛型像符号一样使用，其可以继承其他类。
+定义泛型，就是把需要的类型定义在类后面的尖括号里，然后在类里面就可以把定义好的泛型像符号一样使用，也可以继承其他类。
 ```java
 package com.geekbang.learngenerics.define;
 
@@ -3393,7 +3393,7 @@ public class DefineBoundedGenericTypesAppMain {
 class com.geekbang.learngenerics.ext.GrandParent
 ```
 
-### 4.2.3 协变和逆变
+#### 4.2.3 协变和逆变
 泛型定义的类型，不适用于继承关系，做为参数传递时，需要严格匹配。
 如果需要传递，方法使用协变语法。
 类关系：GrandParent -> Parent -> Children
