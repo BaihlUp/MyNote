@@ -198,4 +198,19 @@ Flink 和 POJO 对象之间的关系？
 
 # 11 实时风控--动态规则
 
-## 11.1 
+## 11.1 Flink-Cep
+什么是 Cep？
+在流式数据中（事件流），筛选出符合条件的一系列动作（事件）
+
+
+什么是 Pattern ？
+Pattern 就是 Cep 里的规则制定
+Pattern 分为 个体模式，组合模式（模式序列）和模式组
+模式组是将组合模式作为条件的个体模式
+
+
+Cep 开发流程？
+1. DataStream 或 KeyedStream
+2. 定义规则（Pattern）
+3. 将规则应用于 KeyedStream，生成 PatternStream
+4. 将 PatternStream，通过 Select 方法，将符合规则的数据输出
