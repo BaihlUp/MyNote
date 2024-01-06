@@ -251,11 +251,65 @@ DataStream API中直接提供了对一些基本数据源的支持，例如文件
 **数据源相关类的继承关系：**
 ![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20240104175405.png)
 
+
+从Flink1.12开始，主要使用流批统一的新Source架构：
+```java
+DataStreamSource<String> stream = env.fromSource(…)
+```
+
 **实现一个自定义数据源的示例：**
+```java
+package com.atguigu.source;  
+  
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;  
+import org.apache.flink.api.common.typeinfo.Types;  
+import org.apache.flink.api.connector.source.util.ratelimit.RateLimiterStrategy;  
+import org.apache.flink.connector.datagen.source.DataGeneratorSource;  
+import org.apache.flink.connector.datagen.source.GeneratorFunction;  
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;  
 
-
+public class DataGeneratorDemo {  
+    public static void main(String[] args) throws Exception {  
+    
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();  
+  
+        // 如果有n个并行度， 最大值设为a  
+        // 将数值 均分成 n份，  a/n ,比如，最大100，并行度2，每个并行度生成50个  
+        // 其中一个是 0-49，另一个50-99  
+        env.setParallelism(2);  
+  
+        /**  
+         * 数据生成器Source，四个参数：  
+         *     第一个： GeneratorFunction接口，需要实现， 重写map方法， 输入类型固定是Long  
+         *     第二个： long类型， 自动生成的数字序列（从0自增）的最大值(小于)，达到这个值就停止了  
+         *     第三个： 限速策略， 比如 每秒生成几条数据  
+         *     第四个： 返回的类型  
+         */  
+        DataGeneratorSource<String> dataGeneratorSource = new DataGeneratorSource<>(  
+                new GeneratorFunction<Long, String>() {  
+                    @Override  
+                    public String map(Long value) throws Exception {  
+                        return "Number:" + value;  
+                    }  
+                },  
+                100,  
+                RateLimiterStrategy.perSecond(1),  
+                Types.STRING  
+        );  
+  
+        env  
+                .fromSource(dataGeneratorSource, WatermarkStrategy.noWatermarks(), "data-generator")  
+                .print();  
+  
+  
+        env.execute();  
+    }  
+}
+```
+以上程序每秒自动产生随机数，直到达到100为止。
 
 ## 3.4 Transformation 数据转换
+
 在Flink中，Transformation（转换）算子就是将一个或多个DataStream转换为新的DataStream，可以将多个转换组合成复杂的数据流(Dataflow)拓扑。
 Transformation应用于一个或多个数据流或数据集，并产生一个或多个输出数据流或数据集。Transformation可能会在每个记录的基础上更改数据流或数据集，但也可以只更改其分区或执行聚合。
 
@@ -269,19 +323,374 @@ map()算子接收一个函数作为参数，并把这个函数应用于DataStrea
 
 ![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20240104175633.png)
 
+只需要基于DataStream调用map()方法就可以进行转换处理。方法需要传入的参数是接口MapFunction的实现；返回值类型还是DataStream，不过泛型（流中的元素类型）可能改变。
+
+**示例代码：**
+```java
+package com.atguigu.transfrom;  
+  
+import com.atguigu.bean.WaterSensor;  
+import com.atguigu.functions.MapFunctionImpl;  
+import org.apache.flink.api.common.functions.MapFunction;  
+import org.apache.flink.streaming.api.datastream.DataStream;  
+import org.apache.flink.streaming.api.datastream.DataStreamSource;  
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;  
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;  
+  
+public class MapDemo {  
+    public static void main(String[] args) throws Exception {  
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();  
+        env.setParallelism(1);  
+  
+        DataStreamSource<WaterSensor> sensorDS = env.fromElements(  
+                new WaterSensor("s1", 1L, 1),  
+                new WaterSensor("s2", 2L, 2),  
+                new WaterSensor("s3", 3L, 3)  
+        );  
+  
+        // TODO map算子： 一进一出  
+  
+        // TODO 方式一： 匿名实现类  
+//        SingleOutputStreamOperator<String> map = sensorDS.map(new MapFunction<WaterSensor, String>() {  
+//            @Override  
+//            public String map(WaterSensor value) throws Exception {  
+//                return value.getId();  
+//            }  
+//        });  
+  
+        // TODO 方式二： lambda表达式  
+//        SingleOutputStreamOperator<String> map = sensorDS.map(sensor -> sensor.getId());  
+  
+        // TODO 方式三： 定义一个类来实现MapFunction  
+//        SingleOutputStreamOperator<String> map = sensorDS.map(new MyMapFunction());  
+        SingleOutputStreamOperator<String> map = sensorDS.map(new MapFunctionImpl());  
+        map.print();  
+  
+  
+        env.execute();  
+    }  
+  
+    public static class MyMapFunction implements MapFunction<WaterSensor,String>{  
+  
+        @Override  
+        public String map(WaterSensor value) throws Exception {  
+            return value.getId();  
+        }  
+    }  
+}
+```
+
+**输出：**
+```bash
+s1
+s2
+s3
+```
+MapFunction实现类的泛型类型，与输入数据类型和输出数据的类型有关。在实现MapFunction接口的时候，需要指定两个泛型，分别是输入事件和输出事件的类型，还需要重写一个map()方法，定义从一个输入事件转换为另一个输出事件的具体逻辑。
 #### 3.4.1.2 flatMap(func)
 
-与map()算子类似，但是每个传入该函数func的DataStream元素会返回0到多个元素，最终会将返回的所有元素合并到一个DataStream。
+flatMap操作又称为扁平映射，主要是将数据流中的整体（一般是集合类型）拆分成一个一个的个体使用。消费一个元素，可以产生0到多个元素。flatMap可以认为是“扁平化”（flatten）和“映射”（map）两步操作的结合，也就是先按照某种规则对数据进行打散拆分，再对拆分后的元素做转换处理。
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20240106205452.png)
+
+同map一样，flatMap也可以使用Lambda表达式或者FlatMapFunction接口实现类的方式来进行传参，返回值类型取决于所传参数的具体逻辑，可以与原数据流相同，也可以不同。
+```java
+package com.atguigu.transfrom;  
+  
+import com.atguigu.bean.WaterSensor;  
+import org.apache.flink.api.common.functions.FilterFunction;  
+import org.apache.flink.api.common.functions.FlatMapFunction;  
+import org.apache.flink.streaming.api.datastream.DataStreamSource;  
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;  
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;  
+import org.apache.flink.util.Collector;  
+  
+/**  
+ * TODO 如果输入的数据是sensor_1，只打印vc；如果输入的数据是sensor_2，既打印ts又打印vc  
+ *  
+ * @author cjp  
+ * @version 1.0  
+ */public class FlatmapDemo {  
+    public static void main(String[] args) throws Exception {  
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();  
+        env.setParallelism(1);  
+  
+        DataStreamSource<WaterSensor> sensorDS = env.fromElements(  
+                new WaterSensor("s1", 1L, 1),  
+                new WaterSensor("s1", 11L, 11),  
+                new WaterSensor("s2", 2L, 2),  
+                new WaterSensor("s3", 3L, 3)  
+        );  
+  
+  
+        /**  
+         * TODO flatmap： 一进多出（包含0出）  
+         *      对于s1的数据，一进一出  
+         *      对于s2的数据，一进2出  
+         *      对于s3的数据，一进0出（类似于过滤的效果）  
+         *  
+         *    map怎么控制一进一出：  
+         *      =》 使用 return  
+         *         *    flatmap怎么控制的一进多出  
+         *      =》 通过 Collector来输出， 调用几次就输出几条  
+         *  
+         *         */        SingleOutputStreamOperator<String> flatmap = sensorDS.flatMap(new FlatMapFunction<WaterSensor, String>() {  
+            @Override  
+            public void flatMap(WaterSensor value, Collector<String> out) throws Exception {  
+                if ("s1".equals(value.getId())) {  
+                    // 如果是 s1，输出 vc                    out.collect(value.getVc().toString());  
+                } else if ("s2".equals(value.getId())) {  
+                    // 如果是 s2，分别输出ts和vc  
+                    out.collect(value.getTs().toString());  
+                    out.collect(value.getVc().toString());  
+                }  
+            }  
+        });  
+  
+        flatmap.print();  
+  
+  
+        env.execute();  
+    }  
+  
+  
+}
+```
+如果输入的数据是sensor_1，只打印vc；如果输入的数据是sensor_2，既打印ts又打印vc。
 
 #### 3.4.1.3 filter
+进行filter转换之后的新数据流的数据类型与原数据流是相同的。filter转换需要传入的参数需要实现FilterFunction接口，而FilterFunction内要实现filter()方法，就相当于一个返回布尔类型的条件表达式。
 
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20240106205231.png)
+
+```java
+package com.atguigu.transfrom;  
+  
+import com.atguigu.bean.WaterSensor;  
+import com.atguigu.functions.FilterFunctionImpl;  
+import com.atguigu.functions.MapFunctionImpl;  
+import org.apache.flink.api.common.functions.FilterFunction;  
+import org.apache.flink.api.common.functions.MapFunction;  
+import org.apache.flink.streaming.api.datastream.DataStreamSource;  
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;  
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;  
+  
+/**  
+ * TODO  
+ *  
+ * @author cjp  
+ * @version 1.0  
+ */public class FilterDemo {  
+    public static void main(String[] args) throws Exception {  
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();  
+        env.setParallelism(1);  
+  
+        DataStreamSource<WaterSensor> sensorDS = env.fromElements(  
+                new WaterSensor("s1", 1L, 1),  
+                new WaterSensor("s1", 11L, 11),  
+                new WaterSensor("s2", 2L, 2),  
+                new WaterSensor("s3", 3L, 3)  
+        );  
+  
+        // TODO filter： true保留，false过滤掉  
+//        SingleOutputStreamOperator<WaterSensor> filter = sensorDS.filter(new FilterFunction<WaterSensor>() {  
+//            @Override  
+//            public boolean filter(WaterSensor value) throws Exception {  
+//                return "s1".equals(value.getId());  
+//            }  
+//        });  
+  
+//        SingleOutputStreamOperator<WaterSensor> filter = sensorDS.filter(new FilterFunctionImpl("s1"));  
+        SingleOutputStreamOperator<WaterSensor> filter = sensorDS.filter(waterSensor -> "s1".equals(waterSensor.id));  
+  
+        filter.print();  
+  
+  
+        env.execute();  
+    }  
+  
+  
+}
+```
 
 ### 3.4.2 聚合算子
 
+#### 3.4.2.1 简单聚合（sum/min/max/minBy/maxBy）
+使用聚合算子前都需要使用keyBy算子，把数据从DataStream转换为KeyedStream。KeyedStream可以认为是“分区流”或者“键控流”，它是对DataStream按照key的一个逻辑分区，所以泛型有两个类型：除去当前流中的元素类型外，还需要指定key的类型。
+- sum()：在输入流上，对指定的字段做叠加求和的操作。
+- min()：在输入流上，对指定的字段求最小值。
+- max()：在输入流上，对指定的字段求最大值。
+- minBy()：与min()类似，在输入流上针对指定字段求最小值。不同的是，min()只计算指定字段的最小值，其他字段会保留最初第一个数据的值；而minBy()则会返回包含字段最小值的整条数据。
+- maxBy()：与max()类似，在输入流上针对指定字段求最大值。两者区别与min()/minBy()完全一致。
+
+简单聚合算子返回的，同样是一个SingleOutputStreamOperator，也就是从KeyedStream又转换成了常规的DataStream。所以可以这样理解：keyBy和聚合是成对出现的，先分区、后聚合，得到的依然是一个DataStream。而且经过简单聚合之后的数据流，元素的数据类型保持不变。
+
+#### 3.4.2.2 reduce
+
+reduce可以对已有的数据进行归约处理，把每一个新输入的数据和当前已经归约出来的值，再做一个聚合计算。
+
+```java
+package com.atguigu.aggreagte;  
+  
+import com.atguigu.bean.WaterSensor;  
+import org.apache.flink.api.common.functions.ReduceFunction;  
+import org.apache.flink.api.java.functions.KeySelector;  
+import org.apache.flink.streaming.api.datastream.DataStreamSource;  
+import org.apache.flink.streaming.api.datastream.KeyedStream;  
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;  
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;  
+  
+ public class ReduceDemo {  
+    public static void main(String[] args) throws Exception {  
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();  
+        env.setParallelism(1);  
+  
+  
+        DataStreamSource<WaterSensor> sensorDS = env.fromElements(  
+                new WaterSensor("s1", 1L, 1),  
+                new WaterSensor("s1", 11L, 11),  
+                new WaterSensor("s1", 21L, 21),  
+                new WaterSensor("s2", 2L, 2),  
+                new WaterSensor("s3", 3L, 3)  
+        );  
+  
+  
+        KeyedStream<WaterSensor, String> sensorKS = sensorDS  
+                .keyBy(new KeySelector<WaterSensor, String>() {  
+                    @Override  
+                    public String getKey(WaterSensor value) throws Exception {  
+                        return value.getId();  
+                    }  
+                });  
+  
+        /**  
+         * TODO reduce:  
+         * 1、keyby之后调用  
+         * 2、输入类型 = 输出类型，类型不能变  
+         * 3、每个key的第一条数据来的时候，不会执行reduce方法，存起来，直接输出  
+         * 4、reduce方法中的两个参数  
+         *     value1： 之前的计算结果，存状态  
+         *     value2： 现在来的数据  
+         */  
+        SingleOutputStreamOperator<WaterSensor> reduce = sensorKS.reduce(new ReduceFunction<WaterSensor>() {  
+            @Override  
+            public WaterSensor reduce(WaterSensor value1, WaterSensor value2) throws Exception {  
+                System.out.println("value1=" + value1);  
+                System.out.println("value2=" + value2);  
+                return new WaterSensor(value1.id, value2.ts, value1.vc + value2.vc);  
+            }  
+        });  
+  
+        reduce.print();  
+        env.execute();  
+    }  
+}
+```
+**输出：**
+```bash
+WaterSensor{id='s1', ts=1, vc=1}
+value1=WaterSensor{id='s1', ts=1, vc=1}
+value2=WaterSensor{id='s1', ts=11, vc=11}
+WaterSensor{id='s1', ts=11, vc=12}
+value1=WaterSensor{id='s1', ts=11, vc=12}
+value2=WaterSensor{id='s1', ts=21, vc=21}
+WaterSensor{id='s1', ts=21, vc=33}
+WaterSensor{id='s2', ts=2, vc=2}
+WaterSensor{id='s3', ts=3, vc=3}
+```
+
+在输入第一条数据时不会触发reduce，后边每次数据到来会触发数据聚合，value1是当前聚合结果，value2是这次新的数据。
 
 ### 3.4.3 用户自定义函数
+#### 3.4.3.1 函数类
 
+Flink暴露了所有UDF函数的接口，具体实现方式为接口或者抽象类，例如MapFunction、FilterFunction、ReduceFunction等。所以用户可以自定义一个函数类，实现对应的接口。
+上边的示例，都是实现了对应UDF函数的类，可以是匿名类，Lambda，继承了接口或抽象类的自定义类。
+#### 3.4.3.2 富函数类
+“富函数类”也是DataStream API提供的一个函数类的接口，所有的Flink函数类都有其Rich版本。富函数类一般是以抽象类的形式出现的。例如：RichMapFunction、RichFilterFunction、RichReduceFunction等。
 
+与常规函数类的不同主要在于，富函数类可以获取运行环境的上下文，并拥有一些生命周期方法，所以可以实现更复杂的功能。
+
+Rich Function有生命周期的概念。典型的生命周期方法有：
+- open()方法，是Rich Function的初始化方法，也就是会开启一个算子的生命周期。当一个算子的实际工作方法例如map()或者filter()方法被调用之前，open()会首先被调用。
+- close()方法，是生命周期中的最后一个调用的方法，类似于结束方法。一般用来做一些清理工作。
+
+**示例代码：**
+```java
+package com.atguigu.transfrom;  
+  
+import com.atguigu.bean.WaterSensor;  
+import org.apache.flink.api.common.functions.RichMapFunction;  
+import org.apache.flink.api.common.functions.RuntimeContext;  
+import org.apache.flink.configuration.Configuration;  
+import org.apache.flink.streaming.api.datastream.DataStreamSource;  
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;  
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;  
+  
+ public class RichFunctionDemo {  
+    public static void main(String[] args) throws Exception {  
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();  
+        env.setParallelism(2);  
+  
+        DataStreamSource<WaterSensor> sensorDS = env.fromElements(  
+                new WaterSensor("s1", 1L, 1),  
+                new WaterSensor("s2", 2L, 2),  
+                new WaterSensor("s3", 3L, 3)  
+        );  
+          
+        SingleOutputStreamOperator<String> map = sensorDS.map(new RichMapFunction<WaterSensor, String>() {  
+  
+            @Override  
+            public void open(Configuration parameters) throws Exception {  
+                super.open(parameters);  
+                System.out.println(  
+                        "子任务编号=" + getRuntimeContext().getIndexOfThisSubtask()  
+                                + "，子任务名称=" + getRuntimeContext().getTaskNameWithSubtasks()  
+                                + ",调用open()");  
+            }  
+  
+            @Override  
+            public void close() throws Exception {  
+                super.close();  
+                System.out.println(  
+                        "子任务编号=" + getRuntimeContext().getIndexOfThisSubtask()  
+                                + "，子任务名称=" + getRuntimeContext().getTaskNameWithSubtasks()  
+                                + ",调用close()");  
+            }  
+  
+            @Override  
+            public String map(WaterSensor value) throws Exception {  
+                return value.getId();  
+            }  
+        });  
+  
+  
+        /**  
+         * TODO RichXXXFunction: 富函数  
+         * 1、多了生命周期管理方法：  
+         *    open(): 每个子任务，在启动时，调用一次  
+         *    close():每个子任务，在结束时，调用一次  
+         *      => 如果是flink程序异常挂掉，不会调用close  
+         *      => 如果是正常调用 cancel命令，可以close  
+         * 2、多了一个 运行时上下文  
+         *    可以获取一些运行时的环境信息，比如 子任务编号、名称、其他的.....  
+         *///        DataStreamSource<Integer> source = env.fromElements(1, 2, 3, 4); 
+    
+        map.print();  
+        env.execute();  
+    }  
+}
+```
+**输出：**
+```bash
+子任务编号=0，子任务名称=Map -> Sink: Print to Std. Out (1/2)#0,调用open()
+子任务编号=1，子任务名称=Map -> Sink: Print to Std. Out (2/2)#0,调用open()
+1> s1
+2> s2
+1> s3
+子任务编号=0，子任务名称=Map -> Sink: Print to Std. Out (1/2)#0,调用close()
+子任务编号=1，子任务名称=Map -> Sink: Print to Std. Out (2/2)#0,调用close()
+```
+以上设置并行度为2，每个子任务启动时会调用open()，退出时调用close()。
 ### 3.4.4 
 
 ## 3.5 Sink 数据输出
