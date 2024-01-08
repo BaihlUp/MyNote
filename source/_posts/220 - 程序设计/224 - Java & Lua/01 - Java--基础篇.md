@@ -3461,6 +3461,48 @@ g2ListSup = new ArrayList<GrandParent>();
 //         List<? super Parent> g2ListSup11 = new ArrayList<? super Parent>();
 ```
 
+#### 4.2.4 泛型方法
+泛型方法的格式：
+
+```bash
+[访问权限] <泛型> 返回类型 ⽅法名([泛型标识参数名称]) 抛出的异常
+```
+
+**例如：**
+```java
+ public <E> List<E> ⽅法名(E[] arr) throws Exception{
+ //。。。。
+ }
+```
+
+**示例：**
+
+```java
+class ArrayAlg {
+	public static <T extends Comparable> Pair<T> minmax(T[] a) {
+		if (a == null || a.length == 0) return null;
+		T min = a[0];
+		T max = a[0];
+		for (int i = 1; i < a.length; i++) {
+			if (min.compareTo(a[i]) > 0) min = a[i];
+			if (max.compareTo(a[i]) < 0) max = a[i];
+		}
+		return new Pair<>(min, max);
+	}
+}
+```
+
+类型变量的限定，泛型方法minmax只能在实现了Comparable接口的类（如String，LocalDate等）的数组上调用。
+
+静态方法也可以是泛型方法，因为泛型参数是在调⽤⽅法时确定的，并⾮在实例化类时确定。
+
+```java
+public static <E> List<E> copyFromArrayToList(E[] arr){
+ //...
+}
+```
+
+
 ### 4.3 Iterator 接口
 实现Iterable接口，就可以支持 forEach 循环。
 ```java

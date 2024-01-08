@@ -691,10 +691,727 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 子任务编号=1，子任务名称=Map -> Sink: Print to Std. Out (2/2)#0,调用close()
 ```
 以上设置并行度为2，每个子任务启动时会调用open()，退出时调用close()。
-### 3.4.4 
+
+### 3.4.4 物理分区算子
+#### 3.4.4.1 随机分区
+随机分区服从均匀分布（uniform distribution），所以可以把流中的数据随机打乱，均匀地传递到下游任务分区。因为是完全随机的，所以对于同样的输入数据, 每次执行得到的结果也不会相同。
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20240108135209.png)
+
+经过随机分区之后，得到的依然是一个DataStream。
+```java
+sensorDS.shuffle().print();
+```
+
+#### 3.4.4.2 轮询分区
+轮询，按照先后顺序将数据做依次分发。
+
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20240108135714.png)
+
+```java
+stream.rebalance()
+```
+
+#### 3.4.4.3 重缩放分区
+
+重缩放分区和轮询分区非常相似。当调用rescale()方法时，其实底层也是使用Round-Robin算法进行轮询，但是只会将数据轮询发送到下游并行任务的一部分中。rescale的做法是分成小团体，发牌人只给自己团体内的所有人轮流发牌。
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20240108140109.png)
+
+重缩放分区与轮询分区相比，因为轮询的范围更小，性能更好。
+```java
+stream.rescale()
+```
+#### 3.4.4.4 广播/全局分区
+- 广播分区
+
+数据会在不同的分区都保留一份，可能进行重复处理。可以通过调用DataStream的broadcast()方法，将输入数据复制并发送到下游算子的所有并行任务中去。
+```java
+stream.broadcast()
+```
+
+- 全局分区
+
+会将所有的输入流数据都发送到下游算子的第一个并行子任务中去。这就相当于强行让下游任务并行度变成了1，所以使用这个操作需要非常谨慎，可能对程序造成很大的压力。
+```java
+stream.global()
+```
+
+#### 3.4.4.5 自定义分区
+如果所有分区策略无法满足需求，可以通过使用partitionCustom()方法来自定义分区策略。
+
+- 自定义分区 MyPartitioner
+
+```java
+package com.atguigu.partition;  
+  
+import org.apache.flink.api.common.functions.Partitioner;  
+  
+public class MyPartitioner implements Partitioner<String> {  
+    @Override  
+    public int partition(String key, int numPartitions) {  
+        return Integer.parseInt(key) % numPartitions;  
+    }  
+}
+```
+
+继承Partitioner 后需要实现 partition方法，第一个参数为 从流数据中提取的计算分区的key，第二个参数为 并行度。
+
+
+- 使用自定义分区
+
+```java
+package com.atguigu.partition;  
+  
+import org.apache.flink.api.java.functions.KeySelector;  
+import org.apache.flink.configuration.Configuration;  
+import org.apache.flink.streaming.api.datastream.DataStreamSource;  
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;  
+  
+public class PartitionCustomDemo {  
+    public static void main(String[] args) throws Exception {  
+  
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();  
+        env.setParallelism(2);  
+  
+        DataStreamSource<String> elementsDs = env.fromElements("1", "2", "3", "4", "5");  
+  
+        elementsDs  
+                .partitionCustom(new MyPartitioner(), r->r)  
+                .print();  
+  
+        env.execute();  
+    }  
+}
+```
+以上设置并行度为2，会把数据按奇偶分到两个分区中。
+
+#### 3.4.4.6 总结
+Flink提供了 7种分区器+ 1种自定义：
+1. shuffle：随机分区
+2. rebalance：轮询
+3. recale：重缩放分区
+4. broadcast：广播
+5. global：全局
+6. keyBy：one-by-one
+7. partitionCustom：自定义分区
+
+### 3.4.5 侧输出流
+在处理流数据时，可以使用侧输出流把部分数据输出到其他流中，达到分流的效果。
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20240108144051.png)
+
+示例：实现将WaterSensor按照Id类型进行分流。
+
+```java
+package com.atguigu.split;  
+  
+import com.atguigu.bean.WaterSensor;  
+import com.atguigu.functions.WaterSensorMapFunction;  
+import org.apache.flink.api.common.functions.FilterFunction;  
+import org.apache.flink.api.common.typeinfo.Types;  
+import org.apache.flink.configuration.Configuration;  
+import org.apache.flink.streaming.api.datastream.DataStreamSource;  
+import org.apache.flink.streaming.api.datastream.SideOutputDataStream;  
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;  
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;  
+import org.apache.flink.streaming.api.functions.ProcessFunction;  
+import org.apache.flink.util.Collector;  
+import org.apache.flink.util.OutputTag;  
+  
+public class SideOutputDemo {  
+    public static void main(String[] args) throws Exception {  
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();  
+//        StreamExecutionEnvironment env = StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(new Configuration());  
+  
+        env.setParallelism(1);  
+  
+//        SingleOutputStreamOperator<WaterSensor> sensorDS = env  
+//                .socketTextStream("10.211.55.4", 7777)  
+//                .map(new WaterSensorMapFunction());  
+  
+        DataStreamSource<WaterSensor> sensorDS = env.fromElements(  
+                new WaterSensor("s1", 1L, 1),  
+                new WaterSensor("s1", 11L, 11),  
+                new WaterSensor("s2", 2L, 2),  
+                new WaterSensor("s3", 3L, 3)  
+        );  
+  
+        /**  
+         * TODO 使用侧输出流 实现分流  
+         * 需求： watersensor的数据，s1、s2的数据分别分开  
+         *  
+         * TODO 总结步骤：  
+         *    1、使用 process算子  
+         *    2、定义 OutputTag对象  
+         *    3、调用 ctx.output  
+         *    4、通过主流 获取 测流  
+         */  
+  
+        /**         * 创建OutputTag对象  
+         * 第一个参数： 标签名  
+         * 第二个参数： 放入侧输出流中的 数据的 类型，Typeinformation  
+         */        OutputTag<WaterSensor> s1Tag = new OutputTag<>("s1", Types.POJO(WaterSensor.class));  
+        OutputTag<WaterSensor> s2Tag = new OutputTag<>("s2", Types.POJO(WaterSensor.class));  
+  
+        SingleOutputStreamOperator<WaterSensor> process = sensorDS  
+                .process(  
+                        new ProcessFunction<WaterSensor, WaterSensor>() {  
+                            @Override  
+                            public void processElement(WaterSensor value, Context ctx, Collector<WaterSensor> out) throws Exception {  
+                                String id = value.getId();  
+                                if ("s1".equals(id)) {  
+                                    // 如果是 s1，放到侧输出流s1中  
+                                    /**  
+                                     * 上下文ctx 调用ouput，将数据放入侧输出流  
+                                     * 第一个参数： Tag对象  
+                                     * 第二个参数： 放入侧输出流中的 数据  
+                                     */  
+                                    ctx.output(s1Tag, value);  
+                                } else if ("s2".equals(id)) {  
+                                    // 如果是 s2，放到侧输出流s2中  
+  
+                                    ctx.output(s2Tag, value);  
+                                } else {  
+                                    // 非s1、s2的数据，放到主流中  
+                                    out.collect(value);  
+                                }  
+  
+                            }  
+                        }  
+                );  
+        // 从主流中，根据标签 获取 侧输出流  
+        SideOutputDataStream<WaterSensor> s1 = process.getSideOutput(s1Tag);  
+        SideOutputDataStream<WaterSensor> s2 = process.getSideOutput(s2Tag);  
+  
+  
+        // 打印主流  
+        process.print("主流-非s1、s2");  
+  
+        //打印 侧输出流  
+//        s1.printToErr("s1");  
+        s1.filter(new FilterFunction<WaterSensor>() {  
+            @Override  
+            public boolean filter(WaterSensor waterSensor) throws Exception {  
+                return waterSensor.getTs() == 11;  
+            }  
+        }).print("s1");  
+        s2.printToErr("s2");  
+  
+        env.execute();  
+    }  
+}  
+```
+**输出：**
+```bash
+s1> WaterSensor{id='s1', ts=11, vc=11}
+主流-非s1、s2> WaterSensor{id='s3', ts=3, vc=3}
+s2> WaterSensor{id='s2', ts=2, vc=2}
+```
+
+按照s1，s2，s3 类型进行分流，分成三条流，对s1流再进行 filter 操作。
+
+### 3.4.6 合流
+#### 3.4.6.1 联合
+
+最简单的合流操作，就是直接将多条流合在一起，叫作流的“联合”（union）。联合操作要求必须流中的数据类型必须相同，合并之后的新流会包括所有流中的元素，数据类型不变。
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20240108145943.png)
+
+```java
+stream1.union(stream2, stream3, ...)
+```
+
+**示例代码：**
+```java
+package com.atguigu.combine;  
+  
+import org.apache.flink.streaming.api.datastream.DataStream;  
+import org.apache.flink.streaming.api.datastream.DataStreamSource;  
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;  
+  
+  
+public class UnionDemo {  
+    public static void main(String[] args) throws Exception {  
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();  
+        env.setParallelism(1);  
+  
+        DataStreamSource<Integer> source1 = env.fromElements(1, 2, 3);  
+        DataStreamSource<Integer> source2 = env.fromElements(11, 22, 33);  
+        DataStreamSource<String> source3 = env.fromElements("111", "222", "333");  
+  
+        /**  
+         * TODO union：合并数据流  
+         * 1、 流的数据类型必须一致  
+         * 2、 一次可以合并多条流  
+         */  
+//        DataStream<Integer> union = source1.union(source2).union(source3.map(r -> Integer.valueOf(r)));  
+        DataStream<Integer> union = source1.union(source2, source3.map(r -> Integer.valueOf(r)));  
+        union.print();  
+  
+  
+        env.execute();  
+    }  
+}
+```
+所有数据合并到一起输出。
+
+#### 3.4.6.2 连接
+流的联合虽然简单，不过受限于数据类型不能改变，灵活性大打折扣，所以实际应用较少出现。
+
+连接操作允许流的数据类型不同，但我们知道一个DataStream中的数据只能有唯一的类型，所以连接得到的并不是DataStream，而是“连接流”（ConnectedStreams），在连接以后，实际上内部仍保持各自的数据形式不变，彼此之间相互独立。要得到新的DataStream，需要进一步定义一个“同处理”（co-process）转换操作，用来说明对于不同来源、不同类型的数据，怎样分别进行处理转换、得到统一的输出类型。
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20240108150840.png)
+
+- CoMapFunction
+
+**代码实现：** 需要分为两步：
+1. 基于一条DataStream调用 `.connect()` 方法，传入另一条DataStream作为参数，将两条流连接起来，得到一个ConnectedStreams
+2. 再调用同处理方法得到DataStream。这里可以的调用的同处理方法有.map()/.flatMap()，以及.process()方法。
+
+```java
+package com.atguigu.combine;  
+  
+import org.apache.flink.streaming.api.datastream.ConnectedStreams;  
+import org.apache.flink.streaming.api.datastream.DataStream;  
+import org.apache.flink.streaming.api.datastream.DataStreamSource;  
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;  
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;  
+import org.apache.flink.streaming.api.functions.co.CoMapFunction;  
+  
+public class ConnectDemo {  
+    public static void main(String[] args) throws Exception {  
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();  
+        env.setParallelism(1);  
+  
+        DataStreamSource<Integer> source1 = env.fromElements(1, 2, 3);  
+        DataStreamSource<String> source2 = env.fromElements("a", "b", "c");  
+  
+        /*** TODO 使用 connect 合流  
+         * 1、一次只能连接 2条流  
+         * 2、流的数据类型可以不一样  
+         * 3、 连接后可以调用 map、flatmap、process来处理，但是各处理各的  
+         */  
+        ConnectedStreams<Integer, String> connect = source1.connect(source2);  
+  
+        SingleOutputStreamOperator<String> result = connect.map(new CoMapFunction<Integer, String, String>() {  
+            @Override  
+            public String map1(Integer value) throws Exception {  
+                return "来源于数字流:" + value.toString();  
+            }  
+  
+            @Override  
+            public String map2(String value) throws Exception {  
+                return "来源于字母流:" + value;  
+            }  
+        });  
+  
+        result.print();  
+        env.execute();  
+    }  
+}
+```
+**输出：**
+```bash
+来源于数字流:1
+来源于字母流:a
+来源于数字流:2
+来源于字母流:b
+来源于数字流:3
+来源于字母流:c
+```
+
+ConnectedStreams有两个类型参数，分别表示内部包含的两条流各自的数据类型；
+由于是两条不同类型的流，调用 `.map()`方法时传入的不再是一个简单的MapFunction，而是一个CoMapFunction，表示分别对两条流中的数据执行map操作。这个接口有三个类型参数，依次表示第一条流、第二条流，以及合并后的流中的数据类型。需要实现的方法：`.map1()`就是第一条流中数据的 `map` 操作，`.map2()` 则是针对第二条流的操作。
+
+- CoProcessFunction
+
+调用.process()时，传入的则是一个CoProcessFunction。它也是“处理函数”家族中的一员，用法非常相似。它需要实现的就是processElement1()、processElement2()两个方法，在每个数据到来时，会根据来源的流调用其中的一个方法进行处理。
+ConnectedStreams也可以直接调用.keyBy()进行按键分区的操作，得到的还是一个ConnectedStreams：
+```java
+connectedStreams.keyBy(keySelector1, keySelector2);
+```
+两个参数keySelector1和keySelector2，是两条流中各自的键选择器；当然也可以直接传入键的位置值（keyPosition），或者键的字段名（field），这与普通的keyBy用法完全一致。ConnectedStreams进行keyBy操作，其实就是把两条流中key相同的数据放到了一起，然后针对来源的流再做各自处理，这在一些场景下非常有用。
+
+**代码示例：**
+```java
+package com.atguigu.combine;  
+  
+import org.apache.flink.api.java.tuple.Tuple2;  
+import org.apache.flink.api.java.tuple.Tuple3;  
+import org.apache.flink.streaming.api.datastream.ConnectedStreams;  
+import org.apache.flink.streaming.api.datastream.DataStreamSource;  
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;  
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;  
+import org.apache.flink.streaming.api.functions.co.CoProcessFunction;  
+import org.apache.flink.util.Collector;  
+  
+import java.util.ArrayList;  
+import java.util.HashMap;  
+import java.util.List;  
+import java.util.Map;  
+  
+public class ConnectKeybyDemo {  
+    public static void main(String[] args) throws Exception {  
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();  
+        env.setParallelism(2);  
+  
+        DataStreamSource<Tuple2<Integer, String>> source1 = env.fromElements(  
+                Tuple2.of(1, "a1"),  
+                Tuple2.of(1, "a2"),  
+                Tuple2.of(2, "b"),  
+                Tuple2.of(3, "c")  
+        );  
+        DataStreamSource<Tuple3<Integer, String, Integer>> source2 = env.fromElements(  
+                Tuple3.of(1, "aa1", 1),  
+                Tuple3.of(1, "aa2", 2),  
+                Tuple3.of(2, "bb", 1),  
+                Tuple3.of(3, "cc", 1)  
+        );  
+  
+        ConnectedStreams<Tuple2<Integer, String>, Tuple3<Integer, String, Integer>> connect = source1.connect(source2);  
+  
+        // 多并行度下，需要根据 关联条件进行 keyby，才能保证 key相同的数据到一起去，才能匹配上  
+        ConnectedStreams<Tuple2<Integer, String>, Tuple3<Integer, String, Integer>> connectKeyby = connect.keyBy(s1 -> s1.f0, s2 -> s2.f0);  
+  
+        /**  
+         * 实现互相匹配的效果：  两条流，，不一定谁的数据先来  
+         *  1、每条流，有数据来，存到一个变量中  
+         *      hashmap  
+         *      =》key=id，第一个字段值  
+         *      =》value=List<数据>  
+         *  2、每条流有数据来的时候，除了存变量中， 不知道对方是否有匹配的数据，要去另一条流存的变量中 查找是否有匹配上的  
+         */  
+        SingleOutputStreamOperator<String> process = connectKeyby.process(  
+                new CoProcessFunction<Tuple2<Integer, String>, Tuple3<Integer, String, Integer>, String>() {  
+                    // 每条流定义一个hashmap，用来存数据  
+                    Map<Integer, List<Tuple2<Integer, String>>> s1Cache = new HashMap<>();  
+                    Map<Integer, List<Tuple3<Integer, String, Integer>>> s2Cache = new HashMap<>();  
+  
+                    /**  
+                     * 第一条流的处理逻辑  
+                     * @param value 第一条流的数据  
+                     * @param ctx   上下文  
+                     * @param out   采集器  
+                     * @throws Exception  
+                     */  
+                    @Override  
+                    public void processElement1(Tuple2<Integer, String> value, Context ctx, Collector<String> out) throws Exception {  
+                        Integer id = value.f0;  
+                        // TODO 1. s1的数据来了，就存到变量中  
+                        if (!s1Cache.containsKey(id)) {  
+                            // 1.1 如果key不存在，说明是该key的第一条数据，初始化，put进map中  
+                            List<Tuple2<Integer, String>> s1Values = new ArrayList<>();  
+                            s1Values.add(value);  
+                            s1Cache.put(id, s1Values);  
+                        } else {  
+                            // 1.2 key存在，不是该key的第一条数据，直接添加到 value的list中  
+                            s1Cache.get(id).add(value);  
+                        }  
+  
+                        // TODO 2.去 s2Cache中查找是否有id能匹配上的,匹配上就输出，没有就不输出  
+                        if (s2Cache.containsKey(id)) {  
+                            for (Tuple3<Integer, String, Integer> s2Element : s2Cache.get(id)) {  
+                                out.collect("s1:" + value + "<========>" + "s2:" + s2Element);  
+                            }  
+                        }  
+  
+                    }  
+  
+                    /**  
+                     * 第二条流的处理逻辑  
+                     * @param value 第二条流的数据  
+                     * @param ctx   上下文  
+                     * @param out   采集器  
+                     * @throws Exception  
+                     */  
+                    @Override  
+                    public void processElement2(Tuple3<Integer, String, Integer> value, Context ctx, Collector<String> out) throws Exception {  
+                        Integer id = value.f0;  
+                        // TODO 1. s2的数据来了，就存到变量中  
+                        if (!s2Cache.containsKey(id)) {  
+                            // 1.1 如果key不存在，说明是该key的第一条数据，初始化，put进map中  
+                            List<Tuple3<Integer, String, Integer>> s2Values = new ArrayList<>();  
+                            s2Values.add(value);  
+                            s2Cache.put(id, s2Values);  
+                        } else {  
+                            // 1.2 key存在，不是该key的第一条数据，直接添加到 value的list中  
+                            s2Cache.get(id).add(value);  
+                        }  
+  
+                        // TODO 2.去 s1Cache中查找是否有id能匹配上的,匹配上就输出，没有就不输出  
+                        if (s1Cache.containsKey(id)) {  
+                            for (Tuple2<Integer, String> s1Element : s1Cache.get(id)) {  
+                                out.collect("s1:" + s1Element + "<========>" + "s2:" + value);  
+                            }  
+                        }  
+                    }  
+                }  
+        );  
+  
+        process.print();  
+        env.execute();  
+    }  
+}
+```
 
 ## 3.5 Sink 数据输出
+Flink作为数据处理框架，最终还是要把计算处理的结果写入外部存储，为外部应用提供支持。
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20240108152743.png)
 
 
+### 3.5.1 连接到外部系统
+Flink1.12开始，重构了Sink架构，使用如下方式：
+```java
+stream.sinkTo(…)
+```
+
+官方提供了众多 Sink 连接器，如下：
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20240108153223.png)
 
 
+Flink官方之外，Apache Bahir框架，也实现了一些其他第三方系统与Flink的连接器。
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20240108153257.png)
+
+### 3.5.2 输出到文件
+FileSink支持行编码（Row-encoded）和批量编码（Bulk-encoded）格式。这两种不同的方式都有各自的构建器（builder），可以直接调用FileSink的静态方法：
+- 行编码： FileSink.forRowFormat（basePath，rowEncoder）。
+- 批量编码： FileSink.forBulkFormat（basePath，bulkWriterFactory）。
+
+**导入依赖：**
+```xml
+<dependency>  
+    <groupId>org.apache.flink</groupId>  
+    <artifactId>flink-connector-files</artifactId>  
+    <version>${flink.version}</version>  
+    <scope>compile</scope>  
+</dependency>
+```
+
+**示例代码：**
+```java
+package com.atguigu.sink;  
+  
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;  
+import org.apache.flink.api.common.serialization.SimpleStringEncoder;  
+import org.apache.flink.api.common.typeinfo.Types;  
+import org.apache.flink.api.connector.source.util.ratelimit.RateLimiterStrategy;  
+import org.apache.flink.configuration.MemorySize;  
+import org.apache.flink.connector.datagen.source.DataGeneratorSource;  
+import org.apache.flink.connector.datagen.source.GeneratorFunction;  
+import org.apache.flink.connector.file.sink.FileSink;  
+import org.apache.flink.core.fs.Path;  
+import org.apache.flink.streaming.api.CheckpointingMode;  
+import org.apache.flink.streaming.api.datastream.DataStreamSource;  
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;  
+import org.apache.flink.streaming.api.functions.sink.filesystem.OutputFileConfig;  
+import org.apache.flink.streaming.api.functions.sink.filesystem.bucketassigners.DateTimeBucketAssigner;  
+import org.apache.flink.streaming.api.functions.sink.filesystem.rollingpolicies.DefaultRollingPolicy;  
+  
+import java.time.Duration;  
+import java.time.ZoneId;  
+import java.util.TimeZone;  
+  
+public class SinkFile {  
+    public static void main(String[] args) throws Exception {  
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();  
+  
+        // TODO 每个目录中，都有 并行度个数的 文件在写入  
+        env.setParallelism(2);  
+  
+        // 必须开启checkpoint，否则一直都是 .inprogress        env.enableCheckpointing(2000, CheckpointingMode.EXACTLY_ONCE);  
+  
+  
+        DataGeneratorSource<String> dataGeneratorSource = new DataGeneratorSource<>(  
+                new GeneratorFunction<Long, String>() {  
+                    @Override  
+                    public String map(Long value) throws Exception {  
+                        return "Number:" + value;  
+                    }  
+                },  
+                Long.MAX_VALUE,  
+                RateLimiterStrategy.perSecond(1000),  
+                Types.STRING  
+        );  
+  
+        DataStreamSource<String> dataGen = env.fromSource(dataGeneratorSource, WatermarkStrategy.noWatermarks(), "data-generator");  
+  
+        // TODO 输出到文件系统  
+        FileSink<String> fieSink = FileSink  
+                // 输出行式存储的文件，指定路径、指定编码  
+                .<String>forRowFormat(new Path("./output/"), new SimpleStringEncoder<>("UTF-8"))  
+                // 输出文件的一些配置： 文件名的前缀、后缀  
+                .withOutputFileConfig(  
+                        OutputFileConfig.builder()  
+                                .withPartPrefix("atguigu-")  
+                                .withPartSuffix(".log")  
+                                .build()  
+                )  
+                // 按照目录分桶：如下，就是每个小时一个目录  
+                .withBucketAssigner(new DateTimeBucketAssigner<>("yyyy-MM-dd HH", ZoneId.systemDefault()))  
+                // 文件滚动策略:  1分钟 或 1m                .withRollingPolicy(  
+                        DefaultRollingPolicy.builder()  
+                                .withRolloverInterval(Duration.ofMinutes(1))  
+                                .withMaxPartSize(new MemorySize(1024*1024))  
+                                .build()  
+                )  
+                .build();  
+  
+  
+        dataGen.sinkTo(fieSink);  
+        env.execute();  
+    }  
+}
+```
+
+### 3.5.3 输出到Kafka
+**导入依赖：**
+```xml
+<dependency>  
+    <groupId>org.apache.flink</groupId>  
+    <artifactId>flink-connector-kafka</artifactId>  
+    <version>${flink.version}</version>  
+</dependency>
+```
+
+**示例代码**：
+```java
+package com.atguigu.sink;  
+  
+import org.apache.flink.api.common.serialization.SimpleStringSchema;  
+import org.apache.flink.connector.base.DeliveryGuarantee;  
+import org.apache.flink.connector.kafka.sink.KafkaRecordSerializationSchema;  
+import org.apache.flink.connector.kafka.sink.KafkaSink;  
+import org.apache.flink.streaming.api.CheckpointingMode;  
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;  
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;  
+import org.apache.kafka.clients.producer.ProducerConfig;  
+  
+public class SinkKafka {  
+    public static void main(String[] args) throws Exception {  
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();  
+        env.setParallelism(1);  
+  
+        // 如果是精准一次，必须开启checkpoint（后续章节介绍）  
+        env.enableCheckpointing(2000, CheckpointingMode.EXACTLY_ONCE);  
+  
+  
+        SingleOutputStreamOperator<String> sensorDS = env  
+                .socketTextStream("hadoop102", 7777);  
+  
+        /**  
+         * Kafka Sink:         * TODO 注意：如果要使用 精准一次 写入Kafka，需要满足以下条件，缺一不可  
+         * 1、开启checkpoint（后续介绍）  
+         * 2、设置事务前缀  
+         * 3、设置事务超时时间：   checkpoint间隔 <  事务超时时间  < max的15分钟  
+         */  
+        KafkaSink<String> kafkaSink = KafkaSink.<String>builder()  
+                // 指定 kafka 的地址和端口  
+                .setBootstrapServers("hadoop102:9092,hadoop103:9092,hadoop104:9092")  
+                // 指定序列化器：指定Topic名称、具体的序列化  
+                .setRecordSerializer(  
+                        KafkaRecordSerializationSchema.<String>builder()  
+                                .setTopic("ws")  
+                                .setValueSerializationSchema(new SimpleStringSchema())  
+                                .build()  
+                )  
+                // 写到kafka的一致性级别： 精准一次、至少一次  
+                .setDeliveryGuarantee(DeliveryGuarantee.EXACTLY_ONCE)  
+                // 如果是精准一次，必须设置 事务的前缀  
+                .setTransactionalIdPrefix("atguigu-")  
+                // 如果是精准一次，必须设置 事务超时时间: 大于checkpoint间隔，小于 max 15分钟  
+                .setProperty(ProducerConfig.TRANSACTION_TIMEOUT_CONFIG, 10*60*1000+"")  
+                .build();  
+  
+  
+        sensorDS.sinkTo(kafkaSink);  
+	    env.execute();  
+    }  
+}
+```
+
+
+### 3.5.4 输出到 MySQL（JDBC）
+
+**导入依赖：**
+```xml
+<!--目前中央仓库还没有 jdbc的连接器，暂时用一个快照版本-->  
+<dependency>  
+    <groupId>org.apache.flink</groupId>  
+    <artifactId>flink-connector-jdbc</artifactId>  
+    <version>1.17-SNAPSHOT</version>  
+</dependency>
+```
+
+**示例代码：**
+```java
+package com.atguigu.sink;  
+  
+import com.atguigu.bean.WaterSensor;  
+import com.atguigu.functions.WaterSensorMapFunction;  
+import org.apache.flink.api.common.restartstrategy.RestartStrategies;  
+import org.apache.flink.connector.jdbc.JdbcConnectionOptions;  
+import org.apache.flink.connector.jdbc.JdbcExecutionOptions;  
+import org.apache.flink.connector.jdbc.JdbcSink;  
+import org.apache.flink.connector.jdbc.JdbcStatementBuilder;  
+import org.apache.flink.streaming.api.CheckpointingMode;  
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;  
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;  
+import org.apache.flink.streaming.api.functions.sink.SinkFunction;  
+  
+import java.sql.PreparedStatement;  
+import java.sql.SQLException;  
+  
+public class SinkMySQL {  
+    public static void main(String[] args) throws Exception {  
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();  
+        env.setParallelism(1);  
+  
+        SingleOutputStreamOperator<WaterSensor> sensorDS = env  
+                .socketTextStream("hadoop102", 7777)  
+                .map(new WaterSensorMapFunction());  
+
+        /**  
+         * TODO 写入mysql  
+         * 1、只能用老的sink写法： addsink  
+         * 2、JDBCSink的4个参数:  
+         *    第一个参数： 执行的sql，一般就是 insert into  
+         *    第二个参数： 预编译sql， 对占位符填充值  
+         *    第三个参数： 执行选项 ---》 攒批、重试  
+         *    第四个参数： 连接选项 ---》 url、用户名、密码  
+         */  
+        SinkFunction<WaterSensor> jdbcSink = JdbcSink.sink(  
+                "insert into ws values(?,?,?)",  
+                new JdbcStatementBuilder<WaterSensor>() {  
+                    @Override  
+                    public void accept(PreparedStatement preparedStatement, WaterSensor waterSensor) throws SQLException {  
+                        //每收到一条WaterSensor，如何去填充占位符  
+                        preparedStatement.setString(1, waterSensor.getId());  
+                        preparedStatement.setLong(2, waterSensor.getTs());  
+                        preparedStatement.setInt(3, waterSensor.getVc());  
+                    }  
+                },  
+                JdbcExecutionOptions.builder()  
+                        .withMaxRetries(3) // 重试次数  
+                        .withBatchSize(100) // 批次的大小：条数  
+                        .withBatchIntervalMs(3000) // 批次的时间  
+                        .build(),  
+                new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()  
+                        .withUrl("jdbc:mysql://hadoop102:3306/test?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=UTF-8")  
+                        .withUsername("root")  
+                        .withPassword("000000")  
+                        .withConnectionCheckTimeoutSeconds(60) // 重试的超时时间  
+                        .build()  
+        );  
+  
+        sensorDS.addSink(jdbcSink);   
+        env.execute();  
+    }  
+}
+```
+
+### 3.5.5 自定义 Sink 输出
+ 如果我们想将数据存储到我们自己的存储设备中，而Flink并没有提供可以直接使用的连接器，就只能自定义Sink进行输出了。与Source类似，Flink为我们提供了通用的SinkFunction接口和对应的RichSinkDunction抽象类，只要实现它，通过简单地调用DataStream的.addSink()方法就可以自定义写入任何外部存储。
+```java
+stream.addSink(new MySinkFunction<String>());
+```
+在实现SinkFunction的时候，需要重写的一个关键方法invoke()，在这个方法中我们就可以实现将流里的数据发送出去的逻辑。
+
+这种方式比较通用，对于任何外部存储系统都有效；不过自定义Sink想要实现状态一致性并不容易，所以一般只在没有其它选择时使用。实际项目中用到的外部连接器Flink官方基本都已实现，而且在不断地扩充，因此自定义的场景并不常见。
+
+## 3.6 时间和窗口
