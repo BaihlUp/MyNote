@@ -2048,5 +2048,604 @@ stream.keyBy(...)
        .evictor(new MyEvictor())
 ```
 
-## 3.7 Flink 中的时间
-### 3.7.1 时间语义
+## 3.7 时间语义
+
+事件时间：数据产生的时间；处理时间：数据真正被处理的时刻。
+在实际应用中，事件时间语义会更为常见。一般情况下，业务日志数据中都会记录数据生成的时间戳（timestamp），它就可以作为事件时间的判断基础。
+> 早期版本默认的时间语义是处理时间；而考虑到事件时间在实际应用中更为广泛，从Flink1.12版本开始，Flink已经将事件时间作为默认的时间语义了。
+
+## 3.8 水位线（Watermark）
+### 3.8.1 事件事件和窗口
+在窗口的处理过程中，可以基于数据的时间戳，自定义一个“逻辑时钟”，这个时钟的时间不会自动流逝，他的时间进展，就是靠着新到数据的时间戳来推动。
+这样好处在于，计算的过程可以完全不依赖处理时间（系统时间），不论什么时候进行统计处理，得到的结果都是正确的。而一般实时流处理的场景中，事件时间可以基本与处理时间保持同步，只是略微有点延迟。
+
+### 3.8.2 什么是水位线
+在Flink中，用来衡量事件时间进展的标记，就被称作“水位线”（Watermark）。
+水位线可以看作一条特殊的数据记录，它是插入到数据流中的一个标记点，主要内容就是一个时间戳，用来指示当前的事件时间。而它插入流中的位置，就应该是在某个数据到来之后；这样就可以从这个数据中提取时间戳，作为当前水位线的时间戳了。
+
+- 乱序流中的水位线
+
+在分布式系统中，数据在节点间传输，会因为网络传输延迟的不确定性，导致顺序发生改变，这就是所谓的“乱序数据”。
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20240109144354.png)
+
+**乱序 + 数据量小**：我们还是靠数据来驱动，每来一个数据就提取他的时间戳、插入水位线，不过现在的情况是数据乱序，所以插入新的水位线时，要先判断一下时间戳是否比之前的大，否则就不再生成新的水位线，只有数据的时间戳比当前时钟大，才能推进时钟前进，这时才插入水位线。
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20240109144554.png)
+
+**乱序 + 数据量大**：如果考虑到大量数据同时到来的处理效率，同样可以周期性地生成水位线，这时只需要保存一下之前所有数据中的最大时间戳，需要插入水位线时，就直接以它作为时间戳生成新的水位线。
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20240109144737.png)
+
+**乱序 + 迟到数据**：为了让窗口能够正确收集迟到的数据，可以等上一段时间，比如2秒；就是当前已有数据的最大时间戳减去2秒，就是要插入的水位线的时间戳。这样的话，9秒的数据到来之后，事件时钟不会直接推进到9秒，而是进展到7秒；必须等到11秒的数据到来之后，事件时钟才会进展到9秒，这时迟到数据也都已收集齐，0～9秒的窗口就可以正确计算结果了。
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20240109145043.png)
+
+> 水位线代表了当前的事件时间时钟，而且可以在数据的时间戳基础上加一些延迟来保证不丢数据，在对于乱序流的正确处理非常重要。
+
+**水位线特性：**
+
+1. 水位线是插入到数据流中的一个标记，可以认为是一个特殊的数据
+2. 水位线主要的内容是一个时间戳，用来表示当前事件时间的进展
+3. 水位线是基于数据的时间戳生成的
+4. 水位线的时间戳必须单调递增，以确保任务的事件时间时钟一直向前推进
+5. 水位线可以通过设置延迟，来保证正确处理乱序数据
+6. 一个水位线Watermark（t），表示在当前流中事件时间已经达到了时间戳t，这代表t之前的所有数据都到齐了，之后流中不会出现时间戳 t' <= t 的数据
+> 水位线是Flink流处理中保证结果正确性的核心机制，它往往会跟窗口一起配合，完成对乱序数据的正确处理。
+
+### 3.8.3 水位线和窗口的工作原理
+
+在Flink中，窗口可以理解为一个“桶”，窗口可以把流切割成有限大小的多个“存储桶”（bucket），每个数据都会分发到对应的桶中，当到达窗口结束时间时，就对每个桶中收集的数据进行计算处理。
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20240109150018.png)
+
+> Flink中窗口并不是静态准备好的，而是动态创建——当有落在这个窗口区间范围的数据达到时，才创建对应的窗口。另外，这里我们认为到达窗口结束时间时，窗口就触发计算并关闭，事实上“触发计算”和“窗口关闭”两个行为也可以分开。
+
+### 3.8.4 生成水位线
+完美的水位线是“绝对正确”的，也就是一个水位线一旦出现，就表示这个时间之前的数据已经全部到齐、之后再也不会出现了。不过如果要保证绝对正确，就必须等足够长的时间，这会带来更高的延迟。
+如果希望处理得更快、实时性更强，那么可以将水位线延迟设得更低一些。这样可以遗漏延迟到达的数据。
+所以水位线是流处理中对低延迟和结果正确行的一个权衡机制，而且可以由程序控制。
+
+**示例代码：** 
+1. `<WaterSensor>forMonotonousTimestamps() `：没有乱序数据，生序的 watermark，没有等待时间
+2. `<WaterSensor>forBoundedOutOfOrderness(Duration.ofSeconds(3)) `：乱序数据，指定 延迟 3s
+```java
+package com.atguigu.watermark;  
+  
+import com.atguigu.bean.WaterSensor;  
+import com.atguigu.functions.WaterSensorMapFunction;  
+import org.apache.commons.lang3.time.DateFormatUtils;  
+import org.apache.flink.api.common.eventtime.SerializableTimestampAssigner;  
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;  
+import org.apache.flink.streaming.api.datastream.KeyedStream;  
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;  
+import org.apache.flink.streaming.api.datastream.WindowedStream;  
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;  
+import org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction;  
+import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;  
+import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;  
+import org.apache.flink.streaming.api.windowing.time.Time;  
+import org.apache.flink.streaming.api.windowing.windows.TimeWindow;  
+import org.apache.flink.util.Collector;  
+  
+public class WatermarkMonoDemo {  
+    public static void main(String[] args) throws Exception {  
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();  
+        env.setParallelism(1);  
+  
+        SingleOutputStreamOperator<WaterSensor> sensorDS = env  
+                .socketTextStream("hadoop102", 7777)  
+                .map(new WaterSensorMapFunction());  
+  
+        // TODO 1.定义Watermark策略  
+        WatermarkStrategy<WaterSensor> watermarkStrategy = WatermarkStrategy  
+                // 1.1 指定watermark生成：升序的watermark，没有等待时间  
+                .<WaterSensor>forMonotonousTimestamps() 
+                // 1.1 指定watermark生成：乱序的，等待3s  
+				//.<WaterSensor>forBoundedOutOfOrderness(Duration.ofSeconds(3)) 
+                // 1.2 指定 时间戳分配器，从数据中提取  
+                .withTimestampAssigner(new SerializableTimestampAssigner<WaterSensor>() {  
+                    @Override  
+                    public long extractTimestamp(WaterSensor element, long recordTimestamp) {  
+                        // 返回的时间戳，要 毫秒  
+                        System.out.println("数据=" + element + ",recordTs=" + recordTimestamp);  
+                        return element.getTs() * 1000L;  
+                    }  
+                });  
+  
+        // TODO 2. 指定 watermark策略  
+        SingleOutputStreamOperator<WaterSensor> sensorDSwithWatermark = sensorDS.assignTimestampsAndWatermarks(watermarkStrategy);  
+  
+        sensorDSwithWatermark.keyBy(sensor -> sensor.getId())  
+                // TODO 3.使用 事件时间语义 的窗口  
+                .window(TumblingEventTimeWindows.of(Time.seconds(10)))  
+                .process(  
+                        new ProcessWindowFunction<WaterSensor, String, String, TimeWindow>() {  
+  
+                            @Override  
+                            public void process(String s, Context context, Iterable<WaterSensor> elements, Collector<String> out) throws Exception {  
+                                long startTs = context.window().getStart();  
+                                long endTs = context.window().getEnd();  
+                                String windowStart = DateFormatUtils.format(startTs, "yyyy-MM-dd HH:mm:ss.SSS");  
+                                String windowEnd = DateFormatUtils.format(endTs, "yyyy-MM-dd HH:mm:ss.SSS");  
+  
+                                long count = elements.spliterator().estimateSize();  
+  
+                                out.collect("key=" + s + "的窗口[" + windowStart + "," + windowEnd + ")包含" + count + "条数据===>" + elements.toString());  
+                            }  
+                        }  
+                )  
+                .print();  
+  
+        env.execute();  
+    }  
+}
+```
+
+1. 先定义watermark策略
+2. 指定watermark策略
+3. 注意使用的是事件时间窗口
+
+- watermark的生成原理
+1. 周期性生成：默认 200ms
+2. 有序流：wartermark = 当前最大事件时间 - 1ms
+3. 乱序流：wartermark = 当前最大事件时间 - 延迟时间 - 1ms
+
+### 3.8.5 自定义水位线生成器
+
+- 周期性和断点式水位生成器
+
+周期性水位生成器通过继承WatermarkGenerator，重载onEvent()观察判断输入的事件，而在onPeriodicEmit()里发出水位线。
+
+断点式生成器会不停地检测onEvent()中的事件，当发现带有水位线信息的事件时，就立即发出水位线。我们把发射水位线的逻辑写在onEvent方法当中即可。
+
+**定义周期性水位线生成器**：
+```java
+package com.atguigu.watermark;  
+  
+import org.apache.flink.api.common.eventtime.Watermark;  
+import org.apache.flink.api.common.eventtime.WatermarkGenerator;  
+import org.apache.flink.api.common.eventtime.WatermarkOutput;  
+  
+public class MyPeriodWatermarkGenerator<T> implements WatermarkGenerator<T> {  
+  
+    // 乱序等待时间  
+    private long delayTs;  
+    // 用来保存 当前为止 最大的事件时间  
+    private long maxTs;  
+  
+    public MyPeriodWatermarkGenerator(long delayTs) {  
+        this.delayTs = delayTs;  
+        this.maxTs = Long.MIN_VALUE + this.delayTs + 1;  
+    }  
+  
+    /**  
+     * 每条数据来，都会调用一次： 用来提取最大的事件时间，保存下来  
+     *  
+     * @param event  
+     * @param eventTimestamp 提取到的数据的 事件时间  
+     * @param output  
+     */  
+    @Override  
+    public void onEvent(T event, long eventTimestamp, WatermarkOutput output) {  
+        maxTs = Math.max(maxTs, eventTimestamp);  
+        System.out.println("调用onEvent方法，获取目前为止的最大时间戳=" + maxTs);  
+    }  
+  
+    /**  
+     * 周期性调用： 发射 watermark  
+     *     * @param output  
+     */  
+    @Override  
+    public void onPeriodicEmit(WatermarkOutput output) {  
+        output.emitWatermark(new Watermark(maxTs - delayTs - 1));  
+        System.out.println("调用onPeriodicEmit方法，生成watermark=" + (maxTs - delayTs - 1));  
+    }  
+}
+```
+
+**定义断点式水位生成器**：
+```java
+package com.atguigu.watermark;  
+  
+import org.apache.flink.api.common.eventtime.Watermark;  
+import org.apache.flink.api.common.eventtime.WatermarkGenerator;  
+import org.apache.flink.api.common.eventtime.WatermarkOutput;  
+  
+public class MyPuntuatedWatermarkGenerator<T> implements WatermarkGenerator<T> {  
+  
+    // 乱序等待时间  
+    private long delayTs;  
+    // 用来保存 当前为止 最大的事件时间  
+    private long maxTs;  
+  
+    public MyPuntuatedWatermarkGenerator(long delayTs) {  
+        this.delayTs = delayTs;  
+        this.maxTs = Long.MIN_VALUE + this.delayTs + 1;  
+    }  
+  
+    /**  
+     * 每条数据来，都会调用一次： 用来提取最大的事件时间，保存下来,并发射watermark  
+     *     * @param event  
+     * @param eventTimestamp 提取到的数据的 事件时间  
+     * @param output  
+     */  
+    @Override  
+    public void onEvent(T event, long eventTimestamp, WatermarkOutput output) {  
+        maxTs = Math.max(maxTs, eventTimestamp);  
+        output.emitWatermark(new Watermark(maxTs - delayTs - 1));  
+        System.out.println("调用onEvent方法，获取目前为止的最大时间戳=" + maxTs+",watermark="+(maxTs - delayTs - 1));  
+    }  
+  
+    /**  
+     * 周期性调用： 不需要  
+     *  
+     * @param output  
+     */  
+    @Override  
+    public void onPeriodicEmit(WatermarkOutput output) {  
+  
+    }  
+}
+```
+
+**使用周期性水位线生成器：**
+
+```java
+package com.atguigu.watermark;  
+  
+import com.atguigu.bean.WaterSensor;  
+import com.atguigu.functions.WaterSensorMapFunction;  
+import org.apache.commons.lang3.time.DateFormatUtils;  
+import org.apache.flink.api.common.eventtime.WatermarkGenerator;  
+import org.apache.flink.api.common.eventtime.WatermarkGeneratorSupplier;  
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;  
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;  
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;  
+import org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction;  
+import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;  
+import org.apache.flink.streaming.api.windowing.time.Time;  
+import org.apache.flink.streaming.api.windowing.windows.TimeWindow;  
+import org.apache.flink.util.Collector;  
+  
+import java.time.Duration;  
+  
+public class WatermarkCustomDemo {  
+    public static void main(String[] args) throws Exception {  
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();  
+        env.setParallelism(1);  
+  
+        // watermark 生成周期，默认周期 200ms        env.getConfig().setAutoWatermarkInterval(2000);  
+  
+  
+        SingleOutputStreamOperator<WaterSensor> sensorDS = env  
+                .socketTextStream("hadoop102", 7777)  
+                .map(new WaterSensorMapFunction());  
+  
+        WatermarkStrategy<WaterSensor> watermarkStrategy = WatermarkStrategy  
+                // TODO 指定 自定义的 生成器  
+                // 1.自定义的 周期性生成  
+//                .<WaterSensor>forGenerator(ctx -> new MyPeriodWatermarkGenerator<>(3000L))  
+                // 2.自定义的 断点式生成  
+                .<WaterSensor>forGenerator(ctx -> new MyPuntuatedWatermarkGenerator<>(3000L))  
+                .withTimestampAssigner(  
+                        (element, recordTimestamp) -> {  
+                            return element.getTs() * 1000L;  
+                        });  
+  
+        SingleOutputStreamOperator<WaterSensor> sensorDSwithWatermark = sensorDS.assignTimestampsAndWatermarks(watermarkStrategy);  
+  
+        sensorDSwithWatermark.keyBy(sensor -> sensor.getId())  
+                .window(TumblingEventTimeWindows.of(Time.seconds(10)))  
+                .process(  
+                        new ProcessWindowFunction<WaterSensor, String, String, TimeWindow>() {  
+  
+                            @Override  
+                            public void process(String s, Context context, Iterable<WaterSensor> elements, Collector<String> out) throws Exception {  
+                                long startTs = context.window().getStart();  
+                                long endTs = context.window().getEnd();  
+                                String windowStart = DateFormatUtils.format(startTs, "yyyy-MM-dd HH:mm:ss.SSS");  
+                                String windowEnd = DateFormatUtils.format(endTs, "yyyy-MM-dd HH:mm:ss.SSS");  
+  
+                                long count = elements.spliterator().estimateSize();  
+  
+                                out.collect("key=" + s + "的窗口[" + windowStart + "," + windowEnd + ")包含" + count + "条数据===>" + elements.toString());  
+                            }  
+                        }  
+                )  
+                .print();  
+  
+        env.execute();  
+    }  
+}
+```
+
+- 在数据源中发送水位线
+
+也可以在自定义的数据源中抽取事件时间，然后发送水位线。这里要注意的是，在自定义数据源中发送了水位线以后，就不能再在程序中使用assignTimestampsAndWatermarks方法来生成水位线了。在自定义数据源中生成水位线和在程序中使用assignTimestampsAndWatermarks方法生成水位线二者只能取其一。
+```java
+env.fromSource(kafkaSource, WatermarkStrategy.forBoundedOutOfOrderness(Duration.ofSeconds(3)), "kafkasource"
+)
+```
+
+### 3.8.6 水位线的传递
+在流处理中，上游任务处理完水位线、时钟改变之后，要把当前的水位线再次发出，广播给所有的下游子任务。而当一个任务接收到多个上游并行任务传递来的水位线时，应该以最小的那个作为当前任务的事件时钟。
+
+水位线在上下游任务之间的传递，非常巧妙地避免了分布式系统中没有统一时钟的问题，每个任务都以“处理完之前所有数据”为标准来确定自己的时钟。
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20240109163531.png)
+
+一个任务接收多个上游并行任务传递时，取最小的那个水位线，但是如果其中一个水位线一直不更新，则一直处在最小，下游任务则一直无法触发窗口，针对这种情况，需要设置空闲等待时间（如果上游任务长时间没有更新水位线，下游则不会再参考此任务的水位线最小值）。
+
+**代码示例：** 并行度为2，有两个map算子，自定义分区以输入数据奇偶数，若只输入 奇数，偶数分区则长时间不会更新水位线，设置空闲等待时间 5s
+**自定义分区：**
+```java
+package com.atguigu.partition;  
+
+import org.apache.flink.api.common.functions.Partitioner;  
+  
+public class MyPartitioner implements Partitioner<String> {  
+    @Override  
+    public int partition(String key, int numPartitions) {  
+        return Integer.parseInt(key) % numPartitions;  
+    }  
+}
+```
+
+```java
+package com.atguigu.watermark;  
+  
+import com.atguigu.bean.WaterSensor;  
+import com.atguigu.functions.WaterSensorMapFunction;  
+import com.atguigu.partition.MyPartitioner;  
+import org.apache.commons.lang3.time.DateFormatUtils;  
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;  
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;  
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;  
+import org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction;  
+import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;  
+import org.apache.flink.streaming.api.windowing.time.Time;  
+import org.apache.flink.streaming.api.windowing.windows.TimeWindow;  
+import org.apache.flink.util.Collector;  
+  
+import java.time.Duration;  
+  
+public class WatermarkIdlenessDemo {  
+    public static void main(String[] args) throws Exception {  
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();  
+  
+        env.setParallelism(2);  
+  
+        // 自定义分区器：数据%分区数，只输入奇数，都只会去往map的一个子任务  
+        SingleOutputStreamOperator<Integer> socketDS = env  
+                .socketTextStream("hadoop102", 7777)  
+                .partitionCustom(new MyPartitioner(), r -> r)  
+                .map(r -> Integer.parseInt(r))  
+                .assignTimestampsAndWatermarks(  
+                        WatermarkStrategy  
+                                .<Integer>forMonotonousTimestamps()  
+                                .withTimestampAssigner((r, ts) -> r * 1000L)  
+                                .withIdleness(Duration.ofSeconds(5))  //空闲等待5s  
+                );  
+  
+        // 分成两组： 奇数一组，偶数一组 ， 开10s的事件时间滚动窗口  
+        socketDS  
+                .keyBy(r -> r % 2)  
+                .window(TumblingEventTimeWindows.of(Time.seconds(10)))  
+                .process(new ProcessWindowFunction<Integer, String, Integer, TimeWindow>() {  
+                    @Override  
+                    public void process(Integer integer, Context context, Iterable<Integer> elements, Collector<String> out) throws Exception {  
+                        long startTs = context.window().getStart();  
+                        long endTs = context.window().getEnd();  
+                        String windowStart = DateFormatUtils.format(startTs, "yyyy-MM-dd HH:mm:ss.SSS");  
+                        String windowEnd = DateFormatUtils.format(endTs, "yyyy-MM-dd HH:mm:ss.SSS");  
+  
+                        long count = elements.spliterator().estimateSize();  
+  
+                        out.collect("key=" + integer + "的窗口[" + windowStart + "," + windowEnd + ")包含" + count + "条数据===>" + elements.toString());  
+  
+                    }  
+                })  
+                .print();  
+  
+        env.execute();  
+    }  
+}
+```
+
+### 3.8.7 迟到数据的处理
+- 乱序等待时间：
+在水印（watermark）产生时，设置一个乱序容忍度，推迟系统时间的推进，保证窗口计算被延迟执行，为乱序的数据争取更多的时间进入窗口。
+```java
+WatermarkStrategy.forBoundedOutOfOrderness(Duration.ofSeconds(10));
+```
+
+- 窗口延迟关闭
+Flink的窗口，也允许迟到数据。当触发了窗口计算后，会先计算当前的结果，但是此时并不会关闭窗口。
+
+以后每来一条迟到数据，就触发一次这条数据所在窗口计算(增量计算)。直到wartermark 超过了窗口结束时间+推迟时间，此时窗口会真正关闭。
+```java
+.window(TumblingEventTimeWindows.of(Time.seconds(5)))  
+.allowedLateness(Time.seconds(3))
+```
+> 不会延迟窗口计算时间，只会延迟窗口关闭时间，只能运用在 eventtime 上。
+
+**使用侧输出流接收迟到的数据**：
+
+```java
+package com.atguigu.watermark;  
+  
+import com.atguigu.bean.WaterSensor;  
+import com.atguigu.functions.WaterSensorMapFunction;  
+import org.apache.commons.lang3.time.DateFormatUtils;  
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;  
+import org.apache.flink.api.common.typeinfo.Types;  
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;  
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;  
+import org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction;  
+import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;  
+import org.apache.flink.streaming.api.windowing.time.Time;  
+import org.apache.flink.streaming.api.windowing.windows.TimeWindow;  
+import org.apache.flink.util.Collector;  
+import org.apache.flink.util.OutputTag;  
+  
+import java.time.Duration;  
+  
+public class WatermarkLateDemo {  
+    public static void main(String[] args) throws Exception {  
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();  
+        env.setParallelism(1);  
+  
+  
+        SingleOutputStreamOperator<WaterSensor> sensorDS = env  
+                .socketTextStream("hadoop102", 7777)  
+                .map(new WaterSensorMapFunction());  
+  
+        WatermarkStrategy<WaterSensor> watermarkStrategy = WatermarkStrategy  
+                .<WaterSensor>forBoundedOutOfOrderness(Duration.ofSeconds(3))  
+                .withTimestampAssigner((element, recordTimestamp) -> element.getTs() * 1000L);  
+  
+        SingleOutputStreamOperator<WaterSensor> sensorDSwithWatermark = sensorDS.assignTimestampsAndWatermarks(watermarkStrategy);  
+  
+  
+        OutputTag<WaterSensor> lateTag = new OutputTag<>("late-data", Types.POJO(WaterSensor.class));  
+  
+        SingleOutputStreamOperator<String> process = sensorDSwithWatermark.keyBy(sensor -> sensor.getId())  
+                .window(TumblingEventTimeWindows.of(Time.seconds(10)))  
+                .allowedLateness(Time.seconds(2)) // 推迟2s关窗  
+                .sideOutputLateData(lateTag) // 关窗后的迟到数据，放入侧输出流  
+                .process(  
+                        new ProcessWindowFunction<WaterSensor, String, String, TimeWindow>() {  
+  
+                            @Override  
+                            public void process(String s, Context context, Iterable<WaterSensor> elements, Collector<String> out) throws Exception {  
+                                long startTs = context.window().getStart();  
+                                long endTs = context.window().getEnd();  
+                                String windowStart = DateFormatUtils.format(startTs, "yyyy-MM-dd HH:mm:ss.SSS");  
+                                String windowEnd = DateFormatUtils.format(endTs, "yyyy-MM-dd HH:mm:ss.SSS");  
+  
+                                long count = elements.spliterator().estimateSize();  
+  
+                                out.collect("key=" + s + "的窗口[" + windowStart + "," + windowEnd + ")包含" + count + "条数据===>" + elements.toString());  
+                            }  
+                        }  
+                );  
+  
+        process.print();  
+        // 从主流获取侧输出流，打印  
+        process.getSideOutput(lateTag).printToErr("关窗后的迟到数据");  
+  
+        env.execute();  
+    }  
+}
+```
+
+1. 乱序与迟到的区别
+	1. 乱序：数据的顺序乱了，时间小的 比 时间大的 晚来
+	2. 迟到：数据的时间戳 < 当前的 watermark
+2. 窗口延迟关闭：在关窗之前，迟到的数据来了，还能被窗口计算，来一条迟到数据触发一次计算。关窗后，迟到的数据不会被计算， 关窗后的迟到数据，可以放入侧输出流。
+3. 为什么不直接把 watermark等待时间设置长些，而是设置允许迟到时间：
+	1. watermark 等待时间一般不会设太大，否则会影响计算延迟
+	2. 设置窗口延迟关闭，不影响计算延迟，而且可以尽量让结果准确
+4. 设置经验：
+	1. watermark等待时间：设置不算大的，一般秒级
+	2. 设置一定的窗口延迟关闭，只考虑大部分的迟到数据，极端小部分迟到很久的数据不管。
+	3. 极端小部分迟到很久的数据，放到侧输出流，可以针对性做其他处理
+
+## 3.9 基于时间的合流（双流联结join）
+### 3.9.1 窗口联结（Window Join）
+窗口联结在代码中的实现，首先需要调用DataStream的.join()方法来合并两条流，得到一个JoinedStreams；接着通过.where()和.equalTo()方法指定两条流中联结的key；然后通过.window()开窗口，并调用.apply()传入联结窗口函数进行处理计算。
+```java
+stream1.join(stream2)
+        .where(<KeySelector>)
+        .equalTo(<KeySelector>)
+        .window(<WindowAssigner>)
+        .apply(<JoinFunction>)
+```
+上面代码中.where()的参数是键选择器（KeySelector），用来指定第一条流中的key；而.equalTo()传入的KeySelector则指定了第二条流中的key。两者相同的元素，如果在同一窗口中，就可以匹配起来，并通过一个“联结函数”（JoinFunction）进行处理了。
+这里.window()传入的就是窗口分配器，之前讲到的三种时间窗口都可以用在这里：滚动窗口（tumbling window）、滑动窗口（sliding window）和会话窗口（session window）。
+而后面调用.apply()可以看作实现了一个特殊的窗口函数。注意这里只能调用.apply()，没有其他替代的方法。
+传入的JoinFunction也是一个函数类接口，使用时需要实现内部的.join()方法。这个方法有两个参数，分别表示两条流中成对匹配的数据。
+其实仔细观察可以发现，窗口join的调用语法和我们熟悉的SQL中表的join非常相似：
+```sql
+SELECT * FROM table1 t1, table2 t2 WHERE t1.id = t2.id;
+```
+这句SQL中where子句的表达，等价于inner join ... on，所以本身表示的是两张表基于id的“内连接”（inner join）。而Flink中的window join，同样类似于inner join。也就是说，最后处理输出的，只有两条流中数据按key配对成功的那些；如果某个窗口中一条流的数据没有任何另一条流的数据匹配，那么就不会调用JoinFunction的.join()方法，也就没有任何输出了。
+
+**代码示例：**
+```java
+package com.atguigu.watermark;  
+  
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;  
+import org.apache.flink.api.common.functions.JoinFunction;  
+import org.apache.flink.api.java.tuple.Tuple2;  
+import org.apache.flink.api.java.tuple.Tuple3;  
+import org.apache.flink.streaming.api.datastream.DataStream;  
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;  
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;  
+import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;  
+import org.apache.flink.streaming.api.windowing.time.Time;  
+  
+public class WindowJoinDemo {  
+    public static void main(String[] args) throws Exception {  
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();  
+        env.setParallelism(1);  
+  
+        SingleOutputStreamOperator<Tuple2<String, Integer>> ds1 = env  
+                .fromElements(  
+                        Tuple2.of("a", 1),  
+                        Tuple2.of("a", 2),  
+                        Tuple2.of("b", 3),  
+                        Tuple2.of("c", 4)  
+                )  
+                .assignTimestampsAndWatermarks(  
+                        WatermarkStrategy  
+                                .<Tuple2<String, Integer>>forMonotonousTimestamps()  
+                                .withTimestampAssigner((value, ts) -> value.f1 * 1000L)  
+                );  
+  
+  
+        SingleOutputStreamOperator<Tuple3<String, Integer,Integer>> ds2 = env  
+                .fromElements(  
+                        Tuple3.of("a", 1,1),  
+                        Tuple3.of("a", 11,1),  
+                        Tuple3.of("b", 2,1),  
+                        Tuple3.of("b", 12,1),  
+                        Tuple3.of("c", 14,1),  
+                        Tuple3.of("d", 15,1)  
+                )  
+                .assignTimestampsAndWatermarks(  
+                        WatermarkStrategy  
+                                .<Tuple3<String, Integer,Integer>>forMonotonousTimestamps()  
+                                .withTimestampAssigner((value, ts) -> value.f1 * 1000L)  
+                );  
+  
+        // TODO window join  
+        // 1. 落在同一个时间窗口范围内才能匹配  
+        // 2. 根据keyby的key，来进行匹配关联  
+        // 3. 只能拿到匹配上的数据，类似有固定时间范围的inner join  
+        DataStream<String> join = ds1.join(ds2)  
+                .where(r1 -> r1.f0)  // ds1的keyby  
+                .equalTo(r2 -> r2.f0) // ds2的keyby  
+                .window(TumblingEventTimeWindows.of(Time.seconds(10)))  
+                .apply(new JoinFunction<Tuple2<String, Integer>, Tuple3<String, Integer, Integer>, String>() {  
+                    /**  
+                     * 关联上的数据，调用join方法  
+                     * @param first  ds1的数据  
+                     * @param second ds2的数据  
+                     * @return  
+                     * @throws Exception  
+                     */  
+                    @Override  
+                    public String join(Tuple2<String, Integer> first, Tuple3<String, Integer, Integer> second) throws Exception {  
+                        return first + "<----->" + second;  
+                    }  
+                });  
+  
+        join.print();  
+        env.execute();  
+    }  
+}
+```
+**输出**：
+```bash
+(a,1)<----->(a,1,1)
+(a,2)<----->(a,1,1)
+(b,3)<----->(b,2,1)
+```
+
+### 3.9.2 间隔联结（Interval Join）
