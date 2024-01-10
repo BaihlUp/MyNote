@@ -1413,8 +1413,8 @@ stream.addSink(new MySinkFunction<String>());
 
 这种方式比较通用，对于任何外部存储系统都有效；不过自定义Sink想要实现状态一致性并不容易，所以一般只在没有其它选择时使用。实际项目中用到的外部连接器Flink官方基本都已实现，而且在不断地扩充，因此自定义的场景并不常见。
 
-## 3.6 Flink 中的窗口
-### 3.6.1 窗口
+# 4 Flink 中的窗口
+## 4.1 窗口
 Flink是一种流式计算引擎，主要是来处理无界数据流的，数据源源不断、无穷无尽。想要更加方便高效地处理无界流，一种方式就是将无限数据切割成有限的“数据块”进行处理，这就是所谓的“窗口”（Window）。
 在Flink中窗口可以把流切割成有限大小的多个“存储桶”（bucket），每个数据都会分发到对应的桶中，当到达窗口结束时间时，就对每个桶中收集的数据进行计算处理。
 ![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20240109091736.png)
@@ -1422,8 +1422,8 @@ Flink是一种流式计算引擎，主要是来处理无界数据流的，数据
 > Flink中窗口并不是静态准备好的，而是动态创建——当有落在这个窗口区间范围的数据达到时，才创建对应的窗口。
 
 
-### 3.6.2 窗口分类
-#### 3.6.2.1 按照驱动类型划分
+### 4.2 窗口分类
+### 4.2.1 按照驱动类型划分
 - 时间窗口（Time Window）
 时间窗口以时间点来定义窗口的开始和结束，所以截取出的就是某一段时间段的数据，到达结束时间时，窗口不再收集数据，触发计算输出结果，并将窗口关闭销毁。
 ```java
@@ -1515,7 +1515,7 @@ stream.keyBy(...)
 ```
 需要注意使用全局窗口，必须自行定义触发器才能实现窗口计算，否则起不到任何作用。
 
-### 3.6.3 窗口API
+## 4.3 窗口API
 1. 按键分区窗口（Keyed Windows）
 
 经过按键分区keyBy操作后，数据流会按照key被分为多条逻辑流（logical streams），这就是KeyedStream。基于KeyedStream进行窗口操作时，窗口计算会在多个并行子任务上同时执行。相同key的数据会被发送到同一个并行子任务，而窗口操作会基于每个key进行单独的处理。所以可以认为，每个key上都定义了一组窗口，各自独立地进行统计计算。
@@ -1627,11 +1627,11 @@ public class TimeWindowDemo {
 }
 ```
 
-### 3.6.4 窗口函数
+## 4.4 窗口函数
 以上关于窗口的API是为了定义窗口分配器，知道了数据属于哪个窗口，可以将数据收集起来，至于收集起来到底要做什么，必须再接上一个定义窗口如何进行计算的操作，这就是“窗口函数”（window functions）。
 ![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20240109112005.png)
 窗口函数定义了要对窗口中收集的数据做的计算操作，根据处理的方式可以分为两类：增量聚合函数和全窗口函数。
-#### 3.6.4.1 增量聚合函数（ReduceFunction/AggregateFunction）
+### 4.4.1 增量聚合函数（ReduceFunction/AggregateFunction）
 
 1. ReduceFunction
 
@@ -1791,7 +1791,7 @@ public class WindowAggregateDemo {
 ```
 以上聚合逻辑计算后，返回类型与输入类型不同。
 
-#### 3.6.4.2 全窗口函数（WindowFunction/ProcessWindowFunction）
+### 4.4.2 全窗口函数（WindowFunction/ProcessWindowFunction）
 有些场景下，我们要做的计算必须基于全部的数据才有效，这时做增量聚合就没什么意义了；另外，输出的结果有可能要包含上下文中的一些信息（比如窗口的起始时间），这是增量聚合函数做不到的。
 
 所以，我们还需要有更丰富的窗口计算方式。窗口操作中的另一大类就是全窗口函数。与增量聚合函数不同，全窗口函数需要先收集窗口中的数据，并在内部缓存起来，等到窗口要输出结果的时候再取出数据进行计算。
@@ -1900,7 +1900,7 @@ key=s1的窗口[2024-01-09 11:37:50.000,2024-01-09 11:38:00.000)包含1条数据
 ```
 全窗口函数不是来一条数据就计算一条，是窗口时间到达后，再计算输出。
 
-#### 3.6.4.3 增量聚合和全窗口函数结合
+### 4.4.3 增量聚合和全窗口函数结合
 通过结合可以兼具两者的优点，调用WindowedStream的.reduce()和.aggregate()方法时，只是简单地直接传入了一个ReduceFunction或AggregateFunction进行增量聚合。除此之外，其实还可以传入第二个参数：一个全窗口函数，可以是WindowFunction或者ProcessWindowFunction。
 ```java
 // ReduceFunction与WindowFunction结合
@@ -2026,12 +2026,12 @@ public class WindowAggregateAndProcessDemo {
 }
 ```
 
-### 3.6.5 其他 API
+## 4.5 其他 API
 
 对于一个窗口算子而言，窗口分配器和窗口函数是必不可少的。除此之外，Flink还提供了其他一些可选的API，让我们可以更加灵活地控制窗口行为。
 
 触发器、移除器： 现成的几个窗口，都有默认的实现，一般不需要自定义
-#### 3.6.5.1 触发器（Trigger）
+#### 4.5.1 触发器（Trigger）
 
 触发器主要是用来控制窗口什么时候触发计算。所谓的“触发计算”，本质上就是执行窗口函数，所以可以认为是计算得到结果并输出的过程。
 基于WindowedStream调用.trigger()方法，就可以传入一个自定义的窗口触发器（Trigger）。
@@ -2040,7 +2040,7 @@ stream.keyBy(...)
        .window(...)
        .trigger(new MyTrigger())
 ```
-#### 3.6.5.2 移除器（Evictor）
+### 4.5.2 移除器（Evictor）
 移除器主要用来定义移除某些数据的逻辑。基于WindowedStream调用.evictor()方法，就可以传入一个自定义的移除器（Evictor）。Evictor是一个接口，不同的窗口类型都有各自预实现的移除器。
 ```java
 stream.keyBy(...)
@@ -2048,18 +2048,19 @@ stream.keyBy(...)
        .evictor(new MyEvictor())
 ```
 
-## 3.7 时间语义
+# 5 水位线（Watermark）
+## 5.1 时间语义
 
 事件时间：数据产生的时间；处理时间：数据真正被处理的时刻。
 在实际应用中，事件时间语义会更为常见。一般情况下，业务日志数据中都会记录数据生成的时间戳（timestamp），它就可以作为事件时间的判断基础。
 > 早期版本默认的时间语义是处理时间；而考虑到事件时间在实际应用中更为广泛，从Flink1.12版本开始，Flink已经将事件时间作为默认的时间语义了。
 
-## 3.8 水位线（Watermark）
-### 3.8.1 事件事件和窗口
+## 5.2 水位线（Watermark）
+### 5.2.1 事件时间和窗口
 在窗口的处理过程中，可以基于数据的时间戳，自定义一个“逻辑时钟”，这个时钟的时间不会自动流逝，他的时间进展，就是靠着新到数据的时间戳来推动。
 这样好处在于，计算的过程可以完全不依赖处理时间（系统时间），不论什么时候进行统计处理，得到的结果都是正确的。而一般实时流处理的场景中，事件时间可以基本与处理时间保持同步，只是略微有点延迟。
 
-### 3.8.2 什么是水位线
+### 5.2.2 什么是水位线
 在Flink中，用来衡量事件时间进展的标记，就被称作“水位线”（Watermark）。
 水位线可以看作一条特殊的数据记录，它是插入到数据流中的一个标记点，主要内容就是一个时间戳，用来指示当前的事件时间。而它插入流中的位置，就应该是在某个数据到来之后；这样就可以从这个数据中提取时间戳，作为当前水位线的时间戳了。
 
@@ -2089,14 +2090,14 @@ stream.keyBy(...)
 6. 一个水位线Watermark（t），表示在当前流中事件时间已经达到了时间戳t，这代表t之前的所有数据都到齐了，之后流中不会出现时间戳 t' <= t 的数据
 > 水位线是Flink流处理中保证结果正确性的核心机制，它往往会跟窗口一起配合，完成对乱序数据的正确处理。
 
-### 3.8.3 水位线和窗口的工作原理
+### 5.2.3 水位线和窗口的工作原理
 
 在Flink中，窗口可以理解为一个“桶”，窗口可以把流切割成有限大小的多个“存储桶”（bucket），每个数据都会分发到对应的桶中，当到达窗口结束时间时，就对每个桶中收集的数据进行计算处理。
 ![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20240109150018.png)
 
 > Flink中窗口并不是静态准备好的，而是动态创建——当有落在这个窗口区间范围的数据达到时，才创建对应的窗口。另外，这里我们认为到达窗口结束时间时，窗口就触发计算并关闭，事实上“触发计算”和“窗口关闭”两个行为也可以分开。
 
-### 3.8.4 生成水位线
+### 5.2.4 生成水位线
 完美的水位线是“绝对正确”的，也就是一个水位线一旦出现，就表示这个时间之前的数据已经全部到齐、之后再也不会出现了。不过如果要保证绝对正确，就必须等足够长的时间，这会带来更高的延迟。
 如果希望处理得更快、实时性更强，那么可以将水位线延迟设得更低一些。这样可以遗漏延迟到达的数据。
 所以水位线是流处理中对低延迟和结果正确行的一个权衡机制，而且可以由程序控制。
@@ -2186,7 +2187,7 @@ public class WatermarkMonoDemo {
 2. 有序流：wartermark = 当前最大事件时间 - 1ms
 3. 乱序流：wartermark = 当前最大事件时间 - 延迟时间 - 1ms
 
-### 3.8.5 自定义水位线生成器
+### 5.2.5 自定义水位线生成器
 
 - 周期性和断点式水位生成器
 
@@ -2363,7 +2364,7 @@ env.fromSource(kafkaSource, WatermarkStrategy.forBoundedOutOfOrderness(Duration.
 )
 ```
 
-### 3.8.6 水位线的传递
+### 5.2.6 水位线的传递
 在流处理中，上游任务处理完水位线、时钟改变之后，要把当前的水位线再次发出，广播给所有的下游子任务。而当一个任务接收到多个上游并行任务传递来的水位线时，应该以最小的那个作为当前任务的事件时钟。
 
 水位线在上下游任务之间的传递，非常巧妙地避免了分布式系统中没有统一时钟的问题，每个任务都以“处理完之前所有数据”为标准来确定自己的时钟。
@@ -2447,7 +2448,7 @@ public class WatermarkIdlenessDemo {
 }
 ```
 
-### 3.8.7 迟到数据的处理
+### 5.2.7 迟到数据的处理
 - 乱序等待时间：
 在水印（watermark）产生时，设置一个乱序容忍度，推迟系统时间的推进，保证窗口计算被延迟执行，为乱序的数据争取更多的时间进入窗口。
 ```java
@@ -2546,8 +2547,8 @@ public class WatermarkLateDemo {
 	2. 设置一定的窗口延迟关闭，只考虑大部分的迟到数据，极端小部分迟到很久的数据不管。
 	3. 极端小部分迟到很久的数据，放到侧输出流，可以针对性做其他处理
 
-## 3.9 基于时间的合流（双流联结join）
-### 3.9.1 窗口联结（Window Join）
+## 5.3 基于时间的合流（双流联结join）
+### 5.3.1 窗口联结（Window Join）
 窗口联结在代码中的实现，首先需要调用DataStream的.join()方法来合并两条流，得到一个JoinedStreams；接着通过.where()和.equalTo()方法指定两条流中联结的key；然后通过.window()开窗口，并调用.apply()传入联结窗口函数进行处理计算。
 ```java
 stream1.join(stream2)
@@ -2648,4 +2649,169 @@ public class WindowJoinDemo {
 (b,3)<----->(b,2,1)
 ```
 
-### 3.9.2 间隔联结（Interval Join）
+### 5.3.2 间隔联结（Interval Join）
+- 原理
+
+间隔联结具体的定义方式是，我们给定两个时间点，分别叫作间隔的“上界”（upperBound）和“下界”（lowerBound）；于是对于一条流（不妨叫作A）中的任意一个数据元素a，就可以开辟一段时间间隔：`[a.timestamp + lowerBound, a.timestamp + upperBound]`,即以a的时间戳为中心，下至下界点、上至上界点的一个闭区间：我们就把这段时间作为可以匹配另一条流数据的“窗口”范围。所以对于另一条流（不妨叫B）中的数据元素b，如果它的时间戳落在了这个区间范围内，a和b就可以成功配对，进而进行计算输出结果。所以匹配的条件为：
+```bash
+a.timestamp + lowerBound <= b.timestamp <= a.timestamp + upperBound
+```
+做间隔联结的两条流A和B，也必须基于相同的key；下界lowerBound应该小于等于上界upperBound，两者都可正可负；间隔联结目前只支持事件时间语义。
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20240110094819.png)
+
+下方的流A去间隔联结上方的流B，所以基于A的每个数据元素，都可以开辟一个间隔区间。我们这里设置下界为-2毫秒，上界为1毫秒。于是对于时间戳为2的A中元素，它的可匹配区间就是[0, 3],流B中有时间戳为0、1的两个元素落在这个范围内，所以就可以得到匹配数据对（2, 0）和（2, 1）。同样地，A中时间戳为3的元素，可匹配区间为[1, 4]，B中只有时间戳为1的一个数据可以匹配，于是得到匹配数据对（3, 1）。
+> 间隔联结同样是一种内连接（inner join）。与窗口联结不同的是，interval join做匹配的时间段是基于流中数据的，所以并不确定；而且流B中的数据可以不只在一个区间内被匹配。
+
+- 示例
+
+间隔联结在代码中，是基于KeyedStream的联结（join）操作。DataStream在keyBy得到KeyedStream之后，可以调用.intervalJoin()来合并两条流，传入的参数同样是一个KeyedStream，两者的key类型应该一致；得到的是一个IntervalJoin类型。后续的操作同样是完全固定的：先通过.between()方法指定间隔的上下界，再调用.process()方法，定义对匹配数据对的处理操作。调用.process()需要传入一个处理函数，这是处理函数家族的最后一员：“处理联结函数”ProcessJoinFunction。
+```java
+stream1
+    .keyBy(<KeySelector>)
+    .intervalJoin(stream2.keyBy(<KeySelector>))
+    .between(Time.milliseconds(-2), Time.milliseconds(1))
+    .process (new ProcessJoinFunction<Integer, Integer, String(){
+
+        @Override
+        public void processElement(Integer left, Integer right, Context ctx, Collector<String> out) {
+            out.collect(left + "," + right);
+        }
+    });
+```
+抽象类ProcessJoinFunction就像是ProcessFunction和JoinFunction的结合，内部同样有一个抽象方法.processElement()。与其他处理函数不同的是，它多了一个参数，这自然是因为有来自两条流的数据。参数中left指的就是第一条流中的数据，right则是第二条流中与它匹配的数据。每当检测到一组匹配，就会调用这里的.processElement()方法，经处理转换之后输出结果。
+> 应用案例：在电商网站中，某些用户行为往往会有短时间内的强关联。我们这里举一个例子，我们有两条流，一条是下订单的流，一条是浏览数据的流。我们可以针对同一个用户，来做这样一个联结。也就是使用一个用户的下订单的事件和这个用户的最近十分钟的浏览数据进行一个联结查询。
+
+**代码案例：** 两条流，进行 IntervalJoin，输出 迟到流数据和联结数据
+```java
+package com.atguigu.watermark;  
+  
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;  
+import org.apache.flink.api.common.functions.MapFunction;  
+import org.apache.flink.api.common.typeinfo.Types;  
+import org.apache.flink.api.java.tuple.Tuple;  
+import org.apache.flink.api.java.tuple.Tuple2;  
+import org.apache.flink.api.java.tuple.Tuple3;  
+import org.apache.flink.streaming.api.datastream.KeyedStream;  
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;  
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;  
+import org.apache.flink.streaming.api.functions.co.ProcessJoinFunction;  
+import org.apache.flink.streaming.api.windowing.time.Time;  
+import org.apache.flink.util.Collector;  
+import org.apache.flink.util.OutputTag;  
+  
+import java.time.Duration;  
+  
+public class IntervalJoinWithLateDemo {  
+    public static void main(String[] args) throws Exception {  
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();  
+        env.setParallelism(1);  
+  
+        SingleOutputStreamOperator<Tuple2<String, Integer>> ds1 = env  
+                .socketTextStream("10.211.55.4", 7777)  
+                .map(new MapFunction<String, Tuple2<String, Integer>>() {  
+                    @Override  
+                    public Tuple2<String, Integer> map(String value) throws Exception {  
+                        String[] datas = value.split(",");  
+                        return Tuple2.of(datas[0], Integer.valueOf(datas[1]));  
+                    }  
+                })  
+                .assignTimestampsAndWatermarks(  
+                        WatermarkStrategy  
+                                .<Tuple2<String, Integer>>forBoundedOutOfOrderness(Duration.ofSeconds(3))  
+                                .withTimestampAssigner((value, ts) -> value.f1 * 1000L)  
+                );  
+  
+        SingleOutputStreamOperator<Tuple3<String, Integer, Integer>> ds2 = env  
+                .socketTextStream("10.211.55.4", 8888)  
+                .map(new MapFunction<String, Tuple3<String, Integer, Integer>>() {  
+                    @Override  
+                    public Tuple3<String, Integer, Integer> map(String value) throws Exception {  
+                        String[] datas = value.split(",");  
+                        return Tuple3.of(datas[0], Integer.valueOf(datas[1]), Integer.valueOf(datas[2]));  
+                    }  
+                })  
+                .assignTimestampsAndWatermarks(  
+                        WatermarkStrategy  
+                                .<Tuple3<String, Integer, Integer>>forBoundedOutOfOrderness(Duration.ofSeconds(3))  
+                                .withTimestampAssigner((value, ts) -> value.f1 * 1000L)  
+                );  
+  
+        /**  
+         * TODO Interval join  
+         * 1、只支持事件时间  
+         * 2、指定上界、下界的偏移，负号代表时间往前，正号代表时间往后  
+         * 3、process中，只能处理 join上的数据  
+         * 4、两条流关联后的watermark，以两条流中最小的为准  
+         * 5、如果 当前数据的事件时间 < 当前的watermark，就是迟到数据， 主流的process不处理  
+         *  => between后，可以指定将 左流 或 右流 的迟到数据 放入侧输出流  
+         */  
+  
+        //1. 分别做keyby，key其实就是关联条件  
+        KeyedStream<Tuple2<String, Integer>, String> ks1 = ds1.keyBy(r1 -> r1.f0);  
+        KeyedStream<Tuple3<String, Integer, Integer>, String> ks2 = ds2.keyBy(r2 -> r2.f0);  
+  
+        //2. 调用 interval join        OutputTag<Tuple2<String, Integer>> ks1LateTag = new OutputTag<>("ks1-late", Types.TUPLE(Types.STRING, Types.INT));  
+        OutputTag<Tuple3<String, Integer, Integer>> ks2LateTag = new OutputTag<>("ks2-late", Types.TUPLE(Types.STRING, Types.INT, Types.INT));  
+          
+        SingleOutputStreamOperator<String> process = ks1.intervalJoin(ks2)  
+                .between(Time.seconds(-2), Time.seconds(2))  
+                .sideOutputLeftLateData(ks1LateTag)  // 将 ks1的迟到数据，放入侧输出流  
+                .sideOutputRightLateData(ks2LateTag) // 将 ks2的迟到数据，放入侧输出流  
+                .process(  
+                        new ProcessJoinFunction<Tuple2<String, Integer>, Tuple3<String, Integer, Integer>, String>() {  
+                            /**  
+                             * 两条流的数据匹配上，才会调用这个方法  
+                             * @param left  ks1的数据  
+                             * @param right ks2的数据  
+                             * @param ctx   上下文  
+                             * @param out   采集器  
+                             * @throws Exception  
+                             */  
+                            @Override  
+                            public void processElement(Tuple2<String, Integer> left, Tuple3<String, Integer, Integer> right, Context ctx, Collector<String> out) throws Exception {  
+                                // 进入这个方法，是关联上的数据  
+                                out.collect(left + "<------>" + right);  
+                            }  
+                        });  
+  
+        process.print("主流");  
+        process.getSideOutput(ks1LateTag).printToErr("ks1迟到数据");  
+        process.getSideOutput(ks2LateTag).printToErr("ks2迟到数据");  
+  
+        env.execute();  
+    }  
+}
+```
+**输入如下：**
+stream1：
+```bash
+s1,2  
+s1,10  # watermark 到 7
+s1,3   
+s1,4  # 迟到数据
+```
+stream2：
+```bash
+s1,2,2
+s1,2,3   
+s1,10,22 # watermark 到 7
+```
+**输出：**
+```bash
+主流> (s1,2)<------>(s1,2,2)
+主流> (s1,2)<------>(s1,2,3)
+主流> (s1,3)<------>(s1,2,2)
+主流> (s1,3)<------>(s1,2,3)
+主流> (s1,10)<------>(s1,10,22)
+ks1迟到数据> (s1,4) # watermark 到 7 后stream1输入，迟到数据
+```
+
+# 6 处理函数
+## 6.1 
+
+# 7 状态管理
+
+
+# 8 容错机制
+
+
