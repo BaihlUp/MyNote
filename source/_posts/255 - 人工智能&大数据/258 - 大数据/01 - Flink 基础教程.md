@@ -2807,10 +2807,377 @@ ks1迟到数据> (s1,4) # watermark 到 7 后stream1输入，迟到数据
 ```
 
 # 6 处理函数
-## 6.1 
+## 6.1 基本处理函数（ProcessFunction）
+### 6.1.1 处理函数的功能和作用
+转换算子，一般只是针对某种具体操作来定义的，能够拿到的信息比较有限。如果我们想要访问事件的时间戳，或者当前的水位线信息，都是完全做不到的。跟时间相关的操作，目前我们只会用窗口来处理。而在很多应用需求中，要求我们对时间有更精细的控制，需要能够获取水位线，甚至要“把控时间”、定义什么时候做什么事，这就不是基本的时间窗口能够实现的了。
+处理函数提供了一个“定时服务”（TimerService），我们可以通过它访问流中的事件（event）、时间戳（timestamp）、水位线（watermark），甚至可以注册“定时事件”。而且处理函数继承了AbstractRichFunction抽象类，所以拥有富函数类的所有特性，同样可以访问状态（state）和其他运行时信息。此外，处理函数还可以直接将数据输出到侧输出流（side output）中。所以，处理函数是最为灵活的处理方法，可以实现各种自定义的业务逻辑。
+处理函数的使用与基本的转换操作类似，只需要直接基于DataStream调用.process()方法就可以了。方法需要传入一个ProcessFunction作为参数，用来定义处理逻辑。
+```java
+stream.process(new MyProcessFunction())
+```
+
+这里ProcessFunction不是接口，而是一个抽象类，继承了AbstractRichFunction；MyProcessFunction是它的一个具体实现。所以所有的处理函数，都是富函数（RichFunction），富函数可以调用的东西这里同样都可以调用。
+
+### 6.1.2 ProcessFunction介绍
+抽象类ProcessFunction继承了AbstractRichFunction，有两个泛型类型参数：I表示Input，也就是输入的数据类型；O表示Output，也就是处理完成之后输出的数据类型。
+内部单独定义了两个方法：一个是必须要实现的抽象方法.processElement()；另一个是非抽象方法.onTimer()。
+```java
+public abstract class ProcessFunction<I, O> extends AbstractRichFunction {
+    ...
+    public abstract void processElement(I value, Context ctx, Collector<O> out) throws Exception;
+    public void onTimer(long timestamp, OnTimerContext ctx, Collector<O> out) throws Exception {}
+    ...
+}
+```
+1. **抽象方法.processElement()**
+
+用于“处理元素”，定义了处理的核心逻辑。这个方法对于流中的每个元素都会调用一次，参数包括三个：输入数据值value，上下文ctx，以及“收集器”（Collector）out。方法没有返回值，处理之后的输出数据是通过收集器out来定义的。
+- value：当前流中的输入元素，也就是正在处理的数据，类型与流中数据类型一致。
+- ctx：类型是ProcessFunction中定义的内部抽象类Context，表示当前运行的上下文，可以获取到当前的时间戳，并提供了用于查询时间和注册定时器的“定时服务”（TimerService），以及可以将数据发送到“侧输出流”（side output）的方法.output()。
+- out：“收集器”（类型为Collector），用于返回输出数据。使用方式与flatMap算子中的收集器完全一样，直接调用out.collect()方法就可以向下游发出一个数据。这个方法可以多次调用，也可以不调用。
+
+2. **非抽象方法.onTimer()**
+
+这个方法只有在注册好的定时器触发的时候才会调用，而定时器是通过“定时服务”TimerService来注册的。打个比方，注册定时器（timer）就是设了一个闹钟，到了设定时间就会响；而.onTimer()中定义的，就是闹钟响的时候要做的事。所以它本质上是一个基于时间的“回调”（callback）方法，通过时间的进展来触发；在事件时间语义下就是由水位线（watermark）来触发了。
+定时方法.onTimer()也有三个参数：时间戳（timestamp），上下文（ctx），以及收集器（out）。这里的timestamp是指设定好的触发时间，事件时间语义下当然就是水位线了。另外这里同样有上下文和收集器，所以也可以调用定时服务（TimerService），以及任意输出处理之后的数据。
+
+既然有.onTimer()方法做定时触发，我们用ProcessFunction也可以自定义数据按照时间分组、定时触发计算输出结果；这其实就实现了窗口（window）的功能。所以说ProcessFunction其实可以实现一切功能。
+> 在Flink中，只有“按键分区流”KeyedStream才支持设置定时器的操作。
+
+### 6.1.3 处理函数的分类
+Flink提供了8个不同的处理函数：
+（1） ProcessFunction
+最基本的处理函数，基于DataStream直接调用.process()时作为参数传入。
+
+（2）KeyedProcessFunction
+
+对流按键分区后的处理函数，基于KeyedStream调用.process()时作为参数传入。要想使用定时器，比如基于KeyedStream。
+
+（3）ProcessWindowFunction
+
+开窗之后的处理函数，也是全窗口函数的代表。基于WindowedStream调用.process()时作为参数传入。
+
+（4）ProcessAllWindowFunction
+
+同样是开窗之后的处理函数，基于AllWindowedStream调用.process()时作为参数传入。
+
+（5）CoProcessFunction
+
+合并（connect）两条流之后的处理函数，基于ConnectedStreams调用.process()时作为参数传入。关于流的连接合并操作，我们会在后续章节详细介绍。
+
+（6）ProcessJoinFunction
+
+间隔连接（interval join）两条流之后的处理函数，基于IntervalJoined调用.process()时作为参数传入。
+
+（7）BroadcastProcessFunction
+
+广播连接流处理函数，基于BroadcastConnectedStream调用.process()时作为参数传入。这里的“广播连接流”BroadcastConnectedStream，是一个未keyBy的普通DataStream与一个广播流（BroadcastStream）做连接（conncet）之后的产物。关于广播流的相关操作，我们会在后续章节详细介绍。
+
+（8）KeyedBroadcastProcessFunction
+
+按键分区的广播连接流处理函数，同样是基于BroadcastConnectedStream调用.process()时作为参数传入。与BroadcastProcessFunction不同的是，这时的广播连接流，是一个KeyedStream与广播流（BroadcastStream）做连接之后的产物。
+
+
+## 6.2 按键分区处理函数
+### 6.2.1 定时器（Timer）和定时服务（TimerService）
+在.onTimer()方法中可以实现定时处理的逻辑，而它能触发的前提，就是之前曾经注册过定时器、并且现在已经到了触发时间。注册定时器的功能，是通过上下文中提供的“定时服务”来实现的。
+
+定时服务与当前运行的环境有关。前面已经介绍过，ProcessFunction的上下文（Context）中提供了.timerService()方法，可以直接返回一个TimerService对象。TimerService是Flink关于时间和定时器的基础服务接口，包含以下六个方法：
+```java
+// 获取当前的处理时间
+long currentProcessingTime();
+
+// 获取当前的水位线（事件时间）
+long currentWatermark();
+
+// 注册处理时间定时器，当处理时间超过time时触发
+void registerProcessingTimeTimer(long time);
+
+// 注册事件时间定时器，当水位线超过time时触发
+void registerEventTimeTimer(long time);
+
+// 删除触发时间为time的处理时间定时器
+void deleteProcessingTimeTimer(long time);
+
+// 删除触发时间为time的处理时间定时器
+void deleteEventTimeTimer(long time);
+```
+分为两大类：基于处理时间和基于事件时间
+对应操作有三个：获取当前时间、注册定时器、删除定时器
+>尽管处理函数中都可以直接访问TimerService，不过只有基于KeyedStream的处理函数，才能去调用注册和删除定时器的方法；未作按键分区的DataStream不支持定时器操作，只能获取当前时间。
+
+TimerService会以键（key）和时间戳为标准，对定时器进行去重；也就是说对于每个key和时间戳，最多只有一个定时器，如果注册了多次，onTimer()方法也将只被调用一次。
+
+### 6.2.2 KeyedProcessFunction案例
+
+```java
+package com.atguigu.process;  
+  
+import com.atguigu.bean.WaterSensor;  
+import com.atguigu.functions.WaterSensorMapFunction;  
+import org.apache.commons.lang3.time.DateFormatUtils;  
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;  
+import org.apache.flink.streaming.api.TimerService;  
+import org.apache.flink.streaming.api.datastream.KeyedStream;  
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;  
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;  
+import org.apache.flink.streaming.api.functions.KeyedProcessFunction;  
+import org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction;  
+import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;  
+import org.apache.flink.streaming.api.windowing.time.Time;  
+import org.apache.flink.streaming.api.windowing.windows.TimeWindow;  
+import org.apache.flink.util.Collector;  
+  
+import java.time.Duration;  
+  
+public class KeyedProcessTimerDemo {  
+    public static void main(String[] args) throws Exception {  
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();  
+        env.setParallelism(1);  
+  
+  
+        SingleOutputStreamOperator<WaterSensor> sensorDS = env  
+                .socketTextStream("hadoop102", 7777)  
+                .map(new WaterSensorMapFunction())  
+                .assignTimestampsAndWatermarks(  
+                        WatermarkStrategy  
+                                .<WaterSensor>forBoundedOutOfOrderness(Duration.ofSeconds(3))  
+                                .withTimestampAssigner((element, ts) -> element.getTs() * 1000L)  
+                );  
+  
+  
+        KeyedStream<WaterSensor, String> sensorKS = sensorDS.keyBy(sensor -> sensor.getId());  
+  
+        // TODO Process:keyed  
+        SingleOutputStreamOperator<String> process = sensorKS.process(  
+                new KeyedProcessFunction<String, WaterSensor, String>() {  
+                    /**  
+                     * 来一条数据调用一次  
+                     * @param value  
+                     * @param ctx  
+                     * @param out  
+                     * @throws Exception  
+                     */  
+                    @Override  
+                    public void processElement(WaterSensor value, Context ctx, Collector<String> out) throws Exception {  
+                        //获取当前数据的key  
+                        String currentKey = ctx.getCurrentKey();  
+  
+                        // TODO 1.定时器注册  
+                        TimerService timerService = ctx.timerService();  
+  
+                        // 1、事件时间的案例  
+                        Long currentEventTime = ctx.timestamp(); // 数据中提取出来的事件时间  
+                        timerService.registerEventTimeTimer(5000L);  
+                        System.out.println("当前key=" + currentKey + ",当前时间=" + currentEventTime + ",注册了一个5s的定时器");  
+  
+                        // 2、处理时间的案例  
+//                        long currentTs = timerService.currentProcessingTime();  
+//                        timerService.registerProcessingTimeTimer(currentTs + 5000L);  
+//                        System.out.println("当前key=" + currentKey + ",当前时间=" + currentTs + ",注册了一个5s后的定时器");  
+  
+  
+                        // 3、获取 process的 当前watermark  
+//                        long currentWatermark = timerService.currentWatermark();  
+//                        System.out.println("当前数据=" + value + ",当前watermark=" + currentWatermark);  
+  
+  
+  
+                        // 注册定时器： 处理时间、事件时间  
+//                        timerService.registerProcessingTimeTimer();  
+//                        timerService.registerEventTimeTimer();  
+                        // 删除定时器： 处理时间、事件时间  
+//                        timerService.deleteEventTimeTimer();  
+//                        timerService.deleteProcessingTimeTimer();  
+  
+                        // 获取当前时间进展： 处理时间-当前系统时间，  事件时间-当前watermark  
+//                        long currentTs = timerService.currentProcessingTime();  
+//                        long wm = timerService.currentWatermark();  
+                    }  
+  
+  
+                    /**  
+                     * TODO 2.时间进展到定时器注册的时间，调用该方法  
+                     * @param timestamp 当前时间进展，就是定时器被触发时的时间  
+                     * @param ctx       上下文  
+                     * @param out       采集器  
+                     * @throws Exception  
+                     */  
+                    @Override  
+                    public void onTimer(long timestamp, OnTimerContext ctx, Collector<String> out) throws Exception {  
+                        super.onTimer(timestamp, ctx, out);  
+                        String currentKey = ctx.getCurrentKey();  
+  
+                        System.out.println("key=" + currentKey + "现在时间是" + timestamp + "定时器触发");  
+                    }  
+                }  
+        );  
+  
+        process.print();  
+        env.execute();  
+    }  
+}
+```
+
+1. 在process中获取当前watermark，显示的是上一次的watermark
+2. 事件时间定时器，通过watermark来触发的
+## 6.3 窗口处理函数
+
+
+## 6.4 应用案例--TopN
+
+
 
 # 7 状态管理
+## 7.1 Flink中的状态
+### 7.1.1 概述
+算子任务可以分为无状态和有状态两种情况。
+无状态的算子任务只需要观察每个独立事件，根据当前输入的数据直接转换输出结果。如map、filter、flatMap，计算时不依赖其他数据，都属于无状态的算子。
 
+有状态算子任务，则除当前数据之外，还需要一些其他数据来得到计算结果，“其他数据”就是所谓的状态（state），如聚合算子、窗口算子都属于有状态算子。
+有状态算子的一般处理流程：
+1. 算子任务接收到上游发来的数据
+2. 获取当前状态
+3. 根据业务逻辑进行计算，更新状态
+4. 得到计算结果，输出发送到下游的任务
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20240110153754.png)
+
+### 7.1.2 状态的分类
+1. 托管状态（Managed State）和原始状态（Raw State）
+
+Flink的状态有两种：托管状态（Managed State）和原始状态（Raw State）。托管状态就是由Flink统一管理的，状态的存储访问、故障恢复和重组等一系列问题都由Flink实现，我们只要调接口就可以；而原始状态则是自定义的，相当于就是开辟了一块内存，需要我们自己管理，实现状态的序列化和故障恢复。
+
+2. 算子状态（Operator State）和按键分区状态（Keyed State）
+
+一个算子任务会按照并行度分为多个并行子任务执行，而不同的子任务会占据不同的任务槽（task slot）。由于不同的slot在计算资源上是物理隔离的，所以Flink能管理的状态在并行任务间是无法共享的，每个状态只能针对当前子任务的实例有效。
+
+而很多有状态的操作（比如聚合、窗口）都是要先做keyBy进行按键分区的。按键分区之后，任务所进行的所有计算都应该只针对当前key有效，所以状态也应该按照key彼此隔离。在这种情况下，状态的访问方式又会有所不同。
+
+状态作用范围限定为当前的算子任务实例，也就是只对当前并行子任务实例有效。这就意味着对于一个并行子任务，占据了一个“分区”，它所处理的所有数据都会访问到相同的状态，状态对于同一任务而言是共享的。
+
+状态是根据输入流中定义的键（key）来维护和访问的，所以只能定义在按键分区流（KeyedStream）中，也就keyBy之后才可以使用。
+
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20240110155542.png)
+
+按键分区状态应用非常广泛。聚合算子必须在keyBy之后才能使用，就是因为聚合的结果是以Keyed State的形式保存的。
+
+也可以通过富函数类（Rich Function）来自定义Keyed State，所以只要提供了富函数类接口的算子，也都可以使用Keyed State。所以即使是map、filter这样无状态的基本转换算子，我们也可以通过富函数类给它们“追加”Keyed State。比如RichMapFunction、RichFilterFunction。在富函数中，我们可以调用.getRuntimeContext()获取当前的运行时上下文（RuntimeContext），进而获取到访问状态的句柄；这种富函数中自定义的状态也是Keyed State。从这个角度讲，Flink中所有的算子都可以是有状态的。
+
+无论是Keyed State还是Operator State，它们都是在本地实例上维护的，也就是说每个并行子任务维护着对应的状态，算子的子任务之间状态不共享。
+
+## 7.2 按键分区状态（Keyed State）
+### 7.2.1 值状态（ValueState）
+状态中只保存一个“值”（value）。`ValueState<T>`本身是一个接口，源码中定义如下：
+```java
+public interface ValueState<T> extends State {
+    T value() throws IOException;
+    void update(T value) throws IOException;
+}
+```
+这里的T是泛型，表示状态的数据内容可以是任何具体的数据类型。如果想要保存一个长整型值作为状态，那么类型就是`ValueState<Long>`。
+- T value()：获取当前状态的值；
+- update(T value)：对状态进行更新，传入的参数value就是要覆写的状态值。
+
+在具体使用时，为了让运行时上下文清楚到底是哪个状态，我们还需要创建一个“状态描述器”（StateDescriptor）来提供状态的基本信息。例如源码中，ValueState的状态描述器构造方法如下：
+
+```java
+public ValueStateDescriptor(String name, Class<T> typeClass) {
+    super(name, typeClass, null);
+}
+```
+
+**代码案例：** 检测每种传感器的水位值，如果连续的两个水位值超过10，就输出报警
+```java
+package com.atguigu.state;  
+  
+import com.atguigu.bean.WaterSensor;  
+import com.atguigu.functions.WaterSensorMapFunction;  
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;  
+import org.apache.flink.api.common.state.ValueState;  
+import org.apache.flink.api.common.state.ValueStateDescriptor;  
+import org.apache.flink.api.common.typeinfo.Types;  
+import org.apache.flink.configuration.Configuration;  
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;  
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;  
+import org.apache.flink.streaming.api.functions.KeyedProcessFunction;  
+import org.apache.flink.util.Collector;  
+  
+import java.time.Duration;  
+  
+/**  
+ * TODO 检测每种传感器的水位值，如果连续的两个水位值超过10，就输出报警  
+ *  
+ * @author cjp  
+ * @version 1.0  
+ */public class KeyedValueStateDemo {  
+    public static void main(String[] args) throws Exception {  
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();  
+        env.setParallelism(1);  
+  
+        SingleOutputStreamOperator<WaterSensor> sensorDS = env  
+                .socketTextStream("hadoop102", 7777)  
+                .map(new WaterSensorMapFunction())  
+                .assignTimestampsAndWatermarks(  
+                        WatermarkStrategy  
+                                .<WaterSensor>forBoundedOutOfOrderness(Duration.ofSeconds(3))  
+                                .withTimestampAssigner((element, ts) -> element.getTs() * 1000L)  
+                );  
+  
+        sensorDS.keyBy(r -> r.getId())  
+                .process(  
+                        new KeyedProcessFunction<String, WaterSensor, String>() {  
+  
+                            // TODO 1.定义状态  
+                            ValueState<Integer> lastVcState;  
+  
+                            @Override  
+                            public void open(Configuration parameters) throws Exception {  
+                                super.open(parameters);  
+                                // TODO 2.在open方法中，初始化状态  
+                                // 状态描述器两个参数：第一个参数，起个名字，不重复；第二个参数，存储的类型  
+                                lastVcState = getRuntimeContext().getState(new ValueStateDescriptor<Integer>("lastVcState", Types.INT));  
+                            }  
+  
+                            @Override  
+                            public void processElement(WaterSensor value, Context ctx, Collector<String> out) throws Exception {  
+                                //lastVcState.value();  // 取出 本组 值状态 的数据  
+                                //lastVcState.update(); // 更新 本组 值状态 的数据  
+                                //lastVcState.clear();  // 清除 本组 值状态 的数据  
+  
+                                // 1. 取出上一条数据的水位值(Integer默认值是null，判断)  
+                                int lastVc = lastVcState.value() == null ? 0 : lastVcState.value();  
+                                // 2. 求差值的绝对值，判断是否超过10  
+                                Integer vc = value.getVc();  
+                                if (Math.abs(vc - lastVc) > 10) {  
+                                    out.collect("传感器=" + value.getId() + "==>当前水位值=" + vc + ",与上一条水位值=" + lastVc + ",相差超过10！！！！");  
+                                }  
+                                // 3. 更新状态里的水位值  
+                                lastVcState.update(vc);  
+                            }  
+                        }  
+                )  
+                .print();  
+  
+        env.execute();  
+    }  
+}
+```
+**输入：**
+```bash
+s1,1,1
+s1,20,1
+s1,30,30
+```
+**输出**：
+```bash
+传感器=s1==>当前水位值=30,与上一条水位值=1,相差超过10！！！！
+```
+
+### 7.2.2 其他状态
+1. 列表状态（ListState）
+2. Map状态（MapState）
+3. 归约状态（ReducingState）
+4. 聚合状态（AggregatingState）
 
 # 8 容错机制
 
