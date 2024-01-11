@@ -10,7 +10,8 @@ published: false
 ---
 ## 0 参考资料
 
-JAVA各版本安装包下载路径：[https://www.injdk.cn/?spm=a2c6h.12873639.article-detail.22.b53720bdMO7XUf](https://www.injdk.cn/?spm=a2c6h.12873639.article-detail.22.b53720bdMO7XUf)
+1. JAVA各版本安装包下载路径：[https://www.injdk.cn/?spm=a2c6h.12873639.article-detail.22.b53720bdMO7XUf](https://www.injdk.cn/?spm=a2c6h.12873639.article-detail.22.b53720bdMO7XUf)
+2. 依赖包网站：[https://mvnrepository.com/](https://mvnrepository.com/)
 
 ## 1 编程基础
 ### 1.1 Main方法
