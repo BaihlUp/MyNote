@@ -3022,7 +3022,54 @@ public class KeyedProcessTimerDemo {
 1. 在process中获取当前watermark，显示的是上一次的watermark
 2. 事件时间定时器，通过watermark来触发的
 ## 6.3 窗口处理函数
+进行窗口计算，我们可以直接调用现成的简单聚合方法（sum/max/min），也可以通过调用.reduce()或.aggregate()来自定义一般的增量聚合函数（ReduceFunction/AggregateFucntion）；而对于更加复杂、需要窗口信息和额外状态的一些场景，我们还可以直接使用全窗口函数、把数据全部收集保存在窗口内，等到触发窗口计算时再统一处理。窗口处理函数就是一种典型的全窗口函数。
 
+窗口处理函数ProcessWindowFunction的使用与其他窗口函数类似，也是基于WindowedStream直接调用方法就可以，只不过这时调用的是.process()。
+```java
+stream.keyBy( t -> t.f0 )
+        .window( TumblingEventTimeWindows.of(Time.seconds(10)) )
+        .process(new MyProcessWindowFunction())
+```
+ProcessWindowFunction既是处理函数又是全窗口函数。从名字上也可以推测出，它的本质似乎更倾向于“窗口函数”一些。事实上它的用法也确实跟其他处理函数有很大不同。我们可以从源码中的定义看到这一点：
+```java
+public abstract class ProcessWindowFunction<IN, OUT, KEY, W extends Window> extends AbstractRichFunction {
+    ...
+    public abstract void process(
+            KEY key, Context context, Iterable<IN> elements, Collector<OUT> out) throws Exception;
+    public void clear(Context context) throws Exception {}
+    public abstract class Context implements java.io.Serializable {...}
+}
+```
+ProcessWindowFunction依然是一个继承了AbstractRichFunction的抽象类，它有四个类型参数：
+- IN：input，数据流中窗口任务的输入数据类型。
+- OUT：output，窗口任务进行计算之后的输出数据类型。
+- KEY：数据中键key的类型。
+- W：窗口的类型，是Window的子类型。一般情况下我们定义时间窗口，W就是TimeWindow。
+
+ProcessWindowFunction里面处理数据的核心方法.process()。方法包含四个参数。
+- key：窗口做统计计算基于的键，也就是之前keyBy用来分区的字段。
+- context：当前窗口进行计算的上下文，它的类型就是ProcessWindowFunction内部定义的抽象类Context。
+- elements：窗口收集到用来计算的所有数据，这是一个可迭代的集合类型。
+- out：用来发送数据输出计算结果的收集器，类型为Collector。
+
+这里的参数不再是一个输入数据，而是窗口中所有数据的集合。而上下文context所包含的内容也跟其他处理函数有所差别：
+```java
+public abstract class Context implements java.io.Serializable {
+    public abstract W window();
+    public abstract long currentProcessingTime();
+    public abstract long currentWatermark();
+    public abstract KeyedStateStore windowState();
+    public abstract KeyedStateStore globalState();
+    public abstract <X> void output(OutputTag<X> outputTag, X value);
+}
+```
+除了可以通过.output()方法定义侧输出流不变外，其他部分都有所变化。这里不再持有TimerService对象，只能通过currentProcessingTime()和currentWatermark()来获取当前时间，所以失去了设置定时器的功能；另外由于当前不是只处理一个数据，所以也不再提供.timestamp()方法。与此同时，也增加了一些获取其他信息的方法：比如可以通过.window()直接获取到当前的窗口对象，也可以通过.windowState()和.globalState()获取到当前自定义的窗口状态和全局状态。注意这里的“窗口状态”是自定义的，不包括窗口本身已经有的状态，针对当前key、当前窗口有效；而“全局状态”同样是自定义的状态，针对当前key的所有窗口有效。
+所以我们会发现，ProcessWindowFunction中除了.process()方法外，并没有.onTimer()方法，而是多出了一个.clear()方法。从名字就可以看出，这主要是方便我们进行窗口的清理工作。如果我们自定义了窗口状态，那么必须在.clear()方法中进行显式地清除，避免内存溢出。
+至于另一种窗口处理函数ProcessAllWindowFunction，它的用法非常类似。区别在于它基于的是AllWindowedStream，相当于对没有keyBy的数据流直接开窗并调用.process()方法：
+```java
+stream.windowAll( TumblingEventTimeWindows.of(Time.seconds(10)) )
+    .process(new MyProcessAllWindowFunction())
+```
 
 ## 6.4 应用案例--TopN
 
