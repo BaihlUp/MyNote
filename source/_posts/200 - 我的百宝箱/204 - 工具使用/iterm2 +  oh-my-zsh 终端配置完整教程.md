@@ -275,3 +275,18 @@ ssh root@x.x.x.x -p xxxxx
 ## 4.9 设置终端历史行数
 打开iTerm2，打开Preferences配置界面，Profiles -> Terminal，根须需求进行修改，如果想不限制行数可以勾选Unlimited scrollback：
 ![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20240113230910.png)
+
+## 4.10 SSH连接保持
+在 ~/.ssh/config 中加入如下配置：
+```bash
+# 设置全局配置，适用于所有主机
+ Host *
+	# 定期发送保持连接的消息，以防止连接超时
+    ServerAliveInterval 30
+    # 允许的服务器无响应次数，达到后将断开连接
+    ServerAliveCountMax 2
+    # 启用ControlMaster自动模式，以便通过一个打开的连接来共享多个会话
+    ControlMaster auto
+    # 指定控制连接的路径和命名方案。这里使用了通配符，包括用户（%r）、主机（%h）、端口（%p）等信息。
+    ControlPath ~/.ssh/master-%r@%h:%p
+```
