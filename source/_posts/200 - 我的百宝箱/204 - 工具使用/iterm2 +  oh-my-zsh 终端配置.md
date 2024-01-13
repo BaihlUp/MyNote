@@ -157,3 +157,108 @@ jo ~/Desktop/dxlWorkspace
 ```bash
 j --stat
 ```
+
+# 4 个性操作
+## 4.1 iTerm2快速隐藏和显示窗体
+打开iTerm2，打开Preferences配置界面，Profiles → Keys →configure Hotkey window，自定义一个快捷键就可以了。
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20240113223549.png)
+
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20240113223622.png)
+
+## 4.2 iTerm2隐藏用户名和主机名
+通常在Shell中默认的我们的用户名和主机名，这两者加在一起会很长，操作的时候很影响观感，我们可以手动去除。
+首先使用命令查看当前用户名称：
+```bash
+whoami
+```
+
+```bash
+#编辑配置文件
+vim ~/.zshrc
+
+#在文件最后增加 DEFAULT_USER="xxxxx" 配置
+DEFAULT_USER="xxxxx"
+
+#退出编辑后执行使配置生效
+source ~/.zshrc 
+```
+再次打开终端姓名和主机名就隐藏掉了。
+
+## 4.3 设置 Status bar
+iTerm2 提供了不少的 Status bar，开启后我们可以在终端的最上方非常方便的实时查看本机的一些信息。
+打开iTerm2，打开Preferences配置界面，Profiles -> session-> 勾选 Status bar enable-> configure Status bar，选择自己想要的展示内容即可。
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20240113223847.png)
+
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20240113224037.png)
+
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20240113223910.png)
+## 4.4 光标选择
+
+iterm提供了三种光标可供选择：_、|、[]。
+
+打开iTerm2，打开Preferences配置界面，Profiles -> text-> cursor，选择自己想要的光标即可。
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20240113224211.png)
+
+## 4.5 窗口设置
+打开iTerm2，打开Preferences配置界面，Profiles -> Window，根据自己的需求设置窗口透明度、背景图片、行列数以及风格等。
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20240113224622.png)
+
+## 4.6 Badge、Title、Icon
+打开iTerm2，打开Preferences配置界面，Profiles -> General ，根据自己的需求设置Badge，点击edit按钮调整Badge位置和大小，Title和Icon选项是设置标签页标题和图标的，博主习惯性采用图片中的设置，各位看官可以根据自己的需求灵活设置。
+
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20240113225516.png)
+
+## 4.7 标签页配色
+打开iTerm2，打开Preferences配置界面，Appearence -> General，将 Theme 改为 Minimal
+
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20240113225913.png)
+
+修改后效果：
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20240113230030.png)
+
+## 4.8 配置SSH快速连接
+### 4.8.1 编写脚本方式
+编写一个登录脚本，如下：
+```bash
+#!/usr/bin/expect
+set timeout 30
+spawn ssh [lindex $argv 0]@[lindex $argv 1] -p [lindex $argv 2]
+expect {
+        "(yes/no)?"
+        {send "yes\n";exp_continue}
+        "password:"
+        {send "[lindex $argv 3]\n"}
+}
+interact
+```
+
+保存到一个位置，在iterm2中指定。
+```bash
+[lindex $argv 0]：服务器用户名
+[lindex $argv 1]：服务器IP地址
+[lindex $argv 2]：端口号
+[lindex $argv 3]：服务器密码
+```
+打开iTerm2，打开Preferences配置界面，Profiles -> general，左下角点击+号，新建profile，参考下面图片在对应位置输入内容即可。
+Name:根据需求输入，通常选择标识性较强的内容便于区分，例如服务器的IP地址
+Command：这里选择login Shell
+Send text at start ：填写格式形如A B C D E这样，每一个部分之间用空格隔开，根据自己实际情况填写,下面是对每一部分内容的解释
+
+```text
+A代表咱们上面写的本机保存sh脚本的路径：/Users/iterm/myserver.sh
+B代表服务器用户名一般为：root
+C代表服务器IP：根据腾讯云服务器对外暴露的公网IP填写
+D代表服务器端口号一般远程连接端口为：22
+E代表服务器密码：根据自己实际的服务器密码填写
+```
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20240113233317.png)
+设置好之后打开iTerm2，点击profiles，点击前面自己新增的连接远程服务器的profile的名字
+
+
+首次连接需要输入一次服务器密码，之后再连接就免密码登陆了。
+### 4.8.2 iterm2 触发器方式
+
+
+## 4.9 设置终端历史行数
+打开iTerm2，打开Preferences配置界面，Profiles -> Terminal，根须需求进行修改，如果想不限制行数可以勾选Unlimited scrollback：
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20240113230910.png)
