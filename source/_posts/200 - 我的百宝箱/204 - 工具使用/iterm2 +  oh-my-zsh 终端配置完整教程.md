@@ -1,13 +1,12 @@
 ---
-title: iterm2 +  oh-my-zsh 终端配置
+title: iterm2 +  oh-my-zsh 终端配置完整教程
 date: 2024-01-13
 categories:
   - 工具使用
 tags:
   - iterm2
-published: false
+published: true
 ---
-
 # 0 参考资料
 
 [https://zhuanlan.zhihu.com/p/550022490](https://zhuanlan.zhihu.com/p/550022490)
@@ -257,7 +256,21 @@ E代表服务器密码：根据自己实际的服务器密码填写
 
 首次连接需要输入一次服务器密码，之后再连接就免密码登陆了。
 ### 4.8.2 iterm2 触发器方式
+点击左上角`Iterm2`任务栏，依次选择`Preferences - Profile`：
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20240113233637.png)
 
+点击左下角的`+`新增一个配置项，在右边的command处输入ssh登录的命令：
+```bash
+ssh root@x.x.x.x -p xxxxx
+```
+然后把tab页面切换到`Advanced`，点击`Edit`进入触发器编辑页面：
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20240113233753.png)
+
+新弹框中新增一个触发器，触发器的作用是匹配终端输出的字符串然后执行相应动作。触发字符串是`password:`，Action选择`Send Text`，Parameters填入登录密码，密码最后以`\n`结束表示输完密码后换行：
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20240113233821.png)
+
+配置好后退出，在任务栏的`Profile`中选择创建好的配置就可以自动登录到设备了：
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20240113233841.png)
 
 ## 4.9 设置终端历史行数
 打开iTerm2，打开Preferences配置界面，Profiles -> Terminal，根须需求进行修改，如果想不限制行数可以勾选Unlimited scrollback：
