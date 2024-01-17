@@ -12,6 +12,7 @@ published: true
 [https://zhuanlan.zhihu.com/p/550022490](https://zhuanlan.zhihu.com/p/550022490)
 
 iterm2奇技淫巧：[https://zhuanlan.zhihu.com/p/522534821](https://zhuanlan.zhihu.com/p/522534821)
+iterm2用法技巧：[https://lhajh.github.io/mac/2018/04/25/Iterm2-usage-and-skills.html](https://lhajh.github.io/mac/2018/04/25/Iterm2-usage-and-skills.html)
 
 # 2 安装oh-my-zsh
 [oh-my-zsh](https://link.juejin.cn/?target=https%3A%2F%2Fgithub.com%2Fohmyzsh%2Fohmyzsh "https://github.com/ohmyzsh/ohmyzsh")更强大的命令行工具，解放双手，比系统自带bash更加酷炫、高效，可以实现更强大的命令补全，命令高亮等一系列酷炫功能。同时支持各种自定义选项，并支持扩展。
