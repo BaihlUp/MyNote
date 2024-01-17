@@ -8,15 +8,18 @@ tags:
 published: false
 ---
 # 0 参考资料
+
 [书中示例代码](https://github.com/russelltao/diveintonginx)
 
 Nginx源码注释：[https://github.com/chronolaw/annotated_nginx](https://github.com/chronolaw/annotated_nginx)
+Nginx中SNI流程源码分析：[https://blog.csdn.net/u011130578/article/details/77979325](https://blog.csdn.net/u011130578/article/details/77979325)
 
 ![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/AADEF0D0-3E09-49F6-807C-35CCF65CB898.png)
 
 
 # 2 如何编写HTTP模块
 ## 2.7 Nginx提供的高级数据结构
+
 - ngx_queue_t 双向链表
 - ngx_array_t 动态数组
 - ngx_list_t 单向链表
@@ -71,6 +74,7 @@ nginx通过事件驱动的方式处理，事件的消费者是某个模块，没
 
 ## 11 HTTP框架的执行流程
 ### 11.1 HTTP处理流程
+
 HTTP框架在初始化时就会将每个监听ngx_listening_t结构体的handler方法设为ngx_http_init_connection方法。
 ngx_http_init_connection方法的执行流程：
 
@@ -226,6 +230,7 @@ ngx_http_core_generic_phase(ngx_http_request_t *r, ngx_http_phase_handler_t *ph)
 Nginx使用的完全无阻塞的事件驱动框架是难以编写功能复杂的模块的， 可以想见， 一个请求在处理一个TCP连接时， 将需要处理这个连接上的可读、 可写以及定时器事件， 而可读事件中又包含连接建立成功、 连接关闭事件， 正常的可读事件在接收到HTTP的不同部分时又要做不同的处理， 这就比较复杂了。 如果一个请求同时需要与多个上游服务器打交道， 同时处理多个TCP连接， 那么它需要处理的事件就太多了， 这种复杂度会使得模块难以维护。 Nginx解决这个问题的手段就是第5章中介绍过的subrequest机制。
 
 ### 11.5 处理HTTP包体
+
 在ngx_http_request_t结构体中的count引用计数标识，因为HTTP模块在处理请求时，接受包体的同时可能还需要处理其他业务，如使用upstream机制与另一台服务器通信。所以在销毁请求时需要通过这个计数判断，否则可能引发严重错误，在为一个请求添加新的事件，或者把一些已经由定时器、epoll中移除的事件重新加入其中，都需要把这个请求的引用计数加1。通过这个标识可以让HTTP框架知道，HTTP模块对于该请求有独立的异步处理机制。
 调用ngx_http_read_client_request_body方法相当于启动了接收包体这个动作。
 读取请求包体的重要结构为ngx_http_request_body_t
@@ -369,7 +374,6 @@ struct ngx_chain_s {
 ## 12 upstream机制的设计与实现
 ### 12.1 upstream机制
 upstream机制的场景示意图：
-
 ![20230418141020](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230418141020.png)
 
 upstream机制中两个核心结构体ngx_http_upstream_t和ngx_http_upstream_conf_t：
@@ -521,7 +525,6 @@ Nginx可以代理多种不同的协议，分为两段方式，先处理响应头
 1. 不转发响应：不转发包体是upstream机制最基本的功能， 特别是客户端请求派生出的子请求多半不需要转发包体。
 2. 转发响应时下游网速优先
 3. 转发响应时上游网速优先
-
 
 ### 12.5 以下游网速优先来转发响应
 转发上游服务器的响应到下游客户端，必然由上游事件来驱动，下游网速优先实际上意味着需要开辟一块固定长度的内存作为缓冲区。

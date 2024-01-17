@@ -149,7 +149,7 @@ OpenResty 中的 `ngx.var.*` 这个 API可以取出响应的数据，如下：
 - `ngx.req.get_method`  返回：字符串格式的方法名
 - `ngx.req.set_method(ngx.HTTP_POST)` 参数是数字常量
 
-```
+```bash
 [root@localhost]#resty -e 'print(ngx.HTTP_POST)'
 8
 ```
@@ -158,7 +158,7 @@ OpenResty 中的 `ngx.var.*` 这个 API可以取出响应的数据，如下：
 #### 2.3.3 请求头
 `ngx.req.get_headers` 来解析和获取请求头，返回值的类型则是 table：
 
-```
+```lua
 local h, err = ngx.req.get_headers()
  
   if err == "truncated" then
