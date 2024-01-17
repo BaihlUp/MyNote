@@ -1,3 +1,12 @@
+---
+title: Ubuntu系统常用命令
+date: 2024-01-17
+categories:
+  - 工具使用
+tags:
+  - Ubuntu
+published: false
+---
 # 1 软件安装
 ## 1.1 APT 命令
 1. 安装软件包
