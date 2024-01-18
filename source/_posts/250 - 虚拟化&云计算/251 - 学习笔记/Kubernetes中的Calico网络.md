@@ -6,6 +6,7 @@ categories:
 tags:
   - Kubernetes
   - Calico
+published: true
 ---
 
 [toc]
