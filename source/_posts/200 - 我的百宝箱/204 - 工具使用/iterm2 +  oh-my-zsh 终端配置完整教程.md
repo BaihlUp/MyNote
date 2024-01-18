@@ -105,6 +105,16 @@ plugins=(zsh-autosuggestions)
 source ~/.zshrc
 ```
 
+### 2.4.3 命令历史
+可以搜索命令历史的插件，使用`Ctrl+R`快捷键触发，模糊搜索历时使用的命令。
+```bash
+git clone https://github.com/zsh-users/zsh-history-substring-search ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-history-substring-search
+```
+- 然后修改配置文件`.zshrc`，在plugins中添加插件`zsh-history-substring-search`；
+- 接下来我们就可以通过`Ctrl+R`快捷键触发，然后进行命令搜索补全了。
+
+
+
 # 3 autojump自动跳转工具
 
 ## 3.1 安装
