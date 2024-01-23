@@ -24,6 +24,12 @@ published: false
 
 ### 1.1.1 常用插件
 
+- Material theme UI：更改主题
+- ignore：排除文件
+- Markdown support：markdown支持
+- http client：发送HTTP请求
+
+
 ### 1.1.2 常用快捷键
 
 # 2 IDEA 基本使用
@@ -36,3 +42,4 @@ published: false
 - **Ctrl + O**：重载继承函数
 
 
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20240122140441.png)
