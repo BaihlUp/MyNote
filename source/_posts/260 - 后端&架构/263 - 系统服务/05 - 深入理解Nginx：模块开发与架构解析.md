@@ -1,6 +1,6 @@
 ---
 title: 05 - 深入理解Nginx：模块开发与架构解析
-date: 2024-01-17
+date: 2024-02-04
 categories:
   - 后端&架构
 tags:
@@ -8,27 +8,25 @@ tags:
 published: false
 ---
 # 0 参考资料
-
 [书中示例代码](https://github.com/russelltao/diveintonginx)
 
-Nginx源码注释：[https://github.com/chronolaw/annotated_nginx](https://github.com/chronolaw/annotated_nginx)
-Nginx中SNI流程源码分析：[https://blog.csdn.net/u011130578/article/details/77979325](https://blog.csdn.net/u011130578/article/details/77979325)
-
-![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/AADEF0D0-3E09-49F6-807C-35CCF65CB898.png)
-
+Nginx 源码注释：[https://github.com/chronolaw/annotated_nginx](https://github.com/chronolaw/annotated_nginx)
 
 # 2 如何编写HTTP模块
 ## 2.7 Nginx提供的高级数据结构
 
+```
 - ngx_queue_t 双向链表
 - ngx_array_t 动态数组
 - ngx_list_t 单向链表
 - ngx_rbtree_t 红黑树
 - ngx_radix_tree_t 基数树
+```
+
 
 # 第3部分 深入Nginx
 
-## 8 Nginx基础架构
+## 8 Nginx 基础架构
 ### 8.2.1 Nginx的模块化设计
 ngx_module_t接口及其对核心、事件、HTTP、mail等4类模块ctx上下文成员的具体化：
 
@@ -74,7 +72,6 @@ nginx通过事件驱动的方式处理，事件的消费者是某个模块，没
 
 ## 11 HTTP框架的执行流程
 ### 11.1 HTTP处理流程
-
 HTTP框架在初始化时就会将每个监听ngx_listening_t结构体的handler方法设为ngx_http_init_connection方法。
 ngx_http_init_connection方法的执行流程：
 
@@ -154,7 +151,7 @@ ngx_http_core_run_phases(ngx_http_request_t *r)
 参考文章：[https://www.codedump.info/post/20190131-nginx-read-http-request/](https://www.codedump.info/post/20190131-nginx-read-http-request/)
 
 ### 11.3 checker方法
-ngx_http_core_run_phases函数中会遍历handlers数组，handlers数组是包含所有模块的处理函数，在ngx_http_init_phase_handlers函数中初始化所有HTTP阶段的模块是填充。不同的阶段会又指定的checker函数，每个阶段里又包括多个模块，每个模块都有自己的handler处理方法，如果当前阶段顺序调用模块处理时，如果不想处理了剩下模块，可以直接通过next，跳到下一个阶段。
+ngx_http_core_run_phases函数中会遍历handlers数组，handlers数组是包含所有模块的处理函数，在ngx_http_init_phase_handlers函数中初始化所有HTTP阶段的模块时填充。不同的阶段会指定checker函数，每个阶段里又包括多个模块，每个模块都有自己的handler处理方法，如果当前阶段顺序调用模块处理时，如果不想处理剩下模块，可以直接通过next，跳到下一个阶段。
 ![20230412181514](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230412181514.png)
 
 下边是ngx_http_core_generic_phase的checker方法：
@@ -230,7 +227,6 @@ ngx_http_core_generic_phase(ngx_http_request_t *r, ngx_http_phase_handler_t *ph)
 Nginx使用的完全无阻塞的事件驱动框架是难以编写功能复杂的模块的， 可以想见， 一个请求在处理一个TCP连接时， 将需要处理这个连接上的可读、 可写以及定时器事件， 而可读事件中又包含连接建立成功、 连接关闭事件， 正常的可读事件在接收到HTTP的不同部分时又要做不同的处理， 这就比较复杂了。 如果一个请求同时需要与多个上游服务器打交道， 同时处理多个TCP连接， 那么它需要处理的事件就太多了， 这种复杂度会使得模块难以维护。 Nginx解决这个问题的手段就是第5章中介绍过的subrequest机制。
 
 ### 11.5 处理HTTP包体
-
 在ngx_http_request_t结构体中的count引用计数标识，因为HTTP模块在处理请求时，接受包体的同时可能还需要处理其他业务，如使用upstream机制与另一台服务器通信。所以在销毁请求时需要通过这个计数判断，否则可能引发严重错误，在为一个请求添加新的事件，或者把一些已经由定时器、epoll中移除的事件重新加入其中，都需要把这个请求的引用计数加1。通过这个标识可以让HTTP框架知道，HTTP模块对于该请求有独立的异步处理机制。
 调用ngx_http_read_client_request_body方法相当于启动了接收包体这个动作。
 读取请求包体的重要结构为ngx_http_request_body_t
@@ -374,6 +370,7 @@ struct ngx_chain_s {
 ## 12 upstream机制的设计与实现
 ### 12.1 upstream机制
 upstream机制的场景示意图：
+
 ![20230418141020](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230418141020.png)
 
 upstream机制中两个核心结构体ngx_http_upstream_t和ngx_http_upstream_conf_t：
@@ -509,7 +506,7 @@ static void ngx_http_upstream_connect(ngx_http_request_t *r, ngx_http_upstream_t
 ```
 流程图如下：
 ![20230418143131](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230418143131.png)
-1. 上边把此连接 ngx_connection_t的都写事件都设置为了ngx_http_upstream_handler
+1. 上边把此连接 ngx_connection_t的读写事件都设置为了ngx_http_upstream_handler
 2. 将upstream机制的write_event_handler方法设置为ngx_http_upstream_send_request_handler，此方法会多次触发，实际还是调用ngx_http_upstream_send_request方法发送。
 3. upstream的read_event_handler方法设置为ngx_http_upstream_process_header
 4. 连接建立成功后，则调用ngx_http_upstream_send_request方法
@@ -525,6 +522,7 @@ Nginx可以代理多种不同的协议，分为两段方式，先处理响应头
 1. 不转发响应：不转发包体是upstream机制最基本的功能， 特别是客户端请求派生出的子请求多半不需要转发包体。
 2. 转发响应时下游网速优先
 3. 转发响应时上游网速优先
+
 
 ### 12.5 以下游网速优先来转发响应
 转发上游服务器的响应到下游客户端，必然由上游事件来驱动，下游网速优先实际上意味着需要开辟一块固定长度的内存作为缓冲区。
@@ -643,7 +641,7 @@ ngx_http_upstream_finalize_request(ngx_http_request_t *r,
 
 ## 14 进程间的通信机制
 ### 14.1 概述
-Nginx框架使用了3种传递消息传递方式： 共享内存、 套接字、 信号。 
+Nginx框架使用了3种消息传递方式： 共享内存、 套接字、 信号。 
 
 ### 14.2 共享内存
 #### 14.2.1 共享内存创建和销毁
@@ -1061,7 +1059,7 @@ ngx_signal_t  signals[] = {
 };
 ```
 以上的所有信号在ngx_init_signals方法中初始化：
-```
+```c
 // 初始化signals数组
 ngx_int_t ngx_init_signals(ngx_log_t *log);
 ```
@@ -1188,7 +1186,7 @@ void ngx_slab_free_locked(ngx_slab_pool_t *pool, void *p);
 slab中把整块内存按4KB分整许多页，每一页只存固定大小的内存块，由于一页上能够分配的内存块数量是有限的，可以在页首用bitmap方式，按二进制位表示页对应位置的内存块是否在使用中。只是遍历bitmap二进制位去寻找页上的空闲内存块， 使得消耗的时间很有限， 例如bitmap占用的内存空间小导致CPU缓存命中率高， 可以按32或64位这样的总线长度去寻找空闲位以减少访问次数等。
 关于对页的管理，分为空闲页、半满页和全满页，不同的页通过链表维护。
 slab会把一页分成不同的内存块大小，内存块分为8，16，32，64.。。。字节。当申请的字节数大于8小于等于16时， 就会使用16字节的内存块， 以此类推。
-按照不同页中含有的内存块大小分类，然后包含相同内存块大小的页组成页链表，并且页的首部放在slots数组中，slots数组也是按序排列，比如开始元素存放的地址是8字节内存块所属页的链表，一次递增。
+按照不同页中含有的内存块大小分类，然后包含相同内存块大小的页组成页链表，并且页的首部放在slots数组中，slots数组也是按序排列，比如开始元素存放的地址是8字节内存块所属页的链表，依次递增。
 
 ![20230411111313](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230411111313.png)
 
@@ -1309,7 +1307,7 @@ struct ngx_slab_page_s {
 上边有5个页，其中有连续的页，如上边slab=2，全满页会脱离链表，所以next和prev指针为0。
 
 ngx_slab_max_size指定了最大内存块的大小。
-```
+```c
     // 最大slab，是page的一半
     // 超过此大小则直接分配整页
     // ngx_pagesize是4k
