@@ -7,7 +7,6 @@ tags:
   - OpenResty
 published: false
 ---
-
 # 1 性能下降10倍的真凶：阻塞函数
 OpenResty 之所以可以保持很高的性能，简单来说，是因为它借用了 Nginx 的事件处理和 Lua 的协程机制，所以：
 * 在遇到网络 I/O 等需要等待返回才能继续的操作时，就会先调用 Lua 协程的 yield 把自己挂起，然后在 Nginx 中注册回调；
