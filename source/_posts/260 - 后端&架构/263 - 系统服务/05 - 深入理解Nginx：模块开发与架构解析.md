@@ -75,24 +75,24 @@ nginx通过事件驱动的方式处理，事件的消费者是某个模块，没
 HTTP框架在初始化时就会将每个监听ngx_listening_t结构体的handler方法设为ngx_http_init_connection方法。
 ngx_http_init_connection方法的执行流程：
 
-![20230412112221](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230412112221.png)
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230412112221.png)
 
 第一次可读事件到来会执行ngx_http_init_request，流程如下：
 
-![20230412112351](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230412112351.png)
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230412112351.png)
 为了提升性能，Nginx并不会在创建连接时就分配内存，只有在第一个可读事件到来后，开始创建ngx_http_request_t，并进行初始化。
 ngx_http_request_t结构体保存了很多整个请求的信息和处理过程中的数据。
 ngx_http_init_request执行到最后会调用ngx_http_process_request_line方法开始接收、解析HTTP请求行，请求行的处理至少会调用一次，根据网络分包情况，会出现多次调用，流程如下：
 
-![20230412112841](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230412112841.png)
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230412112841.png)
 解析请求行后，就会把解析的一些内容保存到ngx_http_request_t结构中特定变量下。
 下边开始在ngx_http_process_request_headers中接收HTTP头部：
 
-![20230412113214](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230412113214.png)
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230412113214.png)
 
 下边调用ngx_http_process_request开始处理请求：
 
-![20230412113314](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230412113314.png)
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230412113314.png)
 
 处理请求的过程中，会执行HTTP各阶段，并且调用阶段里要执行的各模块。
 执行各阶段的模块，由ngx_http_core_run_phases调用各阶段的checker方法执行。
@@ -136,23 +136,23 @@ ngx_http_core_run_phases(ngx_http_request_t *r)
 ```
 模块的处理函数都是通过框架给的checker函数调用，不同阶段的checker函数存在差异，所以不同阶段也可以在调用模块处理时做一些操作。
 
-![20230412141549](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230412141549.png)
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230412141549.png)
 一个请求多半需要Nginx事件模块多次地调度HTTP模块处理， 这时就要看在ngx_http_process_request处理请求的第2步设置的读写事件的回调方法ngx_http_request_handler的功能了。
 请求在处理的时候，第一次调用的是ngx_http_process_request，后边再次处理则使用ngx_http_request_handler，处理流程如下：
 
-![20230412141951](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230412141951.png)
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230412141951.png)
 通常来说， 在接收完HTTP头部后， 是无法在一次Nginx框架的调度中处理完一个请求的。 在第一次接收完HTTP头部后， HTTP框架将调度ngx_http_process_request方法开始处理请求， 这时 如果某个checker方法返回了NGX_OK， 则将会把控制权交还给Nginx框架。 当这个请求上对应的事件再次触发时， HTTP框架将不会再调度ngx_http_process_request方法处理请求， 而是由ngx_http_request_handler方法开始处理请求。 
 
 
 ### 11.2 读HTTP请求状态机流程
 
-![20230414102217](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230414102217.png)
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230414102217.png)
 
 参考文章：[https://www.codedump.info/post/20190131-nginx-read-http-request/](https://www.codedump.info/post/20190131-nginx-read-http-request/)
 
 ### 11.3 checker方法
 ngx_http_core_run_phases函数中会遍历handlers数组，handlers数组是包含所有模块的处理函数，在ngx_http_init_phase_handlers函数中初始化所有HTTP阶段的模块时填充。不同的阶段会指定checker函数，每个阶段里又包括多个模块，每个模块都有自己的handler处理方法，如果当前阶段顺序调用模块处理时，如果不想处理剩下模块，可以直接通过next，跳到下一个阶段。
-![20230412181514](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230412181514.png)
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230412181514.png)
 
 下边是ngx_http_core_generic_phase的checker方法：
 ```c
@@ -268,10 +268,10 @@ typedef struct {
 此结构存放在ngx_http_request_t结构体的request_body成员中。
 ngx_http_read_client_request_body方法的流程图如下：
 
-![20230414103330](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230414103330.png)
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230414103330.png)
 如果下次再次触发可读事件，则变为调用ngx_http_do_read_client_request_body方法接收包体：
 
-![20230414103620](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230414103620.png)
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230414103620.png)
 在接收包体时需要根据配置文件中关于client_body_timeout配置项，配置相应的操作。
 
 - 放弃接收包体
@@ -303,7 +303,7 @@ ngx_http_top_header_filter是一个全局变量。当编译进一个filter模块
 
 响应头和响应体过滤函数的执行顺序如下所示：
 
-![20230414143010](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230414143010.png)
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230414143010.png)
 
 这图只表示了head_filter和body_filter之间的执行顺序，在header_filter和body_filter处理函数之间，在body_filter处理函数之间，可能还有其他执行代码。
 nginx在发送数据时使用单链表，单链表负载的就是ngx_buf_t
@@ -363,7 +363,7 @@ struct ngx_chain_s {
 
 ```
 一般buffer结构体可以表示一块内存，内存的起始和结束地址分别用start和end表示，pos和last表示实际的内容。如果内容已经处理过了，pos的位置就可以往后移动。如果读取到新的内容，last的位置就会往后移动。所以buffer可以在多次调用过程中使用。如果last等于end，就说明这块内存已经用完了。如果pos等于last，说明内存已经处理完了。下面是一个简单的示意图，说明buffer中指针的用法：
-![20230414143222](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230414143222.png)
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230414143222.png)
 
 ### 11.7 结束HTTP请求
 
@@ -371,7 +371,7 @@ struct ngx_chain_s {
 ### 12.1 upstream机制
 upstream机制的场景示意图：
 
-![20230418141020](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230418141020.png)
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230418141020.png)
 
 upstream机制中两个核心结构体ngx_http_upstream_t和ngx_http_upstream_conf_t：
 ```c
@@ -495,7 +495,7 @@ void ngx_http_upstream_init(ngx_http_request_t *r)
 ```
 ngx_http_upstream_init方法的流程如下：
 
-![20230418142114](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230418142114.png)
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230418142114.png)
 
 ### 12.3 与上游服务器建立连接
 为了保证建立TCP连接这个操作不会阻塞进程， Nginx使用无阻塞的套接字来连接上游服务器。
@@ -505,7 +505,7 @@ ngx_http_upstream_init方法的流程如下：
 static void ngx_http_upstream_connect(ngx_http_request_t *r, ngx_http_upstream_t *u)
 ```
 流程图如下：
-![20230418143131](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230418143131.png)
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230418143131.png)
 1. 上边把此连接 ngx_connection_t的读写事件都设置为了ngx_http_upstream_handler
 2. 将upstream机制的write_event_handler方法设置为ngx_http_upstream_send_request_handler，此方法会多次触发，实际还是调用ngx_http_upstream_send_request方法发送。
 3. upstream的read_event_handler方法设置为ngx_http_upstream_process_header
@@ -513,7 +513,7 @@ static void ngx_http_upstream_connect(ngx_http_request_t *r, ngx_http_upstream_t
 
 ngx_http_upstream_send_request方法的流程图：
 
-![20230418144312](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230418144312.png)
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230418144312.png)
 
 ### 12.4 接收上游服务器的响应头部
 在上边的ngx_http_upstream_send_request方法中，当请求全部发送给上游服务器时，开始准备接收来自上游服务器的响应。由ngx_http_upstream_process_header方法处理上游服务器的响应，此方法也会多次被调用。
@@ -529,7 +529,7 @@ Nginx可以代理多种不同的协议，分为两段方式，先处理响应头
 #### 12.5.1 转发响应的包头
 在ngx_http_upstream_send_response方法中完成的，处理流程如下
 
-![20230418153127](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230418153127.png)
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230418153127.png)
 
 通过调用ngx_http_send_header方法向客户端发送HTTP包头，会调用header过滤链表，走一下所有模块：
 ```c
@@ -566,7 +566,7 @@ ngx_http_send_header(ngx_http_request_t *r)
 
 在方法中会判断配置的buffering标志，若为0，表示以下游网速优先，如果为1，则会以上游网速优先，因为上游网速一般比下游网速快很多，所有需要更大的缓冲区保存，如果达到上限，以磁盘文件的形式来缓存来不及向下游转发的响应。
 
-![20230418153520](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230418153520.png)
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230418153520.png)
 
 #### 12.5.2 转发响应包体
 如果buffering为0，则后边转发响应包体将会由ngx_http_upstream_process_non_buffered_upstream方法处理连接上的都事件。
@@ -574,7 +574,7 @@ ngx_http_send_header(ngx_http_request_t *r)
 
 ngx_http_upstream_process_non_buffered_request的流程图：
 
-![20230418154143](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230418154143.png)
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230418154143.png)
 
 ngx_http_upstream_process_non_buffered_request方法中调用ngx_http_output_filter方法，走过整个body过滤链表：
 ```c
@@ -1102,7 +1102,7 @@ ngx_err_t ngx_unlock_fd(ngx_fd_t fd);
 ### 14.8 互斥锁
 基于原子操作、信号量、文件锁，nginx在更高层次封装了一个互斥锁，许多Nginx模块也是更多直接使用它。操作方法如下：
 
-![20230410164924](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230410164924.png)
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230410164924.png)
 
 互斥锁接口的内部实现中使用了原子操作、信号量和文件锁，可以通过参数控制使用什么逻辑。
 以上接口都是通过操作ngx_shmtx_t类型的结构体来实现互斥操作：
@@ -1188,7 +1188,7 @@ slab中把整块内存按4KB分整许多页，每一页只存固定大小的内�
 slab会把一页分成不同的内存块大小，内存块分为8，16，32，64.。。。字节。当申请的字节数大于8小于等于16时， 就会使用16字节的内存块， 以此类推。
 按照不同页中含有的内存块大小分类，然后包含相同内存块大小的页组成页链表，并且页的首部放在slots数组中，slots数组也是按序排列，比如开始元素存放的地址是8字节内存块所属页的链表，依次递增。
 
-![20230411111313](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230411111313.png)
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230411111313.png)
 
 上图包含了空闲页、半满页、全满页的链表和分别存在两个slot中。
 
@@ -1275,7 +1275,7 @@ typedef struct {
 } ngx_slab_pool_t;
 ```
 
-![20230411111607](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230411111607.png)
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230411111607.png)
 
 下边是一个页的结构ngx_slab_page_t
 ```c
@@ -1303,7 +1303,7 @@ struct ngx_slab_page_s {
 ```
 如果页链表中有多个连续页空闲，则可以进行合并，合并后页的数量计入slab中，然后修改页的next指针，指向后边的页。
 
-![20230411111950](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230411111950.png)
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230411111950.png)
 上边有5个页，其中有连续的页，如上边slab=2，全满页会脱离链表，所以next和prev指针为0。
 
 ngx_slab_max_size指定了最大内存块的大小。
@@ -1314,6 +1314,6 @@ ngx_slab_max_size指定了最大内存块的大小。
     ngx_slab_max_size = ngx_pagesize / 2;
 ```
 分配内存流程：
-![20230411112227](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230411112227.png)
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/20230411112227.png)
 
 > 通过slots数组管理包含相同类型内存块大小的页面，slots数组有序，通过线性偏移，则可以直接找到需要的内存块大小所属页面链表地址，然后在页链表中找能满足的页，如果分配的内存大于了ngx_slab_max_size，则直接分配空闲页，如果小于则看看有没有半满页能满足，在页内部包含多个内存块，通过bitmap管理，标识内存块是否可用。如果bitmap全部可用，则表示当前页为全满页，则加入全满页链表。
