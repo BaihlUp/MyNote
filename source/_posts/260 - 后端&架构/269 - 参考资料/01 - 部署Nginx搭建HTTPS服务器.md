@@ -1,5 +1,5 @@
 ---
-title: 01 - 部署Nginx搭建HTTPS服务器
+title: 部署Nginx搭建HTTPS服务器
 date: 2024-02-04
 categories:
   - 后端&架构

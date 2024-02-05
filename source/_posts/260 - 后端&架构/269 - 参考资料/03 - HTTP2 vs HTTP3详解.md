@@ -1,5 +1,5 @@
 ---
-title: 03 - HTTP2 vs HTTP3详解
+title: HTTP2 vs HTTP3详解
 date: 2024-02-05
 categories:
   - 后端&架构
