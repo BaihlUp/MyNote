@@ -28,7 +28,6 @@ SO_REUSEADDR 提供了一套复用地址的规则。对于 AF_INET 套接字，
 ## REUSEPORT
 对于TCP套接字而言，这个选项通过每个监听线程使用不同的 listen fd 来改进accpet的负载分配。相对于传统的做法如只有一个 accept 线程在处理连接，或者是多个线程使用同一个listen fd 进行 accept，REUSEPORT 有助于负载均衡的改进。
 
-
 ```bash
 不开启 REUSEADDR，开启 REUSEPORT。
 server1 ：127.0.0.1:30001, bind 成功
