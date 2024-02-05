@@ -392,4 +392,4 @@ QPACK使用独立的单向Stream分别传输动态表编码、解码信息，这
 
 ![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/20240205162632.png)
 ## 3.2 HTTP2 和 HTTP3 对比图
-![[Pasted image 20240205162730.png]]
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/Pasted%20image%2020240205162730.png)
