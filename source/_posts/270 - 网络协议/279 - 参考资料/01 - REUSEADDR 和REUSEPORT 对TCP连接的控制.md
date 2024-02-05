@@ -5,7 +5,7 @@ categories:
   - 网络协议
 tags:
   - SO_REUSEADDR、SO_REUSEPORT
-published: false
+published: true
 ---
 ## 参考资料
 [REUSEADDR 与 REUSEPORT 到底做了什么？](https://zhuanlan.zhihu.com/p/492644204)
