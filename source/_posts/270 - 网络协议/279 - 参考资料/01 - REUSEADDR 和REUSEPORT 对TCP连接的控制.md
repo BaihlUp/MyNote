@@ -35,3 +35,18 @@ server2 ：127.0.0.1:30001, bind 成功
 ```
 开启REUSEPORT，可以实现两个进程监听和bind相同的ip+port，此时需要内核负载均衡方式选择处理请求的进程。
 
+## 在 Nginx中不适用 reuseport 与 使用 reuseport的差异
+- 未开启reuseport
+
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/20240205172646.png)
+
+- 开启reuseport
+
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/20240205172807.png)
+
+Nginx启动了16个work process，开启reuseport后，每个进程都会监听 端口。每个进程都维护自己的监听套接字，新建连接可以通过内核进行负载均衡分发，如下图：
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/20240205173127.png)
+
+
+
+
