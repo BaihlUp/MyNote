@@ -8,7 +8,6 @@ tags:
   - Python
 published: true
 ---
-
 # 1 类
 ## 1.1 类的定义和使用
 ```python
