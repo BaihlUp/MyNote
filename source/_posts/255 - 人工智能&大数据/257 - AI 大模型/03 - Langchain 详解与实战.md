@@ -5,7 +5,7 @@ categories:
   - 人工智能&大数据
 tags:
   - LangChain
-published: false
+published: true
 ---
 # 0 参考资料
 
@@ -22,7 +22,6 @@ published: false
 1. AutoGPT：[https://github.com/Significant-Gravitas/AutoGPT](https://github.com/Significant-Gravitas/AutoGPT)
 2. AgentBench：[https://github.com/THUDM/AgentBench](https://github.com/THUDM/AgentBench) （测试 Agent 性能）
 3. ChatALL：[https://github.com/sunner/ChatALL](https://github.com/sunner/ChatALL) （对多个大模型进行整合输出）
-
 
 # 1 LangChain 安装和使用
 
@@ -153,7 +152,9 @@ from langchain import HuggingFaceHub
 llm = HuggingFaceHub(model_id="bigscience/bloom-1b7")
 ```
 
-# 1.4 
+# 1.4 LangChain 构建问答系统
+
+- [文档QA系统](https://github.com/huangjia2019/langchain/tree/main/02_%E6%96%87%E6%A1%A3QA%E7%B3%BB%E7%BB%9F)
 
 # 2 LangChain 核心组件
 ## 2.1 模型 I/O
