@@ -5,9 +5,8 @@ categories:
   - 后端&架构
 tags:
   - OpenResty
-published: false
+published: true
 ---
-
 ## 0 参考资料
 1. [nginx-lua-module 中文版](https://github.com/iresty/nginx-lua-module-zh-wiki)
 2. [nginx-lua-module 原版](https://github.com/openresty/lua-nginx-module)
@@ -560,7 +559,7 @@ end
 - **table.remove 删除指定元素**
 
 它的作用是在 table 中根据下标来删除元素，也就是说只能删除 table 中数组部分的元素。我们还是来看color的例子：
-```
+```lua
 resty -e 'local color = {first = "red", "blue", third = "green", "yellow"}
   table.remove(color, 1)
   for k, v in pairs(color) do
@@ -572,7 +571,7 @@ resty -e 'local color = {first = "red", "blue", third = "green", "yellow"}
 - **table.concat 元素拼接函数**
 
 它可以按照下标，把 table 中的元素拼接起来。既然这里又是根据下标来操作的，那么显然还是针对 table 的数组部分。
-```
+```lua
 resty -e 'local color = {first = "red", "blue", third = "green", "yellow"}
 print(table.concat(color, ", "))'
 ```
@@ -774,7 +773,7 @@ Q：当 OpenResty 中的 Lua 规则和 NGINX 配置文件产生冲突时，比�
 
 A：其实，这个具体要看 NGINX 配置的 rewrite 规则是怎么写的了，是 break 还是 last。这一点，在 OpenResty 的官方文档中有注明，并且配了一个示例代码：
 
-```
+```lua
  location /foo {
      rewrite ^ /bar;
      rewrite_by_lua 'ngx.exit(503)';
@@ -786,7 +785,7 @@ A：其实，这个具体要看 NGINX 配置的 rewrite 规则是怎么写的了
 在示例代码的这个配置中，ngx.exit(503) 是不会被执行的。
 
 但是，如果你改成下面这样的写法，ngx.exit(503) 就可以被执行。
-```
+```lua
 rewrite ^ /bar break；
 ```
 
@@ -799,11 +798,11 @@ rewrite ^ /bar break；
 #### 3.1.1 安装
 下边通过源码进行安装
 1. 先安装perl的包管理器cpanminus
-```
+```bash
  yum install cpanminus
 ```
 2. 下载最新的 test-nginx代码，并编译安装
-```
+```bash
 git clone https://github.com/agentzh/test-nginx.git
 cd test-nginx & perl Makefile.PL
 sudo make install
@@ -818,7 +817,7 @@ test::nginx 中提供了很多 DSL 的原语，下边按照 Nginx 配置、发�
 `test::nginx` 的原语中带有 config 这个关键字的，就和 Nginx 配置相关，还有 `config`、`stream_config`、`http_config` 等。
 他们的作用都一样，即在Nginx的不同上下文中，插入指定的Nginx配置。这些配置可以是Nginx指令，也可以是 `content_by_lua_block` 封装起来的Lua代码。
  config是最常用的原语，在其中可以加载Lua库，并调用函数来做白盒测试。下边是一段测试代码：
-```
+```perl
  === TEST 1: sanity
 --- config
     location /t {
@@ -840,13 +839,13 @@ test::nginx 中提供了很多 DSL 的原语，下边按照 Nginx 配置、发�
 
 想要单元测试的代码被运行，就要发送一个HTTP请求，访问的地址是config中注明的 /t ，如下：
 
-```
+```perl
 --- request
 GET /t
 ```
 这段代码在 request 原语中，发起了一个 GET 请求，地址是 /t。这里，我们并没有注明访问的 ip 地址、域名和端口，也没有指定是 HTTP 1.0 还是 HTTP 1.1，这些细节都被 test::nginx 隐藏了，你不用去关心。这就是 DSL 的好处之一——你只需要关心业务逻辑，不用被各种细节所打扰。
 如果想要测试HTTP 1.0 也可以显示指定：
-```
+```perl
 --- request
 GET /t  HTTP/1.0
 ```

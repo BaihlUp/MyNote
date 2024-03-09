@@ -5,7 +5,7 @@ categories:
   - 后端&架构
 tags:
   - OpenResty
-published: false
+published: true
 ---
 
 # 2 OpenResty开发平台
