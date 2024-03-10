@@ -2,7 +2,7 @@
 title: HTTP2 vs HTTP3详解
 date: 2024-02-05
 categories:
-  - 后端&架构
+  - 网络协议
 tags:
   - HTTP2
   - HTTP3
