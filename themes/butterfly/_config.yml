@@ -44,7 +44,7 @@ favicon: /img/favicon.png
 
 # Avatar (頭像)
 avatar:
-  img: https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png
+  img: https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/41710043961_.pic.jpg
   effect: false
 
 # Disable all banner image
@@ -234,7 +234,7 @@ aside:
       link: https://github.com/BaihlUp
   card_announcement:
     enable: true
-    content: This is my Blog
+    content: 个人笔记迁移中ing....
   card_recent_post:
     enable: true
     limit: 5 # if set 0 will show all
