@@ -1,0 +1,325 @@
+---
+title: Istio 中的流量劫持机制
+date: 2024-03-10
+categories:
+  - 虚拟化&云计算
+tags:
+  - 云原生
+  - Istio
+published: true
+---
+## 1 Istio流量劫持机制
+在Service Mesh架构中，Istio通过流量劫持机制，让Pod中的应用访问其他服务时都经过Istio代理，实现对流量的控制。基于Istio可以实现请求路由、服务发现和负载均衡、故障处理、故障注入和规则配置等功能。，因为所有Pod中的进出流量都经过Istio的数据面，所以也可以实现日志记录和追踪。如下是Istio的架构图：
+![](https://s2.loli.net/2022/09/24/y12MGxe4srHBLTK.png)
+下边通过一个示例操作，看下Istio是怎么实现流量劫持的，流量被劫持后又是怎么转到目的地的。
+## 2 环境介绍
+部署两个Pod，分别表示客户端和服务端，通过客户端发起请求，然后看请求整个链路的转发过程。
+```sh
+# 创建一个namespace
+kubectl create ns sidecar
+# 注入sidecar
+kubectl label ns sidecar istio-injection=enabled
+# 部署nginx pod
+kubectl apply -f nginx.yaml -n sidecar
+# 部署toolbox pod
+kubectl apply -f toolbox.yaml -n sidecar
+```
+1. nginx.yaml
+
+部署一个nginx pod，并创建service。
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx
+          image: nginx
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+spec:
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: 80
+  selector:
+    app: nginx
+```
+2. toolbox.yaml
+
+toolbox其实就是一个centos，可以在其中执行curl发送请求。
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: toolbox
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: toolbox
+  template:
+    metadata:
+      labels:
+        app: toolbox
+        access: "true"
+    spec:
+      containers:
+        - name: toolbox
+          image: centos
+          command:
+            - tail
+            - -f
+            - /dev/null
+```
+执行`kubectl get pod,deployment,svc,endpoints -n sidecar -o wide`看下环境情况：
+![](https://s2.loli.net/2022/09/24/tcAMUZIqzQPlErg.png)
+1. 可以看到两个Pod分别为 nginx-deployment-85b98978db-48m47（IP：10.10.1.5） 和 toolbox-78555898fb-b9qxq（IP：10.10.1.6）
+2. 创建的Service的IP为10.102.37.221
+3. Service的Endpoints目前有一个10.10.1.5，就是运行Nginx的那个Pod，当然，也可以创建多个服务，统一提供服务。
+因为我现在登录在Kubernetes集群的Master节点，其实现在就可以执行 `curl http://10.102.37.221`访问Nginx服务。
+
+![](https://s2.loli.net/2022/09/24/yK64fBaRmtwVj2g.png)
+### 2.1 注入Sidecar
+刚才创建namespace后，执行了 `kubectl label ns sidecar istio-injection=enabled`可以看下sidecar namespace的配置，执行`kubectl get ns sidecar -oyaml`:
+```yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  creationTimestamp: "2022-09-24T08:12:14Z"
+  labels:
+    istio-injection: enabled
+    kubernetes.io/metadata.name: sidecar
+  name: sidecar
+  resourceVersion: "8032"
+  uid: 3fdb6ab1-71b6-44ae-83c8-636dfa266147
+spec:
+  finalizers:
+  - kubernetes
+status:
+  phase: Active
+```
+通过把istio-injection设置为enabled，这样在本namespace中的pod都会注入Sidecar。注入Sidecar后Pod有什么变化呢，可以看下 toolbox-78555898fb-b9qxq 这个pod的运行状态：
+![](https://s2.loli.net/2022/09/24/BqHkVpFsjAJ8UzW.png)
+其中READY中都是2/2，说明Pod中有两个容器，并且状态都是running，查看Pod中都是什么容器。
+**查看Pod里初始化容器：**
+```sh
+kubectl get pods toolbox-78555898fb-b9qxq -n sidecar  -o jsonpath={.spec.initContainers[*].name}
+```
+输出为：istio-init
+**查看Pod里业务容器：**
+```sh
+kubectl get pods toolbox-78555898fb-b9qxq -n sidecar  -o jsonpath={.spec.containers[*].name}
+```
+输出：toolbox 和 istio-proxy
+### 2.2 Init container
+通过查看 toolbox-78555898fb-b9qxq 这个pod的配置，在配置中可以看到istio-init的容器配置信息：
+![](https://s2.loli.net/2022/09/24/vO1YkRhb7V6IFu8.png)
+容器中执行了 `istio-iptables` 配置了iptables规则，也正是因为这个配置劫持了Pod进出的流量，下边我们再仔细看规则的内容。istio-init 在Pod启动时执行，执行完就自动退出了。
+### 2.3 istio-proxy container
+istio-proxy在Pod主要做流量代理，通过运行Envoy，可以根据Envoy配置实现流量的灵活控制。配置内容比较多这里就不展示了。所以 toolbox-78555898fb-b9qxq 中展示READY的两个容器就是toolbox 和 istio-proxy。
+## 3 客户端请求
+在 toolbox-78555898fb-b9qxq 中访问 nginx-deployment-85b98978db-48m47，这样在客户端和服务端中都会发生流量劫持。
+```sh
+baihl@baihl-master:~$ kubectl exec -it toolbox-78555898fb-b9qxq -n sidecar sh
+kubectl exec [POD] [COMMAND] is DEPRECATED and will be removed in a future version. Use kubectl exec [POD] -- [COMMAND] instead.
+sh-4.4# curl http://10.102.37.221
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome to nginx!</title>
+<style>
+html { color-scheme: light dark; }
+body { width: 35em; margin: 0 auto;
+font-family: Tahoma, Verdana, Arial, sans-serif; }
+</style>
+</head>
+<body>
+<h1>Welcome to nginx!</h1>
+<p>If you see this page, the nginx web server is successfully installed and
+working. Further configuration is required.</p>
+<p>For online documentation and support please refer to
+<a href="http://nginx.org/">nginx.org</a>.<br/>
+Commercial support is available at
+<a href="http://nginx.com/">nginx.com</a>.</p>
+<p><em>Thank you for using nginx.</em></p>
+</body>
+</html>
+```
+执行上边操作后，请求从客户端到服务端的大概流程如下：
+![](https://s2.loli.net/2022/09/24/tdEzm1IfhuPQNwC.png)
+其中有两个地方被iptables规则劫持：
+1. 发起curl请求默认请求的是80端口，但是会被iptables OUTPUT劫持转发到envoy监听的15001端口
+2. 请求到达Nginx时，目标端口为80，但是会被iptables PREROUTING劫持转到envoy监听的15006端口。
+### 3.1 Iptables规则
+下边看下iptables规则的内容是什么，因为Pod中的命令不全，所以使用nsenter命令在宿主机上进入容器查看。首先获取容器的PID
+![](https://s2.loli.net/2022/09/24/r82USiCs6lOoDXg.png)
+> 我的Kubernetes环境分为master和node节点，容器是运行在node节点，所以就在node节点操作
+根据上图，toolbox的容器Pid为36009：
+```
+sudo nsenter -t 36009 -n iptables-legacy-save
+```
+查看到的iptables规则如下：
+```
+# Generated by iptables-save v1.8.7 on Sat Sep 24 23:53:39 2022
+*nat
+:PREROUTING ACCEPT [9019:541231]
+:INPUT ACCEPT [9012:540720]
+:OUTPUT ACCEPT [722:64866]
+:POSTROUTING ACCEPT [725:65046]
+:ISTIO_INBOUND - [0:0]
+:ISTIO_IN_REDIRECT - [0:0]
+:ISTIO_OUTPUT - [0:0]
+:ISTIO_REDIRECT - [0:0]
+# 入流量匹配这条，走到ISTIO_INBOUND
+-A PREROUTING -p tcp -j ISTIO_INBOUND
+# 出流量匹配这条，走到ISTIO_OUTPUT
+-A OUTPUT -p tcp -j ISTIO_OUTPUT
+-A ISTIO_INBOUND -p tcp -m tcp --dport 15008 -j RETURN
+-A ISTIO_INBOUND -p tcp -m tcp --dport 15090 -j RETURN
+-A ISTIO_INBOUND -p tcp -m tcp --dport 15021 -j RETURN
+-A ISTIO_INBOUND -p tcp -m tcp --dport 15020 -j RETURN
+# 入流量匹配这条，走到ISTIO_IN_REDIRECT
+-A ISTIO_INBOUND -p tcp -j ISTIO_IN_REDIRECT
+# 目标端口转换为 15006，针对curl请求目标端口 80 --> 15006
+-A ISTIO_IN_REDIRECT -p tcp -j REDIRECT --to-ports 15006
+-A ISTIO_OUTPUT -s 127.0.0.6/32 -o lo -j RETURN
+-A ISTIO_OUTPUT ! -d 127.0.0.1/32 -o lo -m owner --uid-owner 1337 -j ISTIO_IN_REDIRECT
+-A ISTIO_OUTPUT -o lo -m owner ! --uid-owner 1337 -j RETURN
+-A ISTIO_OUTPUT -m owner --uid-owner 1337 -j RETURN
+-A ISTIO_OUTPUT ! -d 127.0.0.1/32 -o lo -m owner --gid-owner 1337 -j ISTIO_IN_REDIRECT
+-A ISTIO_OUTPUT -o lo -m owner ! --gid-owner 1337 -j RETURN
+-A ISTIO_OUTPUT -m owner --gid-owner 1337 -j RETURN
+-A ISTIO_OUTPUT -d 127.0.0.1/32 -j RETURN
+# 以上的都不匹配，走到ISTIO_REDIRECT
+-A ISTIO_OUTPUT -j ISTIO_REDIRECT
+# 目标端口转换为15001，针对curl请求目标端口 80 --> 15001
+-A ISTIO_REDIRECT -p tcp -j REDIRECT --to-ports 15001
+COMMIT
+# Completed on Sat Sep 24 23:53:39 2022
+```
+在toolbox中发起 `curl http://10.102.37.221`，默认的端口为80，经过iptables OUTPUT规则目标端口转换为15001，请求被转到envoy，在envoy中有listener监听15001。
+
+### 3.2 Envoy Config
+- listener 15001
+
+请求到达Envoy，被监听的15001接收，下边看看Envoy listener 15001的配置，同样配置较多，只展示关键部分：
+```
+istioctl pc listener -n sidecar toolbox-78555898fb-b9qxq --port 15001 -ojson
+```
+```json
+{
+    "name": "virtualOutbound",
+    "address": {
+        "socketAddress": {
+            "address": "0.0.0.0",
+            "portValue": 15001
+        }
+    },
+    "useOriginalDst": true
+}
+```
+配置中的useOriginalDst设置为true，表示获取原始目的端口，就是被iptables规则转换前的80端口，看到这个listener的配置为virtualOutbound，就像它的名字一样是个虚拟机，所以获取出来原始的端口80后，就会再被listener 80配置处理。
+- listener 80
+
+同样，我们看下listener 80的配置：
+```
+istioctl pc listener -n sidecar toolbox-78555898fb-b9qxq --port 80 -ojson
+```
+只看关键配置：
+```json
+ {
+        "name": "0.0.0.0_80",
+        "address": {
+            "socketAddress": {
+                "address": "0.0.0.0",
+                "portValue": 80
+            }
+        },
+        "routeConfigName": "80"
+}
+```
+经过listener 80后，匹配routeConfigName "80"，继续看route。
+- route "80"
+
+执行 `istioctl pc route -n sidecar toolbox-78555898fb-b9qxq --name=80 -ojson` 查看如下：
+```json
+{
+                "name": "nginx.sidecar.svc.cluster.local:80",
+                "domains": [
+                    "nginx.sidecar.svc.cluster.local",
+                    "nginx.sidecar.svc.cluster.local:80",
+                    "nginx",
+                    "nginx:80",
+                    "nginx.sidecar.svc",
+                    "nginx.sidecar.svc:80",
+                    "nginx.sidecar",
+                    "nginx.sidecar:80",
+                    "10.102.37.221",
+                    "10.102.37.221:80"
+                ],
+                "routes": [
+                    {
+                        "name": "default",
+                        "match": {
+                            "prefix": "/"
+                        },
+                        "route": {
+                            "cluster": "outbound|80||nginx.sidecar.svc.cluster.local",
+```
+根据上边的配置，请求会选择 `"cluster": "outbound|80||nginx.sidecar.svc.cluster.local"` 处理。现在我们就看下选择的cluster正式的endpoint是什么。
+- endpoints
+
+执行如下命令过滤出我们需要的endpoints：
+```
+istioctl pc endpoints -n sidecar toolbox-78555898fb-b9qxq --cluster="outbound|80||nginx.sidecar.svc.cluster.local"  -ojson
+```
+根据配置可以看到最终选择后端为10.10.1.5，就是我们部署的nginx Pod的地址。
+```json
+{
+    "name": "outbound|80||nginx.sidecar.svc.cluster.local",
+    "addedViaApi": true,
+    "hostStatuses": [
+        {
+            "address": {
+                "socketAddress": {
+                    "address": "10.10.1.5",
+                    "portValue": 80
+                }
+            },
+            "stats": [...],
+            "healthStatus": {
+                "edsHealthStatus": "HEALTHY"
+            },
+            "weight": 1,
+            "locality": {}
+        }
+    ],
+    "circuitBreakers": {...},
+    "observabilityName": "outbound|80||nginx.sidecar.svc.cluster.local"
+}
+```
+经过以上流程，请求就从toolbox Pod中出去了，请求的目标地址变为 10.10.1.5，目标端口为80。
+## 4 服务端接收请求
+请求到达服务端一样会经过iptables规则和Envoy代理，才能最终到达Nginx。分析过程和客户端一样，就不再赘述。
+## 5 Service Mesh 涉及的网络栈
+上边的请求流程，在两个Pod中都经过了多次协议栈的处理。
+![](https://s2.loli.net/2022/09/25/XTJVbtgGL6W5uHh.png)
+就像上图一样，请求一次要经过多次网络栈的处理，对性能肯定会有影响，既然有问题，就会出现技术去解决，Cilium就可以实现加速，具体架构图如下：
+![](https://s2.loli.net/2022/09/25/FCzw1u2YU4GlvhS.png)
+Cilium底层基于Linux内核的新技术eBPF，保持好奇心，多多探索吧，哈哈。
+
