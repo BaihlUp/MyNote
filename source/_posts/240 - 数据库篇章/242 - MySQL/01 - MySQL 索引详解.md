@@ -6,7 +6,7 @@ categories:
 tags:
   - 数据库
   - MySQL
-published: false
+published: true
 ---
 ## 第4讲 深入浅出索引
 
