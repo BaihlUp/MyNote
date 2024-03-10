@@ -1,11 +1,11 @@
 ---
-title: 05 - 深入理解Nginx：模块开发与架构解析
+title: 深入理解Nginx：模块开发与架构解析
 date: 2024-02-04
 categories:
   - 后端&架构
 tags:
   - Nginx
-published: false
+published: true
 ---
 # 0 参考资料
 [书中示例代码](https://github.com/russelltao/diveintonginx)
@@ -15,14 +15,13 @@ Nginx 源码注释：[https://github.com/chronolaw/annotated_nginx](https://gith
 # 2 如何编写HTTP模块
 ## 2.7 Nginx提供的高级数据结构
 
-```
+```c
 - ngx_queue_t 双向链表
 - ngx_array_t 动态数组
 - ngx_list_t 单向链表
 - ngx_rbtree_t 红黑树
 - ngx_radix_tree_t 基数树
 ```
-
 
 # 第3部分 深入Nginx
 
