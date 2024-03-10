@@ -11,13 +11,13 @@ published: true
 ## 1 简介
 上一篇是在Service Mesh中两个应用之间互相访问，本片介绍下通过Istio Ingress把服务网络中的应用对外暴露，通过Ingress Gateway控制从外边访问服务网格中的应用。
 在Service Mesh中部署两个服务，一个httpserver应用，一个Nginx，通过在Ingress Gateway中配置路由控制，使用同一个域名，不同的URI访问两个应用服务。如下：
-```
+```bash
 curl -H "Host: simple.baihl.io" $INGRESS_IP/simple/httpserver
 curl -H "Host: simple.baihl.io" $INGRESS_IP/simple/nginx
 ```
 `$INGRESS_IP` 为 Istio中Ingress Gateway对外的IP地址。
 ## 2 创建应用服务
-```sh
+```bash
 kubectl create ns simple
 kubectl create -f simple.yaml -n simple
 kubectl create -f nginx.yaml -n simple
