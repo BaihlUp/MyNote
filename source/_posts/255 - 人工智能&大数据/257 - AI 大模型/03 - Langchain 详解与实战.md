@@ -541,6 +541,533 @@ The output should be a markdown code snippet formatted in the following schema, 
 ```
 LangChain的输出解析对 prompt 增加特定处理。
 
+## 2.2 链（Chain）
+如果想开发更复杂的应用程序，那么就需要通过 “Chain” 来链接LangChain的各个组件和功能——模型之间彼此链接，或模型与其他组件链接。
+**说到链的实现和使用，也简单。**
+- 首先LangChain通过设计好的接口，实现一个具体的链的功能。例如，LLM链（LLMChain）能够接受用户输入，使用 PromptTemplate 对其进行格式化，然后将格式化的响应传递给 LLM。这就相当于把整个Model I/O的流程封装到链里面。
+- 实现了链的具体功能之后，我们可以通过将多个链组合在一起，或者将链与其他组件组合来构建更复杂的链。
+所以你看，链在内部把一系列的功能进行封装，而链的外部则又可以组合串联。 **链其实可以被视为LangChain中的一种基本功能单元。**
+LangChain中提供了很多种类型的预置链，目的是使各种各样的任务实现起来更加方便、规范。
 
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/20240311151037.png)
 
+LangChain中各种各样的链：[https://github.com/langchain-ai/langchain/tree/master/libs/langchain/langchain/chains](https://github.com/langchain-ai/langchain/tree/master/libs/langchain/langchain/chains)
+### 2.2.1 Sequential Chain：顺序链
+使用示例，我们的目标是这样的：
+- 第一步，我们假设大模型是一个植物学家，让他给出某种特定鲜花的知识和介绍。
+- 第二步，我们假设大模型是一个鲜花评论者，让他参考上面植物学家的文字输出，对鲜花进行评论。
+- 第三步，我们假设大模型是易速鲜花的社交媒体运营经理，让他参考上面植物学家和鲜花评论者的文字输出，来写一篇鲜花运营文案。
 
+首先，导入所有需要的库。
+```python
+# 设置OpenAI API密钥
+import os
+os.environ["OPENAI_API_KEY"] = '你的OpenAI API Key'
+
+from langchain.llms import OpenAI
+from langchain.chains import LLMChain
+from langchain.prompts import PromptTemplate
+from langchain.chains import SequentialChain
+```
+然后，添加第一个LLMChain，生成鲜花的知识性说明。
+```python
+# 这是第一个LLMChain，用于生成鲜花的介绍，输入为花的名称和种类
+llm = OpenAI(temperature=.7)
+template = """
+你是一个植物学家。给定花的名称和类型，你需要为这种花写一个200字左右的介绍。
+
+花名: {name}
+颜色: {color}
+植物学家: 这是关于上述花的介绍:"""
+prompt_template = PromptTemplate(input_variables=["name", "color"], template=template)
+introduction_chain = LLMChain(llm=llm, prompt=prompt_template, output_key="introduction")
+
+```
+接着，添加第二个LLMChain，根据鲜花的知识性说明生成评论。
+```python
+# 这是第二个LLMChain，用于根据鲜花的介绍写出鲜花的评论
+llm = OpenAI(temperature=.7)
+template = """
+你是一位鲜花评论家。给定一种花的介绍，你需要为这种花写一篇200字左右的评论。
+
+鲜花介绍:
+{introduction}
+花评人对上述花的评论:"""
+prompt_template = PromptTemplate(input_variables=["introduction"], template=template)
+review_chain = LLMChain(llm=llm, prompt=prompt_template, output_key="review")
+```
+接着，添加第三个LLMChain，根据鲜花的介绍和评论写出一篇自媒体的文案。
+```python
+# 这是第三个LLMChain，用于根据鲜花的介绍和评论写出一篇自媒体的文案
+template = """
+你是一家花店的社交媒体经理。给定一种花的介绍和评论，你需要为这种花写一篇社交媒体的帖子，300字左右。
+
+鲜花介绍:
+{introduction}
+花评人对上述花的评论:
+{review}
+
+社交媒体帖子:
+"""
+prompt_template = PromptTemplate(input_variables=["introduction", "review"], template=template)
+social_post_chain = LLMChain(llm=llm, prompt=prompt_template, output_key="social_post_text")
+```
+最后，添加SequentialChain，把前面三个链串起来。
+```python
+# 这是总的链，我们按顺序运行这三个链
+overall_chain = SequentialChain(
+    chains=[introduction_chain, review_chain, social_post_chain],
+    input_variables=["name", "color"],
+    output_variables=["introduction","review","social_post_text"],
+    verbose=True)
+
+# 运行链，并打印结果
+result = overall_chain({"name":"玫瑰", "color": "黑色"})
+print(result)
+
+```
+最终的输出如下：
+```json
+> Entering new  chain...
+
+> Finished chain.
+{'name': '玫瑰', 'color': '黑色',
+'introduction': '\n\n黑色玫瑰，这是一种对传统玫瑰花的独特颠覆，它的出现挑战了我们对玫瑰颜色的固有认知。它的花瓣如煤炭般黑亮，反射出独特的微光，而花蕊则是金黄色的，宛如夜空中的一颗星，强烈的颜色对比营造出一种前所未有的视觉效果。在植物学中，黑色玫瑰的出现无疑提供了一种新的研究方向，对于我们理解花朵色彩形成的机制有着重要的科学价值。',
+'review': '\n\n黑色玫瑰，这不仅仅是一种花朵，更是一种完全颠覆传统的艺术表现形式。黑色的花瓣仿佛在诉说一种不可言喻的悲伤与神秘，而黄色的蕊瓣犹如漆黑夜空中的一抹亮色，给人带来无尽的想象。它将悲伤与欢乐，神秘与明亮完美地结合在一起，这是一种全新的视觉享受，也是一种对生活理解的深度表达。',
+'social_post_text': '\n欢迎来到我们的自媒体平台，今天，我们要向您展示的是我们的全新产品——黑色玫瑰。这不仅仅是一种花，这是一种对传统观念的挑战，一种视觉艺术的革新，更是一种生活态度的象征。
+这种别样的玫瑰花，其黑色花瓣宛如漆黑夜空中闪烁的繁星，富有神秘的深度感，给人一种前所未有的视觉冲击力。这种黑色，它不是冷酷、不是绝望，而是充满着独特的魅力和力量。而位于黑色花瓣之中的金黄色花蕊，则犹如星星中的灵魂，默默闪烁，给人带来无尽的遐想，充满活力与生机。
+黑色玫瑰的存在，不仅挑战了我们对于玫瑰传统颜色的认知，它更是一种生动的生命象征，象征着那些坚韧、独特、勇敢面对生活的人们。黑色的花瓣中透露出一种坚韧的力量，而金黄的花蕊则是生活中的希望，二者的结合恰好象征了生活中的喜怒哀乐，体现了人生的百态。'}
+```
+至此，就通过两个LLM链和一个顺序链，生成了一篇完美的文案。
+
+### 2.2.2 RouterChain：路由链
+RouterChain，也叫路由链，能动态选择用于给定输入的下一个链。我们会根据用户的问题内容，首先使用路由器链确定问题更适合哪个处理模板，然后将问题发送到该处理模板进行回答。如果问题不适合任何已定义的处理模板，它会被发送到默认链。
+在这里，我们会用LLMRouterChain和MultiPromptChain（也是一种路由链）组合实现路由功能，该MultiPromptChain会调用LLMRouterChain选择与给定问题最相关的提示，然后使用该提示回答问题。
+**具体步骤如下：**
+1. 构建处理模板：为鲜花护理和鲜花装饰分别定义两个字符串模板。
+2. 提示信息：使用一个列表来组织和存储这两个处理模板的关键信息，如模板的键、描述和实际内容。
+3. 初始化语言模型：导入并实例化语言模型。
+4. 构建目标链：根据提示信息中的每个模板构建了对应的LLMChain，并存储在一个字典中。
+5. 构建LLM路由链：这是决策的核心部分。首先，它根据提示信息构建了一个路由模板，然后使用这个模板创建了一个LLMRouterChain。
+6. 构建默认链：如果输入不适合任何已定义的处理模板，这个默认链会被触发。
+7. 构建多提示链：使用MultiPromptChain将LLM路由链、目标链和默认链组合在一起，形成一个完整的决策系统。
+
+#### 2.2.2.1 构建提示信息的模板
+```python
+# 构建两个场景的模板
+flower_care_template = """你是一个经验丰富的园丁，擅长解答关于养花育花的问题。
+                        下面是需要你来回答的问题:
+                        {input}"""
+
+flower_deco_template = """你是一位网红插花大师，擅长解答关于鲜花装饰的问题。
+                        下面是需要你来回答的问题:
+                        {input}"""
+# 构建提示信息
+prompt_infos = [
+    {
+        "key": "flower_care",
+        "description": "适合回答关于鲜花护理的问题",
+        "template": flower_care_template,
+    },
+    {
+        "key": "flower_decoration",
+        "description": "适合回答关于鲜花装饰的问题",
+        "template": flower_deco_template,
+    }]
+```
+循环prompt_infos这个列表，构建出两个目标链，分别负责处理不同的问题。
+```python
+# 构建目标链
+from langchain.chains.llm import LLMChain
+from langchain.prompts import PromptTemplate
+chain_map = {}
+for info in prompt_infos:
+    prompt = PromptTemplate(template=info['template'],
+                            input_variables=["input"])
+    print("目标提示:\n",prompt)
+    chain = LLMChain(llm=llm, prompt=prompt,verbose=True)
+    chain_map[info["key"]] = chain
+```
+目标链提示是这样的：
+```json
+目标提示:
+input_variables=['input']
+output_parser=None partial_variables={}
+template='你是一个经验丰富的园丁，擅长解答关于养花育花的问题。\n                        下面是需要你来回答的问题:\n
+{input}' template_format='f-string'
+validate_template=True
+
+目标提示:
+input_variables=['input']
+output_parser=None partial_variables={}
+template='你是一位网红插花大师，擅长解答关于鲜花装饰的问题。\n                        下面是需要你来回答的问题:\n
+{input}' template_format='f-string'
+validate_template=True
+```
+对于每个场景，创建一个 LLMChain（语言模型链）。每个链会根据其场景模板生成对应的提示，然后将这个提示送入语言模型获取答案。
+
+#### 2.2.2.2 构建路由链
+```python
+# 构建路由链
+from langchain.chains.router.llm_router import LLMRouterChain, RouterOutputParser
+from langchain.chains.router.multi_prompt_prompt import MULTI_PROMPT_ROUTER_TEMPLATE as RounterTemplate
+destinations = [f"{p['key']}: {p['description']}" for p in prompt_infos]
+router_template = RounterTemplate.format(destinations="\n".join(destinations))
+print("路由模板:\n",router_template)
+router_prompt = PromptTemplate(
+    template=router_template,
+    input_variables=["input"],
+    output_parser=RouterOutputParser(),)
+print("路由提示:\n",router_prompt)
+router_chain = LLMRouterChain.from_llm(llm,
+                                       router_prompt,
+                                       verbose=True)
+```
+输出：
+````bash
+路由模板:
+ Given a raw text input to a language model select the model prompt best suited for the input. You will be given the names of the available prompts and a description of what the prompt is best suited for. You may also revise the original input if you think that revising it will ultimately lead to a better response from the language model.
+
+<< FORMATTING >>
+Return a markdown code snippet with a JSON object formatted to look like:
+```json
+{{
+    "destination": string \ name of the prompt to use or "DEFAULT"
+    "next_inputs": string \ a potentially modified version of the original input
+}}
+```
+
+REMEMBER: "destination" MUST be one of the candidate prompt names specified below OR it can be "DEFAULT" if the input is not well suited for any of the candidate prompts.
+REMEMBER: "next_inputs" can just be the original input if you don't think any modifications are needed.
+
+<< CANDIDATE PROMPTS >>
+flower_care: 适合回答关于鲜花护理的问题
+flower_decoration: 适合回答关于鲜花装饰的问题
+
+<< INPUT >>
+{input}
+
+<< OUTPUT >>
+
+路由提示:
+input_variables=['input'] output_parser=RouterOutputParser(default_destination='DEFAULT', next_inputs_type=<class 'str'>, next_inputs_inner_key='input')
+partial_variables={}
+template='Given a raw text input to a language model select the model prompt best suited for the input. You will be given the names of the available prompts and a description of what the prompt is best suited for. You may also revise the original input if you think that revising it will ultimately lead to a better response from the language model.\n\n
+<< FORMATTING >>\n
+Return a markdown code snippet with a JSON object formatted to look like:\n```json\n{{\n "destination": string \\ name of the prompt to use or "DEFAULT"\n    "next_inputs": string \\ a potentially modified version of the original input\n}}\n```\n\n
+REMEMBER: "destination" MUST be one of the candidate prompt names specified below OR it can be "DEFAULT" if the input is not well suited for any of the candidate prompts.\n
+REMEMBER: "next_inputs" can just be the original input if you don\'t think any modifications are needed.\n\n<< CANDIDATE PROMPTS >>\n
+flower_care: 适合回答关于鲜花护理的问题\n
+flower_decoration: 适合回答关于鲜花装饰的问题\n\n
+<< INPUT >>\n{input}\n\n<< OUTPUT >>\n'
+template_format='f-string'
+validate_template=True
+````
+1. 路由模板的解释
+
+路由模板是路由功能得以实现的核心。
+
+2. 路由提示的解释
+
+路由提示 (router_prompt）则根据路由模板，生成了具体传递给LLM的路由提示信息。
+- 其中input_variables 指定模板接收的输入变量名，这里只有 `"input"`。
+- output_parser 是一个用于解析模型输出的对象，它有一个默认的目的地和一个指向下一输入的键。
+- template 是实际的路由模板，用于给模型提供指示。这就是刚才详细解释的模板内容。
+- template_format 指定模板的格式，这里是 `"f-string"`。
+- validate_template 是一个布尔值，如果为 True，则会在使用模板前验证其有效性。
+
+这个构造允许你将用户的原始输入送入路由器，然后路由器会决定将该输入发送到哪个具体的模型提示，或者是否需要对输入进行修订以获得最佳的响应。
+
+#### 2.2.2.3 构建默认链
+除了处理目标链和路由链之外，还需要准备一个默认链。如果路由链没有找到适合的链，那么，就以默认链进行处理。
+```python
+# 构建默认链
+from langchain.chains import ConversationChain
+default_chain = ConversationChain(llm=llm,
+                                  output_key="text",
+                                  verbose=True)
+```
+#### 2.2.2.4 构建多提示链
+使用MultiPromptChain类把前几个链整合在一起，实现路由功能。这个MultiPromptChain类是一个多路选择链，它使用一个LLM路由器链在多个提示之间进行选择。**MultiPromptChain中有三个关键元素。**
+- router_chain（类型RouterChain）：这是用于决定目标链和其输入的链。当给定某个输入时，这个router_chain决定哪一个destination_chain应该被选中，以及传给它的具体输入是什么。
+- destination_chains（类型Mapping[str, LLMChain]）：这是一个映射，将名称映射到可以将输入路由到的候选链。例如，你可能有多种处理文本输入的方法（或“链”），每种方法针对特定类型的问题。destination_chains可以是这样一个字典： `{'weather': weather_chain, 'news': news_chain}`。在这里，weather_chain可能专门处理与天气相关的问题，而news_chain处理与新闻相关的问题。
+- default_chain（类型LLMChain）：当 router_chain 无法将输入映射到destination_chains中的任何一个链时，LLMChain 将使用此默认链。这是一个备选方案，确保即使路由器不能决定正确的链，也总有一个链可以处理输入。
+
+**它的工作流程如下：**
+1. 输入首先传递给router_chain。
+2. router_chain根据某些标准或逻辑决定应该使用哪一个destination_chain。
+3. 输入随后被路由到选定的destination_chain，该链进行处理并返回结果。
+4. 如果router_chain不能决定正确的destination_chain，则输入会被传递给default_chain。
+
+这样，MultiPromptChain就提供了一个在多个处理链之间动态路由输入的机制，以得到最相关或最优的输出。
+```python
+# 构建多提示链
+from langchain.chains.router import MultiPromptChain
+chain = MultiPromptChain(
+    router_chain=router_chain,
+    destination_chains=chain_map,
+    default_chain=default_chain,
+    verbose=True)
+```
+
+#### 2.2.2.5 运行路由链
+通过下边的方式运行路由链：
+```python
+print(chain.run(“如何为玫瑰浇水？”))
+```
+输出：
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/20240311155929.png)
+
+**完整代码：** [https://github.com/huangjia2019/langchain/blob/main/09_%E9%93%BE%E4%B8%8B/Rounter_Chain.py](https://github.com/huangjia2019/langchain/blob/main/09_%E9%93%BE%E4%B8%8B/Rounter_Chain.py)
+## 2.3 记忆（Memory）
+在默认情况下，无论是LLM还是代理都是无状态的，每次模型的调用都是独立于其他交互的。但是在聊天中，为了对话的连贯性，是需要让大模型记住之前的内容，具体的实现方式有如下几种。
+
+1. ConversationBufferMemory的 [实现细节](https://github.com/langchain-ai/langchain/blob/master/libs/langchain/langchain/memory/buffer.py)
+2. ConversationSummaryMemory的 [实现细节](https://github.com/langchain-ai/langchain/blob/master/libs/langchain/langchain/memory/summary.py)
+
+### 2.3.1 ConversationChain
+这个Chain最主要的特点是，它提供了包含AI 前缀和人类前缀的对话摘要格式，这个对话格式和记忆机制结合得非常紧密。使用示例：
+```python
+# 设置OpenAI API密钥  
+# import os  
+# os.environ["OPENAI_API_KEY"] = 'Your Key'  
+  
+# 导入所需的库  
+from langchain import OpenAI  
+from langchain.chains import ConversationChain  
+  
+# 初始化大语言模型  
+llm = OpenAI(  
+    temperature=0.5,  
+    model_name="text-davinci-003"  
+)  
+  
+# 初始化对话链  
+conv_chain = ConversationChain(llm=llm)  
+  
+# 打印对话的模板  
+print(conv_chain.prompt.template)
+```
+输出：
+```python
+The following is a friendly conversation between a human and an AI. The AI is talkative and provides lots of specific details from its context. If the AI does not know the answer to a question, it truthfully says it does not know.
+
+Current conversation:
+{history}
+Human: {input}
+AI:
+```
+这里的提示为人类（我们）和人工智能（ text-davinci-003 ）之间的对话设置了一个基本对话框架：这是 **人类和** **AI** **之间的友好对话。AI** **非常健谈并从其上下文中提供了大量的具体细节。** (The following is a friendly conversation between a human and an AI. The AI is talkative and provides lots of specific details from its context. )
+同时，这个提示试图通过说明以下内容来减少幻觉，也就是尽量减少模型编造的信息：
+**“如果** **AI** **不知道问题的答案，它就会如实说它不知道。”**（If the AI does not know the answer to a question, it truthfully says it does not know.）之后，我们看到两个参数 {history} 和 {input}。
+- **{history}** 是存储会话记忆的地方，也就是人类和人工智能之间对话历史的信息。
+- **{input}** 是新输入的地方，你可以把它看成是和ChatGPT对话时，文本框中的输入。
+
+>当有了 {history} 参数，以及 Human 和 AI 这两个前缀，我们就能够把历史对话信息存储在提示模板中，并作为新的提示内容在新一轮的对话过程中传递给模型。—— 这就是记忆机制的原理。
+### 2.3.2 ConversationBufferMemory
+在LangChain中，通过ConversationBufferMemory（ **缓冲记忆**）可以实现最简单的记忆机制。示例如下：
+```python
+# 设置OpenAI API密钥  
+# import os  
+# os.environ["OPENAI_API_KEY"] = 'Your Key'  
+  
+# 导入所需的库  
+from langchain import OpenAI  
+from langchain.chains import ConversationChain  
+from langchain.chains.conversation.memory import ConversationBufferMemory  
+  
+# 初始化大语言模型  
+llm = OpenAI(  
+    temperature=0.5,  
+)  
+  
+# 初始化对话链  
+conversation = ConversationChain(  
+    llm=llm,  
+    memory=ConversationBufferMemory()  
+)  
+  
+# 第一天的对话  
+# 回合1  
+conversation("我姐姐明天要过生日，我需要一束生日花束。")  
+print("第一次对话后的记忆:", conversation.memory.buffer)  
+  
+# 回合2  
+conversation("她喜欢粉色玫瑰，颜色是粉色的。")  
+print("第二次对话后的记忆:", conversation.memory.buffer)  
+  
+# 回合3 （第二天的对话）  
+conversation("我又来了，还记得我昨天为什么要来买花吗？")  
+print("/n第三次对话后时提示:/n",conversation.prompt.template)  
+print("/n第三次对话后的记忆:/n", conversation.memory.buffer)
+```
+在第三回合中模型的输出：
+```bash
+Human: 我姐姐明天要过生日，我需要一束生日花束。
+AI:  哦，你姐姐明天要过生日，那太棒了！我可以帮你推荐一些生日花束，你想要什么样的？我知道有很多种，比如玫瑰、康乃馨、郁金香等等。
+Human: 她喜欢粉色玫瑰，颜色是粉色的。
+AI:  好的，那我可以推荐一束粉色玫瑰的生日花束给你，你想要多少朵？
+Human: 我又来了，还记得我昨天为什么要来买花吗？
+AI:  是的，我记得你昨天来买花是因为你姐姐明天要过生日，你想要买一束粉色玫瑰的生日花束给她。
+```
+实际上，这些聊天历史信息，都被传入了ConversationChain的提示模板中的 {history} 参数，构建出了包含聊天记录的新的提示输入。这样简单的存储之前的对话内容，新输入中也包含了更多的Token（所有的聊天历史记录），这意味着响应时间变慢和更高的成本。而且，当达到LLM的令牌数（上下文窗口）限制时，太长的对话无法被记住（对于text-davinci-003和gpt-3.5-turbo，每次的最大输入限制是4096个Token）。
+
+### 2.3.3 ConversationBufferWindowMemory
+ConversationBufferWindowMemory 是 **缓冲窗口记忆**，它的思路就是只保存最新最近的几次人类和AI的互动。因此，它在之前的“缓冲记忆”基础上增加了一个窗口值 k。这意味着我们只保留一定数量的过去互动，然后“忘记”之前的互动。使用示例：
+```python
+# 设置OpenAI API密钥  
+import os  
+os.environ["OPENAI_API_KEY"] = 'Your Key'  
+  
+# 导入所需的库  
+from langchain import OpenAI  
+from langchain.chains import ConversationChain  
+from langchain.chains.conversation.memory import ConversationBufferWindowMemory  
+  
+# 初始化大语言模型  
+llm = OpenAI(  
+    temperature=0.5,  
+)  
+  
+# 初始化对话链  
+conversation = ConversationChain(  
+    llm=llm,  
+    memory=ConversationBufferWindowMemory(k=1)  
+)  
+  
+# 第一天的对话  
+# 回合1  
+result = conversation("我姐姐明天要过生日，我需要一束生日花束。")  
+print(result)  
+# 回合2  
+result = conversation("她喜欢粉色玫瑰，颜色是粉色的。")  
+# print("\n第二次对话后的记忆:\n", conversation.memory.buffer)  
+print(result)  
+  
+# 第二天的对话  
+# 回合3  
+result = conversation("我又来了，还记得我昨天为什么要来买花吗？")  
+print(result)
+```
+第二回合输出：
+```json
+{'input': '她喜欢粉色玫瑰，颜色是粉色的。', 'history': 'Human: 我姐姐明天要过生日，我需要一束生日花束。\nAI:  好的，让我来帮助你选择一束生日花束吧！根据我所知，生日花束通常会选择一些鲜艳的颜色，比如红色、粉色或橙色的花朵。也可以根据你姐姐的喜好来选择，比如她喜欢什么样的花或颜色。另外，你可以选择一束混合花束，里面包含多种不同的花朵，这样会更加丰富多彩。你还有其他要求吗？', 'response': ' 好的，我会为你选择一束粉色玫瑰的花束。你姐姐一定会喜欢的！另外，你还可以选择一些附加的小礼物，比如巧克力或贺卡，来让这份礼物更加特别。我可以帮你一起挑选，如果你需要的话。'}
+```
+第三回合的输出：
+```json
+{'input': '我又来了，还记得我昨天为什么要来买花吗？', 'history': 'Human: 她喜欢粉色玫瑰，颜色是粉色的。\nAI:  好的，我会为你选择一束粉色玫瑰的花束。你姐姐一定会喜欢的！另外，你还可以选择一些附加的小礼物，比如巧克力或贺卡，来让这份礼物更加特别。我可以帮你一起挑选，如果你需要的话。', 'response': ' 是的，你昨天来买花是为了给你的母亲庆祝她的生日。你选择了一束红色康乃馨和一张生日贺卡。我希望你的母亲喜欢这份礼物。'}
+```
+在第三个回合，当我们询问“还记得我昨天为什么要来买花吗？”，由于我们只保留了最近的互动（k=1），模型已经忘记了正确的答案，回答也是错误的了。
+
+### 2.3.4  ConversationSummaryMemory
+ConversationSummaryMemory（ **对话总结记忆**）的思路就是将对话历史进行汇总，然后再传递给 {history} 参数。这种方法旨在通过对之前的对话进行汇总来避免过度使用 Token。
+ConversationSummaryMemory有这么几个核心特点。
+1. 汇总对话：此方法不是保存整个对话历史，而是每次新的互动发生时对其进行汇总，然后将其添加到之前所有互动的“运行汇总”中。
+2. 使用LLM进行汇总：该汇总功能由另一个LLM驱动，这意味着对话的汇总实际上是由AI自己进行的。
+3. 适合长对话：对于长对话，此方法的优势尤为明显。虽然最初使用的 Token 数量较多，但随着对话的进展，汇总方法的增长速度会减慢。与此同时，常规的缓冲内存模型会继续线性增长。
+
+**代码示例：**
+```python
+# 设置OpenAI API密钥  
+# import os  
+# os.environ["OPENAI_API_KEY"] = 'Your Key'  
+  
+# 导入所需的库  
+from langchain import OpenAI  
+from langchain.chains import ConversationChain  
+from langchain.chains.conversation.memory import ConversationSummaryMemory  
+  
+# 初始化大语言模型  
+llm = OpenAI(  
+    temperature=0.5,  
+    # model_name="text-davinci-003"  
+)  
+  
+# 初始化对话链  
+conversation = ConversationChain(  
+    llm=llm,  
+    memory=ConversationSummaryMemory(llm=llm)  
+)  
+  
+# 第一天的对话  
+# 回合1  
+result = conversation("我姐姐明天要过生日，我需要一束生日花束。")  
+print(result)  
+# 回合2  
+result = conversation("她喜欢粉色玫瑰，颜色是粉色的。")  
+# print("\n第二次对话后的记忆:\n", conversation.memory.buffer)  
+print(result)  
+  
+# 第二天的对话  
+# 回合3  
+result = conversation("我又来了，还记得我昨天为什么要来买花吗？")  
+print(result)
+```
+第二回合的输出：
+```json
+{'input': '她喜欢粉色玫瑰，颜色是粉色的。', 'history': '\nThe human asks the AI for help in choosing a birthday bouquet for their sister. The AI suggests a bouquet of pink roses and white daisies, symbolizing gentleness and purity, and recommends adding some green leaves for decoration. The AI also asks for the desired number of flowers to help select the appropriate size.', 'response': ' 那么我建议您选择一束粉红色的玫瑰和白色的雏菊，这象征着温柔和纯洁。您也可以在花束中加入一些绿叶作为装饰。请问您想要多少朵花呢？这样我可以帮您选择合适的大小。'}
+```
+第三回合的输出：
+```json
+{'input': '我又来了，还记得我昨天为什么要来买花吗？', 'history': '\nThe human asks the AI for help in choosing a birthday bouquet for their sister. The AI suggests a bouquet of pink roses and white daisies, symbolizing gentleness and purity, and recommends adding green leaves for decoration. The AI also asks for the desired number of flowers to help select the appropriate size. The human clarifies that their sister prefers pink roses and the AI suggests adding them to the bouquet. The AI also asks for the desired number of flowers to ensure the right size.', 'response': ' 当然记得！昨天您说您的妹妹生日快到了，想要给她一个特别的生日花束。您想要为她挑选什么样的花束呢？我可以帮您选择最合适的花束。'}
+```
+看得出来，这里的 `'history'`，不再是之前人类和AI对话的简单复制粘贴，而是经过了总结和整理之后的一个综述信息。
+ConversationSummaryMemory的优点是对于长对话，可以减少使用的 Token 数量，因此可以记录更多轮的对话信息，使用起来也直观易懂。不过，它的缺点是，对于较短的对话，可能会导致更高的 Token 使用。另外，对话历史的记忆完全依赖于中间汇总LLM的能力，还需要为汇总LLM使用 Token，这增加了成本，且并不限制对话长度。
+
+### 2.3.5 ConversationSummaryBufferMemory
+ConversationSummaryBufferMemory，即 **对话总结缓冲记忆**，它是一种 **混合记忆** 模型，结合了上述各种记忆机制，包括ConversationSummaryMemory 和 ConversationBufferWindowMemory的特点。这种模型旨在在对话中总结早期的互动，同时尽量保留最近互动中的原始内容。
+是通过max_token_limit这个参数做到这一点的。当最新的对话文字长度在300字之内的时候，LangChain会记忆原始对话内容；当对话文字超出了这个参数的长度，那么模型就会把所有超过预设长度的内容进行总结，以节省Token数量。
+```python
+# 设置OpenAI API密钥  
+# import os  
+# os.environ["OPENAI_API_KEY"] = 'Your Key'  
+  
+# 导入所需的库  
+from langchain import OpenAI  
+from langchain.chains import ConversationChain  
+from langchain.chains.conversation.memory import ConversationSummaryBufferMemory  
+  
+# 初始化大语言模型  
+llm = OpenAI(  
+    temperature=0.5,  
+    # model_name="gpt-4"  
+)  
+  
+# 初始化对话链  
+conversation = ConversationChain(  
+    llm=llm,  
+    memory=ConversationSummaryBufferMemory(  
+        llm=llm,  
+        max_token_limit=300  
+    )  
+)  
+  
+# 第一天的对话  
+# 回合1  
+result = conversation("我姐姐明天要过生日，我需要一束生日花束。")  
+print(result)  
+# 回合2  
+result = conversation("她喜欢粉色玫瑰，颜色是粉色的。")  
+# print("\n第二次对话后的记忆:\n", conversation.memory.buffer)  
+print(result)  
+  
+# 第二天的对话  
+# 回合3  
+result = conversation("我又来了，还记得我昨天为什么要来买花吗？")  
+print(result)
+```
+第三回合输出：
+```json
+{'input': '我又来了，还记得我昨天为什么要来买花吗？',
+'history': "System: \nThe human asked the AI for advice on buying a bouquet for their sister's birthday. The AI suggested buying a vibrant bouquet as a representation of their wishes and blessings, and recommended looking for special bouquets like colorful roses or lilies for something more unique.\nHuman: 她喜欢粉色玫瑰，颜色是粉色的。\nAI:  好的，那粉色玫瑰就是一个很好的选择！你可以买一束粉色玫瑰花束，这样你姐姐会很开心的！你可以在花店里找到粉色玫瑰，也可以从网上订购，你可以根据你的预算，选择合适的数量。另外，你可以考虑添加一些装饰，比如细绳、彩带或者小礼品",
+'response': ' 是的，我记得你昨天来买花是为了给你姐姐的生日。你想买一束粉色玫瑰花束来表达你的祝福和祝愿，你可以在花店里找到粉色玫瑰，也可以从网上订购，你可以根据你的预算，选择合适的数量。另外，你可以考虑添加一些装饰，比如细绳、彩带或者小礼品}
+```
+在第三回合，它察觉出前两轮的对话已经超出了300个字节，就把早期的对话加以总结，以节省Token资源。
+
+### 2.3.6 四种记忆机制的比较
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/20240311150350.png)
+
+在经过 K 轮对话后，对Token的消耗对比：ConversationSummaryBufferMemory和ConversationSummaryMemory，在对话轮次较少的时候可能会浪费一些Token，但是多轮对话过后，Token的节省就逐渐体现出来了。ConversationBufferWindowMemory对于Token的节省最为直接，但是它会完全遗忘掉K轮之前的对话内容，因此对于某些场景也不是最佳选择。
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/20240311150409.png)
+
+## 2.4 代理
