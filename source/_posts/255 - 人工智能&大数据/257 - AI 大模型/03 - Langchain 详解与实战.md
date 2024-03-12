@@ -1070,4 +1070,86 @@ print(result)
 在经过 K 轮对话后，对Token的消耗对比：ConversationSummaryBufferMemory和ConversationSummaryMemory，在对话轮次较少的时候可能会浪费一些Token，但是多轮对话过后，Token的节省就逐渐体现出来了。ConversationBufferWindowMemory对于Token的节省最为直接，但是它会完全遗忘掉K轮之前的对话内容，因此对于某些场景也不是最佳选择。
 ![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/20240311150409.png)
 
-## 2.4 代理
+## 2.4 代理（Agents）
+### 2.4.1 代理的作用
+如果需要模型做自主判断、自行调用工具、自行决定下一步行动的时候，可以使用Agent（也就是代理）。代理就像一个多功能的接口，它能够接触并使用一套工具。根据用户的输入，代理会决定调用哪些工具。它不仅可以同时使用多种工具，而且可以将一个工具的输出数据作为另一个工具的输入数据。
+在LangChain中使用代理，需要理解下面三个元素。
+- **大模型**：提供逻辑的引擎，负责生成预测和处理输入。
+- 与之交互的 **外部工具**：可能包括数据清洗工具、搜索引擎、应用程序等。
+- 控制交互的 **代理**：调用适当的外部工具，并管理整个交互过程的流程。
+
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/20240312090544.png)
+
+这个过程有很多地方需要大模型自主判断下一步行为（也就是操作）要做什么，如果不加引导，那大模型本身是不具备这个能力的。比如下面这一系列的操作：
+
+- 什么时候开始在本地知识库中搜索（这个比较简单，毕竟是第一个步骤，可以预设）？
+- 怎么确定本地知识库的检索已经完成，可以开始下一步？
+- 调用哪一种外部搜索工具（比如Google引擎）？
+- 如何确定外部搜索工具返回了想要找的内容？
+- 如何确定信息真实性的检索已经全部完成，可以开始下一步？
+
+### 2.4.2 ReAct 框架
+ReAct 框架的灵感来自“行动”和“推理”之间的协同作用，这种协同作用使得咱们人类能够学习新任务并做出决策或推理。如每天早上想知道如何为鲜花定价？我会去Google上面查一查今天的鲜花成本价啊（ **行动**），也就是我预计的进货的价格，然后我会根据这个价格的高低（ **观察**），来确定我要加价多少（ **思考**），最后计算出一个售价（ **行动**）！
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/20240312091016.png)
+
+这个例子中有观察、有思考，然后才会具体行动。这里的观察和思考，我们统称为推理（Reasoning）过程，推理指导着你的行动（Acting）。
+ReAct 指如何指导大语言模型推理和行动的一种思维框架。这个思维框架是Shunyu Yao等人在ICLR 2023会议论文《 [ReAct: Synergizing Reasoning and Acting in Language Models](https://arxiv.org/pdf/2210.03629.pdf)》（ReAct：在语言模型中协同推理和行动）中提出的。
+
+### 2.4.3 通过代理实现ReAct框架
+下边使用LangChain中最为常用的 **ZERO_SHOT_REACT_DESCRIPTION** ——这种常用代理类型，看下LLM是如何在ReAct框架的指导下进行推理的。
+要给代理一个任务，这个任务是找到玫瑰的当前市场价格，然后计算出加价15%后的新价格。
+
+在开始之前，有一个准备工作，需要在 [serpapi.com](https://serpapi.com/) 注册一个账号，并且拿到你的 SERPAPI_API_KEY，这个就是我们要为大模型提供的 Google 搜索工具。安装 SerpAPI 的包：
+```bash
+pip install google-search-results
+```
+
+**代码示例：**
+```python
+# 设置OpenAI和SERPAPI的API密钥  
+import os  
+os.environ["OPENAI_API_KEY"] = 'Your OpenAI API Key'  
+os.environ["SERPAPI_API_KEY"] = 'Your SerpAPI API Key'  
+  
+# 加载所需的库  
+from langchain.agents import load_tools  
+from langchain.agents import initialize_agent  
+from langchain.agents import AgentType  
+from langchain.llms import OpenAI  
+  
+# 初始化大模型  
+llm = OpenAI(temperature=0)  
+  
+# 设置工具  
+tools = load_tools(["serpapi", "llm-math"], llm=llm)  
+  
+# 初始化Agent  
+agent = initialize_agent(tools, llm, agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, verbose=True)  
+  
+# 跑起来  
+agent.run("目前市场上玫瑰花的平均价格是多少？如果我在此基础上加价15%卖出，应该如何定价？")
+```
+**输出：**
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/20240312092314.png)
+
+ZERO_SHOT_REACT_DESCRIPTION类型的智能代理在LangChain中，自动形成了一个完善的思考与行动链条，而且给出了正确的答案。
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/20240312092332.png)
+
+通过ReAct框架，大模型将被引导生成一个任务解决轨迹，即观察环境-进行思考-采取行动。观察和思考阶段被统称为推理（Reasoning），而实施下一步行动的阶段被称为行动（Acting）。在每一步推理过程中，都会详细记录下来，这也改善了大模型解决问题时的可解释性和可信度。
+- 在推理阶段，模型对当前环境和状态进行观察，并生成推理轨迹，从而使模型能够诱导、跟踪和更新操作计划，甚至处理异常情况。
+- 在行动阶段，模型会采取下一步的行动，如与外部源（如知识库或环境）进行交互并收集信息，或给出最终答案。
+### 2.4.4 AgentExecutor 驱动模型和工具完成任务
+在链中，一系列操作被硬编码（在代码中）。在代理中，语言模型被用作推理引擎来确定要采取哪些操作以及按什么顺序执行这些操作。
+下面这个图，就展现出了Agent接到任务之后，自动进行推理，然后自主调用工具完成任务的过程。
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/20240312092610.png)
+
+AgentExecutor中最重要的方法是步骤处理方法，`_take_next_step`方法。它用于在思考-行动-观察的循环中采取单步行动。先调用代理的计划，查找代理选择的工具，然后使用选定的工具执行该计划（此时把输入传给工具），从而获得观察结果，然后继续思考，直到输出是 AgentFinish 类型，循环才会结束。
+
+### 2.4.5 Agent 的关键组件
+在LangChain的代理中，有这样几个关键组件。
+1. **代理**（Agent）：这个类决定下一步执行什么操作。它由一个语言模型和一个提示（prompt）驱动。提示可能包含代理的性格（也就是给它分配角色，让它以特定方式进行响应）、任务的背景（用于给它提供更多任务类型的上下文）以及用于激发更好推理能力的提示策略（例如ReAct）。LangChain中包含很多种不同类型的代理。
+2. **工具**（Tools）：工具是代理调用的函数。这里有两个重要的考虑因素：一是让代理能访问到正确的工具，二是以最有帮助的方式描述这些工具。如果你没有给代理提供正确的工具，它将无法完成任务。如果你没有正确地描述工具，代理将不知道如何使用它们。LangChain提供了一系列的工具，同时你也可以定义自己的工具。
+3. **工具包**（Toolkits）：工具包是一组用于完成特定目标的彼此相关的工具，每个工具包中包含多个工具。比如LangChain的Office365工具包中就包含连接Outlook、读取邮件列表、发送邮件等一系列工具。当然LangChain中还有很多其他工具包供你使用。
+4. **代理执行器**（AgentExecutor）：代理执行器是代理的运行环境，它调用代理并执行代理选择的操作。执行器也负责处理多种复杂情况，包括处理代理选择了不存在的工具的情况、处理工具出错的情况、处理代理产生的无法解析成工具调用的输出的情况，以及在代理决策和工具调用进行观察和日志记录。
+
+总的来说，代理就是一种用语言模型做出决策、调用工具来执行具体操作的系统。通过设定代理的性格、背景以及工具的描述，你可以定制代理的行为，使其能够根据输入的文本做出理解和推理，从而实现自动化的任务处理。而代理执行器（AgentExecutor）就是上述机制得以实现的引擎。
