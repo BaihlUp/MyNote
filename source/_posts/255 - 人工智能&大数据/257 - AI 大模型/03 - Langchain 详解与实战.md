@@ -1153,3 +1153,62 @@ AgentExecutor中最重要的方法是步骤处理方法，`_take_next_step`方�
 4. **代理执行器**（AgentExecutor）：代理执行器是代理的运行环境，它调用代理并执行代理选择的操作。执行器也负责处理多种复杂情况，包括处理代理选择了不存在的工具的情况、处理工具出错的情况、处理代理产生的无法解析成工具调用的输出的情况，以及在代理决策和工具调用进行观察和日志记录。
 
 总的来说，代理就是一种用语言模型做出决策、调用工具来执行具体操作的系统。通过设定代理的性格、背景以及工具的描述，你可以定制代理的行为，使其能够根据输入的文本做出理解和推理，从而实现自动化的任务处理。而代理执行器（AgentExecutor）就是上述机制得以实现的引擎。
+
+
+### 2.4.6 其他 Agent 类型
+#### 2.4.6.1 结构化工具
+通过指定AgentType.STRUCTURED_CHAT_ZERO_SHOT_REACT_DESCRIPTION 这个代理类型，代理能够调用包含一系列复杂工具的“ **结构化工具箱**”，组合调用其中的多个工具，完成批次相关的任务集合。
+结构化工具的示例包括：
+1. 文件管理工具集：支持所有文件系统操作，如写入、搜索、移动、复制、列目录和查找。
+2. Web 浏览器工具集：官方的 PlayWright 浏览器工具包，允许代理访问网站、点击、提交表单和查询数据。
+
+下边以 PlayWright 工具包为例，来实现一个结构化工具对话代理。
+Playwright是一个开源的自动化框架，它可以让你模拟真实用户操作网页，帮助开发者和测试者自动化网页交互和测试。用简单的话说，它就像一个“机器人”，可以按照你给的指令去浏览网页、点击按钮、填写表单、读取页面内容等等，就像一个真实的用户在使用浏览器一样。
+Playwright支持多种浏览器，比如Chrome、Firefox、Safari等，这意味着可以用它来测试你的网站或测试应用在不同的浏览器上的表现是否一致。
+先用 `pip install playwright` 安装Playwright工具。然后还需要通过 `playwright install` 命令来安装三种常用的浏览器工具。
+通过Playwright浏览器工具来访问一个测试网页：
+```python
+from playwright.sync_api import sync_playwright
+
+def run():
+    # 使用Playwright上下文管理器
+    with sync_playwright() as p:
+        # 使用Chromium，但你也可以选择firefox或webkit
+        browser = p.chromium.launch()
+
+        # 创建一个新的页面
+        page = browser.new_page()
+
+        # 导航到指定的URL
+        page.goto('https://langchain.com/')
+
+        # 获取并打印页面标题
+        title = page.title()
+        print(f"Page title is: {title}")
+
+        # 关闭浏览器
+        browser.close()
+
+if __name__ == "__main__":
+    run()
+```
+输出：
+```bash
+Page title is: LangChain
+```
+
+**使用结构化工具对话代理：**
+使用的Agent类型是STRUCTURED_CHAT_ZERO_SHOT_REACT_DESCRIPTION。要使用的工具则是PlayWrightBrowserToolkit，这是LangChain中基于PlayWrightBrowser包封装的工具箱，它继承自 BaseToolkit类。
+PlayWrightBrowserToolkit 为 PlayWright 浏览器提供了一系列交互的工具，可以在同步或异步模式下操作。
+其中具体的工具就包括：
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/20240313102748.png)
+
+#### 2.4.6.2 Self-Ask with Search 代理
+Self-Ask with Search 也是LangChain中的一个有用的代理类型（SELF_ASK_WITH_SEARCH）。它利用一种叫做 “Follow-up Question（追问）”加“Intermediate Answer（中间答案）”的技巧，来辅助大模型寻找事实性问题的过渡性答案，从而引出最终答案。
+如下使用SerpAPIWrapper作为工具，用OpenAI作为语言模型，创建Self-Ask with Search代理。
+```python
+
+```
+
+
+#### 2.4.6.3 Plan and execute 代理
