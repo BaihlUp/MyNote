@@ -14,6 +14,7 @@ published: true
 - LangChain 中文网：[https://www.langchain.asia/](https://www.langchain.asia/)
 - LangChain Github：[https://github.com/langchain-ai/langchain](https://github.com/langchain-ai/langchain)
 - LangChain API文档：[https://python.langchain.com/docs/get_started](https://python.langchain.com/docs/get_started)
+- 大语言模型实践：[https://wangwei1237.github.io/LLM_in_Action/](https://wangwei1237.github.io/LLM_in_Action/)
 
 ## 0.2 课程
 - [《LangChain 实战课》](https://time.geekbang.org/column/intro/655)
