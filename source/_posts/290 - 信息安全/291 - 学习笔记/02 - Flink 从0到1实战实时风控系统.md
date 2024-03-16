@@ -1,4 +1,13 @@
-
+---
+title: Flink 从0到1实战实时风控系统
+date: 2024-03-15
+categories:
+  - 信息安全
+tags:
+  - 风控系统
+  - Flink
+published: false
+---
 # 0 参考资料
 
 [Flink 从0到1实战实时风控系统](https://coding.imooc.com/class/698.html)
@@ -8,7 +17,7 @@
 
 1. IDEA Community Edition 2022.2.1 ( 社区版 )
 2. RDM ( Redis 可视化工具, 课程使用的版本是2021.2 )
-```
+```bash
 win下载地址：
 https://sourceforge.net/projects/rdm.mirror/
 
