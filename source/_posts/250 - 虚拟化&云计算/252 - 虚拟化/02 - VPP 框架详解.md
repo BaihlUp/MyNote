@@ -158,6 +158,8 @@ static __clib_unused vlib_node_registration_t __clib_unused_##x
 clib_calljmp --> thread0 --> vlib_main --> vlib_register_all_static_nodes --> vlib_register_node
 ```
 
+> VPP 中使用 calljmp 实现协程调用
+
 可以 看到 `vlib_register_all_static_nodes` 函数中先注册了一个 `null-node` 作为结尾标识，通过 遍历  `vgm->node_registrations` 执行注册逻辑：
 ```c
 void
@@ -189,8 +191,6 @@ vlib_register_all_static_nodes (vlib_main_t * vm)
     }
 }
 ```
-
-
 ### 2.1.3 初始化 init（function init）
 	1. cmd init
 	2. feature init
@@ -300,10 +300,52 @@ call_init_exit_functions_internal (vlib_main_t *vm,
 }
 ```
 
+- feature init
+
+feature 定义为 有类似功能 的node。
+```c
+VNET_FEATURE_INIT (ip4_vxlan_bypass, static) =
+{
+  .arc_name = "ip4-unicast",
+  .node_name = "ip4-vxlan-bypass",
+  .runs_before = VNET_FEATURES ("ip4-lookup"),
+};
+```
+
+VNET_FEATURE_INIT 宏定义如下：
+```c
+#define VNET_FEATURE_INIT(x,...)				\
+  __VA_ARGS__ vnet_feature_registration_t vnet_feat_##x;	\
+static void __vnet_add_feature_registration_##x (void)		\
+  __attribute__((__constructor__)) ;				\
+static void __vnet_add_feature_registration_##x (void)		\
+{								\
+  vnet_feature_main_t * fm = &feature_main;			\
+  vnet_feat_##x.next = fm->next_feature;			\
+  fm->next_feature = & vnet_feat_##x;				\
+}								\
+static void __vnet_rm_feature_registration_##x (void)		\
+  __attribute__((__destructor__)) ;				\
+static void __vnet_rm_feature_registration_##x (void)		\
+{								\
+  vnet_feature_main_t * fm = &feature_main;			\
+  vnet_feature_registration_t *r = &vnet_feat_##x;		\
+  VLIB_REMOVE_FROM_LINKED_LIST (fm->next_feature, r, next);	\
+}								\
+__VA_ARGS__ vnet_feature_registration_t vnet_feat_##x
+```
+会把所有待初始化的 feature 组成一个链表。
 ### 2.1.4 数据包抓取初始化
 
 
+## 2.2 
 
 
 
+
+# 3 VPP 性能测试
+
+## 3.1 VPP + iperf3
+
+## 3.2 VPP + ACL + Nginx
 
