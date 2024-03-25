@@ -5,7 +5,7 @@ categories:
   - Linux 内核
 tags:
   - Linux内核
-published: false
+published: true
 ---
 # 背景
 
