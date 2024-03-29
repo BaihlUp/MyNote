@@ -182,3 +182,24 @@ root@ubuntu:/usr/local/nginx# cat /proc/interrupts |grep eth
 ```
 
 一次中断，保证一个包的完整接收，但是并不是限定了连接就一致在这个cpu上。
+
+# 5 其他
+## 5.1 多队列网卡的发送和接收
+网卡内部有多个队列，与CPU进行绑定，通过PCI总线进行数据分发。
+
+**接收数据：**
+1. 数据先进行hash
+2. 根据hash后的结果，放入对应的队列中
+3. 触发中断，由CPU进行处理：使用**NAPI**对单纯的硬件中断进行优化，有中断触发,数据就一直读， 因此rte_eth_rc_burst读出来得到数据是多个数组（多个队列即多个NAPI）。
+
+**发送数据：**
+1. 通过队列，把send()接口和网卡发送进行拆分，对应的QDisc就是队列，可以是多个队列。
+2. 多个QDIsc队列设计方案：FIFO，可以四元组检索对应放数据。 （可以设置）
+
+## 5.2 DPDK与多队列网卡
+配置：rte_eth_dev_configure() ：对网卡进行配置
+启动： rte_eth_rx_queue_setup() ： 对RX队列的配置
+​            rte_eth_tx_queue_setup() ： 对TX队列的配置
+接收： rte_eth_rx_burst()
+发送：rte_eth_tx_burst()
+
