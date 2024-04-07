@@ -547,3 +547,7 @@ I/O透传的一个典型问题是从物理网卡接收到的数据包将直接�
 ![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/20240407174055.png)
 
 上图中是数据中心使用Virtio设备的一种典型场景。宿主机使用虚拟交换机连通物理网卡和虚拟机。虚拟交换机内部有一个DPDK Vhost，实现了Virtio的后端网络设备驱动程序逻辑。虚拟机里有DPDK的Virtio前端网络设备驱动。前端和后端通过Virtio的虚拟队列交换数据。这样虚拟机里的网络数据便可以发送到虚拟交换机中，然后经过转发逻辑，可以经由物理网卡进入外部网络。
+
+参考资料：[详解：VirtIO Networking 虚拟网络设备实现架构](https://www.sdnlab.com/26199.html)
+
+## 12 
