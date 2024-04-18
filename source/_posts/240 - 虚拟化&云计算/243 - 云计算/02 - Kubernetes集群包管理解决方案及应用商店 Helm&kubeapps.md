@@ -293,23 +293,15 @@ stable  http://mirror.azure.cn/kubernetes/charts/
 
 ### 5.1.5删除仓库
 
-
-
 ~~~powershell
 [root@k8s-master01 ~]# helm repo remove stable
 "stable" has been removed from your repositories
 ~~~
 
-
-
 ~~~powershell
 [root@k8s-master01 ~]# helm repo list
 Error: no repositories to show
 ~~~
-
-
-
-
 
 ## 5.2 查看charts
 
