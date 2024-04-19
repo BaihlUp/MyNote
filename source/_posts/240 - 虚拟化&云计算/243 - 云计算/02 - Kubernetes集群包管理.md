@@ -20,15 +20,11 @@ published: true
 # kubectl create deployment nginx --image=nginx --dry-run=client -o yaml > deployment.yaml
 ~~~
 
-
-
 2、启动nginx的pod
 
 ~~~powershell
 # kubectl apply -f deployment.yaml
 ~~~
-
-
 
 3、检查pod服务
 
@@ -36,11 +32,7 @@ published: true
 # kubectl get pod
 ~~~
 
-
-
 4、创建service
-
-
 
 ~~~powershell
 # kubectl expose deployment  nginx --port=8099 --target-port=80 --type=NodePort --dry-run=client -o yaml > service.yaml
@@ -54,33 +46,23 @@ published: true
 # kubectl apply -f service.yaml
 ~~~
 
-
-
 6、检查service端口
-
-
 
 ~~~powershell
 # kubectl get svc
 ~~~
 
-
-
 7、访问nginx服务
-
-
 
 ![image-20220728133433498](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image-20220728133433498.png)
 
 
 实际生产中，微服务项目可能有十几个模块，若还需要进行安全访问和控制，那么需要创建诸如Role、ServiceAccount等资源。部署和版本升级时也往往需要修改或添加配置文件中的一些参数（例如：服务占用的CPU、内存、副本数、端口等），维护大量的yaml文件极为不便，所以，我们需要将这些YAML文件作为一个**整体**管理，并高效复用。
-
 - 在Linux操作系统软件部署中，我们可以使用批量管理工具完成软件的批量管理等，例如yum、dnf等；
 - 在容器应用中Docker使用Dockerfile文件解决了容器镜像制作难题；
 - 在kubernetes应用中，通过YAML格式文件解决容器编排部署难题，例如可以通过YAML格式的资源清单文件，非常方便部署不同控制器类型的应用;但是如何维护大量的，系统性的YAML文件，需要我们拥有更好的工具，不能简单使用YAML资源清单托管服务器就可以解决的，
 
 那么在CNCF的体系中是否存在这样的强力“工具”，能够简化我们部署安装过程呢？答案是存在的，Helm就是这样一款工具。
-
 
 # 二、helm是什么
 
