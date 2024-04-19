@@ -91,7 +91,8 @@ jobs:
         uses: peaceiris/actions-gh-pages@v4
         with:
           # deploy_key: ${{ secrets.HEXO_DEPLOY_KEY }}
-          personal_token: ${{ secrets.HEXO_DEPLOY_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          # personal_token: ${{ secrets.HEXO_DEPLOY_TOKEN }}
           user_name: ${{ env.GIT_USER }}
           user_email: ${{ env.GIT_EMAIL }}
           commit_msg: ${{ github.event.head_commit.message }}  # (or delete this input setting to use hexo default settings)
