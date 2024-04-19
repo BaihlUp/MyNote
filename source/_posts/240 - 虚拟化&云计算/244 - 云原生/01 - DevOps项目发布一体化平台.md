@@ -148,24 +148,17 @@ https://git-scm.com/（傻瓜式安装）
 
 搞定后，即可像Gitee、GitHub一样使用。
 
-
-
 ### 三、Build阶段工具
 
 构建Java项目的工具一般有两种选择，一个是Maven，一个是Gradle。
-
 这里我们选择Maven作为项目的编译工具。
-
 具体安装Maven流程不做阐述，但是需要确保配置好Maven仓库私服以及JDK编译版本。
-
 ### 四、Operate阶段工具
 
 部署过程，会采用Docker进行部署，暂时只安装Docker即可，后续还需安装Kubenetes
-
 #### 4.1 Docker安装
 
 - 准备测试环境&生产环境
-
 - 下载Docker依赖组件
 
   ```sh
@@ -206,9 +199,7 @@ https://git-scm.com/（傻瓜式安装）
 #### 4.2 Docker-Compose安装
 
 - 下载Docker/Compose：https://github.com/docker/compose
-
 - 将下载好的[docker-compose-Linux-x86_64]()文件移动到Linux操作系统：……
-
 - 设置[docker-compose-Linux-x86_64]()文件权限，并移动到$PATH目录中
 
   ```sh
@@ -231,11 +222,8 @@ https://git-scm.com/（傻瓜式安装）
 ### 五、Integrate工具
 
 持续集成、持续部署的工具很多，其中Jenkins是一个开源的持续集成平台。
-
 Jenkins涉及到将编写完毕的代码发布到测试环境和生产环境的任务，并且还涉及到了构建项目等任务。
-
 Jenkins需要大量的插件保证工作，安装成本较高，下面会基于Docker搭建Jenkins。
-
 #### 5.1 Jenkins介绍
 
 Jenkins是一个开源软件项目，是基于Java开发的一种持续集成工具
