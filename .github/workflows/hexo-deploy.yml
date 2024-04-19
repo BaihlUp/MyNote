@@ -86,7 +86,7 @@ jobs:
       - name: Deploy
         id: deploy
         # uses: sma11black/hexo-action@v1.0.4
-        uses: peaceiris/actions-gh-pages@v4
+        uses: peaceiris/actions-gh-pages@v3
         with:
           deploy_key: ${{ secrets.HEXO_DEPLOY_KEY }}
           user_name: ${{ env.GIT_USER }}
