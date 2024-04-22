@@ -930,21 +930,9 @@ mysql-1.6.9.tgz
 
 - 在线的 URL（helm install fool https://example.com/charts/foo-1.2.3.tgz）
 
-
-
-
-
-
-
 # 六、Chart包开发
-
-
-
 ## 6.1 Chart 目录结构   
-
-![1605264781567](images/2)
-
-
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/20240422102446.png)
 
 ~~~powershell
 [root@k8s-master01 helmdir]# helm create foo
