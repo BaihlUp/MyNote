@@ -1075,9 +1075,6 @@ nginx-1659144826        default         1               2022-07-30 09:33:46.8810
 ~~~
 
 
-
-
-
 ~~~powershell
 [root@k8s-master01 nginx]# kubectl get pods,service
 NAME                                         READY   STATUS    RESTARTS      AGE
@@ -1087,8 +1084,6 @@ pod/nfs-client-provisioner-9d46587b5-7n2vf   1/1     Running   4 (31m ago)   42h
 NAME                 TYPE        CLUSTER-IP    EXTERNAL-IP   PORT(S)   AGE
 service/helm-nginx   ClusterIP   10.96.2.120   <none>        80/TCP    51s
 ~~~
-
-
 
 ```powershell
 [root@k8s-master01 nginx]# curl http://10.96.2.120
@@ -1117,16 +1112,12 @@ Commercial support is available at
 </html>
 ```
 
-
-
-### 6, 删除
+### 6 删除
 
 ~~~powershell
 [root@k8s-master01 ~]# helm uninstall nginx-1659144826
 release "nginx-1659144826" uninstalled
 ~~~
-
-
 
 ## 6.3 创建可配置的Chart
 
@@ -1143,8 +1134,6 @@ release "nginx-1659144826" uninstalled
 - Files：类似于chart的对象，包含chart中的所有非特殊文件。这不会授予您访问模板的权限，但可以访问存在的其他文件（除非使用它们除外.helmignore）。可以使用{{index .Files "file.name"}}或使用{{.Files.Get name}}或 {{.Files.GetStringname}}函数访问文件。您也可以访问该文件的内容，[]byte使用{{.Files.GetBytes}}
 - Capabilities：类似于地图的对象，包含有关Kubernetes（{{.Capabilities.KubeVersion}}，Tiller（{{.Capabilities.TillerVersion}}和支持的Kubernetes API）版本（{{.Capabilities.APIVersions.Has "batch/v1"）的版本的信息
 
-
-
 ### 6.3.2 新增values.yaml文件
 
 ```powershell
@@ -1156,8 +1145,6 @@ image:
   tag: '1.15-alpine'
 replicas: 2
 ```
-
-
 
 ### 6.3.3 配置deploy引用values的值
 
@@ -1183,8 +1170,6 @@ spec:
         imagePullPolicy: IfNotPresent
 ```
 
-
-
 ### 6.3.4 测试
 
 #### 6.3.4.1 直接应用测试
@@ -1201,16 +1186,12 @@ REVISION: 1
 TEST SUITE: None
 ~~~
 
-
-
 ~~~powershell
 [root@k8s-master01 nginx]# kubectl get pods
 NAME                                     READY   STATUS    RESTARTS      AGE
 helm-nginx-65f57fb758-pcmkg              1/1     Running   0             38s
 helm-nginx-65f57fb758-rmmv5              1/1     Running   0             38s
 ~~~
-
-
 
 #### 6.3.4.2 通过命令行设置变量后干运行测试
 
@@ -1261,10 +1242,6 @@ spec:
         imagePullPolicy: IfNotPresent
 ~~~
 
-
-
-
-
 ```powershell
 [root@k8s-master01 nginx]# helm install helm-nginx --set replicas=3 /helm/nginx
 NAME: helm-nginx
@@ -1276,17 +1253,12 @@ TEST SUITE: None
 ```
 
 
-
-
-
 ```powershell
 [root@k8s-master01 nginx]# helm ls
 NAME            NAMESPACE       REVISION        UPDATED                                 STATUS          CHART                   APP VERSION
 helm-nginx      default         1               2022-07-30 09:54:00.744748457 +0800 CST deployed        helm-nginx-1.0.0
 
 ```
-
-
 
 ~~~powershell
 [root@k8s-master01 nginx]# kubectl get pods,svc
@@ -1300,20 +1272,14 @@ NAME                 TYPE        CLUSTER-IP    EXTERNAL-IP   PORT(S)   AGE
 service/helm-nginx   ClusterIP   10.96.1.197   <none>        80/TCP    59s
 ~~~
 
-
-
 ### 6.3.5将Chart包进行打包
 
 > 将chart打包成一个压缩文件，便于存储与分享。
-
-
 
 ```powershell
 [root@k8s-master01 nginx]# helm package .
 Successfully packaged chart and saved it to: /helm/nginx/helm-nginx-1.0.0.tgz
 ```
-
-
 
 ~~~powershell
 [root@k8s-master01 nginx]# ls
@@ -1321,25 +1287,17 @@ Chart.yaml  helm-nginx-1.0.0.tgz  templates  values.yaml
 打包出mychart-0.1.0.tgz文件
 ~~~
 
-
-
 ### 6.3.6 使用Chart安装
 
 ~~~powershell
 [root@master nginx]# helm install helm-nginx2 /helm/nginx/helm-nginx-1.0.0.tgz
 ~~~
 
-
-
 # 七、Chart包托管至Harbor方案
-
-
 
 ## 7.1 集群外harbor服务器准备
 
 ### 7.1.1 docker-ce安装
-
-
 
 ~~~powershell
 wget https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo -O /etc/yum.repos.d/docker-ce.repo
