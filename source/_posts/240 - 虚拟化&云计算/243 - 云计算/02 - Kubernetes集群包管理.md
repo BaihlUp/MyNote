@@ -70,8 +70,6 @@ published: true
 
 - 作为CNCF的毕业项目。它的官方的定义是：Helm是一个为K8s进行包管理的工具。Helm将yaml作为一个整体管理并实现了这些yaml的高效复用，就像Linux中的yum或apt-get，它使我们能够在K8s中方便快捷的安装、管理、卸载K8s应用。
 
-
-
 ![image-20220728134805687](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image-20220728134805687.png)
 
 
@@ -86,11 +84,6 @@ published: true
 * 除此以外，Helm还提供了kubernetes上的软件部署，删除，升级，回滚应用的强大功能。
 * Helm 社区已经维护了一个官方 Helm Hub，我们可以直接使用已经做好的 Helm Chart，部署和管理比较复杂的应用程序
 * 早期的hub.helm.dev转移到了https://artifacthub.io/。
-
-
-
-
-
 # 三、helm作用及核心概念
 
 Helm基于go模板语言，用户只要提供规定的目录结构和模板文件。在真正部署时Helm模板引擎便可以将其渲染成真正的K8s资源配置文件，并按照正确的顺序将它们部署到节点上。
@@ -98,22 +91,13 @@ Helm基于go模板语言，用户只要提供规定的目录结构和模板文�
 Helm 定义了一套 Chart 格式来描述一个应用。打个比方，一个安卓程序打包成 APK 格式，就可以安装到任意一台运行安卓系统的手机上，如果我们把 kubernetes 集群比做安卓系统，kubernetes 集群内应用比做安卓程序，那么 Chart 就可以比做 APK。这就意味着，kubernetes 集群应用只要打包成 Chart，就可以通过 Helm 部署到任意一个 kubernetes 集群中。
 
 Helm中有三个重要概念，分别为Chart、Repository和Release。
-
 - Chart代表中Helm包。它包含在K8s集群内部运行应用程序，工具或服务所需的所有资源定义，为所有项目资源清单yaml文件的集合，采用TAR格式，可以类比成yum中的RPM。
-
 - Repository就是用来存放和共享Chart的地方，可以类比成YUM仓库。
-
 - Release是运行在K8s集群中的Chart的实例，一个Chart可以在同一个集群中安装多次。Chart就像流水线中初始化好的模板，Release就是这个“模板”所生产出来的各个产品。
 
 Helm作为K8s的包管理软件，每次安装Charts 到K8s集群时，都会创建一个新的 release。你可以在Helm 的Repository中寻找需要的Chart。Helm对于部署过程的优化的点在于简化了原先完成配置文件编写后还需使用一串kubectl命令进行的操作、统一管理了部署时的可配置项以及方便了部署完成后的升级和维护。
 
-
-
 # 三、helm架构
-
-
-
-
 
 ![image-20220728135524226](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image-20220728135524226.png)
 
@@ -125,63 +109,36 @@ Helm作为K8s的包管理软件，每次安装Charts 到K8s集群时，都会创
 
 Helm客户端使用REST+JSON的方式与K8s中的apiserver进行交互，进而管理deployment、service等资源，并且客户端本身并不需要数据库，它会把相关的信息储存在K8s集群内的Secrets中。
 
-
-
 # 四、helm部署
-
-
 
 ![image-20220728140501620](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image-20220728140501620.png)
 
-
-
 ![image-20220728140538044](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image-20220728140538044.png)
-
-
-
-
 
 ![image-20220728140644543](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image-20220728140644543.png)
 
-
-
-
-
 ![image-20220728141000714](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image-20220728141000714.png)
 
-
-
 ![image-20220728141101419](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image-20220728141101419.png)
-
-
-
 
 
 ~~~powershell
 [root@k8s-master01 ~]# wget https://get.helm.sh/helm-v3.9.2-linux-amd64.tar.gz
 ~~~
 
-
-
 ~~~powershell
 [root@k8s-master01 ~]#  ls
 helm-v3.9.2-linux-amd64.tar.gz
 ~~~
 
-
-
 ~~~powershell
 [root@k8s-master01 ~]# tar xf helm-v3.9.2-linux-amd64.tar.gz
 ~~~
-
-
 
 ~~~powershell
 [root@k8s-master01 ~]# ls
 linux-amd64
 ~~~
-
-
 
 ~~~powershell
 [root@k8s-master01 ~]# cd linux-amd64/
@@ -189,33 +146,18 @@ linux-amd64
 helm  LICENSE  README.md
 ~~~
 
-
-
 ~~~powershell
 [root@k8s-master01 linux-amd64]# mv helm /usr/bin
 ~~~
-
-
 
 ~~~powershell
 [root@k8s-master01 linux-amd64]# helm version
 version.BuildInfo{Version:"v3.9.2", GitCommit:"1addefbfe665c350f4daf868a9adc5600cc064fd", GitTreeState:"clean", GoVersion:"go1.17.12"}
 ~~~
 
-
-
-
-
-
-
 # 五、helm基础使用
 
-
-
 ## 5.1 添加及删除仓库
-
-
-
 ### 5.1.1 查看仓库
 
 ~~~powershell
@@ -223,10 +165,7 @@ version.BuildInfo{Version:"v3.9.2", GitCommit:"1addefbfe665c350f4daf868a9adc5600
 Error: no repositories to show
 ~~~
 
-
-
 ### 5.1.2 添加新的仓库地址
-
 ``` powershell
 微软源
 [root@k8s-master01 ~]# helm repo add stable http://mirror.azure.cn/kubernetes/charts/
@@ -238,22 +177,14 @@ prometheus源
 [root@k8s-master01 ~]# helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 ```
 
-
-
 ### 5.1.3 查看已经添加的仓库
-
-
-
 ~~~powershell
 [root@k8s-master01 ~]# helm repo list
 NAME    URL
 stable  http://mirror.azure.cn/kubernetes/charts/
 ~~~
 
-
-
 ### 5.1.4 更新仓库
-
 ```powershell
 [root@k8s-master01 ~]# helm repo update
 Hang tight while we grab the latest from your chart repositories...
@@ -261,19 +192,13 @@ Hang tight while we grab the latest from your chart repositories...
 Update Complete. ⎈Happy Helming!⎈
 ```
 
-
-
 **再查看**
-
 ~~~powershell
 [root@master ~]# helm repo list
 NAME    URL
 stable  http://mirror.azure.cn/kubernetes/charts/
 ~~~
-
-
-
-### 5.1.5删除仓库
+### 5.1.5 删除仓库
 
 ~~~powershell
 [root@k8s-master01 ~]# helm repo remove stable
@@ -310,8 +235,6 @@ stable/bookstack                        1.2.4           0.27.5                  
 ......
 ~~~
 
-
-
 ~~~powershell
 [root@k8s-master01 ~]# helm search repo nginx
 NAME                            CHART VERSION   APP VERSION     DESCRIPTION
@@ -321,20 +244,14 @@ stable/nginx-lego               0.3.1                           Chart for nginx-
 stable/gcloud-endpoints         0.1.2           1               DEPRECATED Develop, deploy, protect and monitor...
 ~~~
 
-
-
 ~~~powershell
 [root@k8s-master01 ~]# helm search repo tomcat
 NAME            CHART VERSION   APP VERSION     DESCRIPTION
 stable/tomcat   0.4.3           7.0             DEPRECATED - Deploy a basic tomcat application ...
 ~~~
-
-
-
 ## 5.3 部署应用 MySQL
 
 > 环境说明：k8s集群中存在storageclass:nfs-client
-
 
 
 我们现在安装一个 `mysql` 应用：
@@ -492,8 +409,6 @@ mysql> show databases;
 4 rows in set (0.01 sec)
 ~~~
 
-
-
 ## 5.4 查看chart资源
 
 ```powershell
@@ -510,8 +425,6 @@ deployment.apps/mysql-1658996042   1/1     1            1           72m
 NAME                                          DESIRED   CURRENT   READY   AGE
 replicaset.apps/mysql-1658996042-755f5f64f6   1         1         1       72m
 ```
-
-
 
 我们也可以 `helm show chart` 命令来了解 MySQL 这个 chart 包的一些特性：
 
@@ -542,8 +455,6 @@ version: 1.6.9
 ......
 ```
 
-
-
 ## 5.5 删除Release
 
 如果需要删除这个 release，也很简单，只需要使用 `helm uninstall`或`helm delete` 命令即可：
@@ -573,10 +484,7 @@ mysql-1605192239        default         1              ........    uninstalled  
 状态为uninstalled
 ```
 
-
-
 审查历史时甚至可以取消删除`release`。
-
 `Usage:  helm rollback <RELEASE> [REVISION] [flags]`
 
 ~~~powershell
@@ -588,8 +496,6 @@ NAME              NAMESPACE     REVISION     UPDATED    STATUS        CHART     
 mysql-1605192239     default     2        .........     deployed      mysql-1.6.9       5.7.30
 rollback后，又回到deployed状态
 ~~~
-
-
 
 ## 5.6 定制参数部署应用
 
@@ -605,8 +511,6 @@ rollback后，又回到deployed状态
 
 上面我们看到的所有参数都是可以用自己的数据来覆盖的，可以在安装的时候通过 YAML 格式的文件来传递这些参数
 
-
-
 1，准备参数文件
 
 ~~~powershell
@@ -617,15 +521,11 @@ persistence:
   storageClass: nfs-client
 ~~~
 
-
-
 2, 使用`-f mysql-config.yml`安装应用并覆盖参数
 
 ```powershell
 [root@k8s-master01 ~]# helm install mysql -f mysql-config.yml stable/mysql
 ```
-
-
 
 ~~~powershell
 输出内容：
@@ -666,8 +566,6 @@ To connect to your database directly from outside the K8s cluster:
     mysql -h ${MYSQL_HOST} -P${MYSQL_PORT} -u root -p${MYSQL_ROOT_PASSWORD}
 ~~~
 
-
-
 3, 查看覆盖的参数
 
 ~~~powershell
@@ -705,8 +603,6 @@ mysql-855976764d-npvgm   1/1     Running   0          41m   100.119.84.71   k8s-
 
 得到pod的IP为100.119.84.71
 ~~~
-
-
 
 6, 安装mysql客户端并连接测试
 
@@ -954,8 +850,6 @@ foo
 └── values.yaml
 ~~~
 
-
-
 ~~~powershell
 [root@master ~]# helm pull stable/mysql
 
@@ -979,8 +873,6 @@ total 48
 drwxr-xr-x 2 root root   50 Nov 13 18:43 tests
 ~~~
 
-
-
 | 文件              | 说明                                                         |
 | ----------------- | ------------------------------------------------------------ |
 | Chart.yaml        | 用于描述Chart的基本信息;  `helm show chart stable/mysql`命令查看的内容就是此文件内容 |
@@ -990,8 +882,6 @@ drwxr-xr-x 2 root root   50 Nov 13 18:43 tests
 | requirements.yaml | [可选] 用于存放当前Chart依赖的其它Chart的说明文件            |
 | charts/           | [可选]: 该目录中放置当前Chart依赖的其它Chart                 |
 | templates/        | [可选]: 部署文件模版目录                                     |
-
-
 
 ## 6.2 创建不可配置的chart
 
@@ -1064,8 +954,6 @@ REVISION: 1
 TEST SUITE: None
 ~~~
 
-
-
 ### 5, 查看与验证
 
 ~~~powershell
@@ -1073,7 +961,6 @@ TEST SUITE: None
 NAME                    NAMESPACE       REVISION        UPDATED                                 STATUS          CHART                   APP VERSION
 nginx-1659144826        default         1               2022-07-30 09:33:46.881083524 +0800 CST deployed        helm-nginx-1.0.0
 ~~~
-
 
 ~~~powershell
 [root@k8s-master01 nginx]# kubectl get pods,service
