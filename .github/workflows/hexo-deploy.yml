@@ -97,6 +97,7 @@ jobs:
           external_repository: ${{ env.DEPLOY_REPO }}
           publish_branch: ${{ env.DEPLOY_BRANCH }}
           commit_msg: ${{ github.event.head_commit.message }}  # (or delete this input setting to use hexo default settings)
+          publish_dir: ./public
       # Use the output from the `deploy` step(use for test action)
       - name: Get the output
         run: |
