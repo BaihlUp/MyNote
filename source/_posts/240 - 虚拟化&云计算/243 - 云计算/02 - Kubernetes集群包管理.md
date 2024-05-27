@@ -989,6 +989,7 @@ release "nginx-1659144826" uninstalled
 
 ### 6.3.1 官方的预定义变量
 
+```bash
 - Release.Name：发布的名称（不是chart）
 - Release.Time：chart发布上次更新的时间。这将匹配Last ReleasedRelease对象上的时间。
 - Release.Namespace：chart发布到的名称空间。
@@ -999,6 +1000,7 @@ release "nginx-1659144826" uninstalled
 - Chart：内容Chart.yaml。因此，chart版本可以Chart.Version和维护者一样获得 Chart.Maintainers。
 - Files：类似于chart的对象，包含chart中的所有非特殊文件。这不会授予您访问模板的权限，但可以访问存在的其他文件（除非使用它们除外.helmignore）。可以使用{{index .Files "file.name"}}或使用{{.Files.Get name}}或 {{.Files.GetStringname}}函数访问文件。您也可以访问该文件的内容，[]byte使用{{.Files.GetBytes}}
 - Capabilities：类似于地图的对象，包含有关Kubernetes（{{.Capabilities.KubeVersion}}，Tiller（{{.Capabilities.TillerVersion}}和支持的Kubernetes API）版本（{{.Capabilities.APIVersions.Has "batch/v1"）的版本的信息
+```
 
 ### 6.3.2 新增values.yaml文件
 
