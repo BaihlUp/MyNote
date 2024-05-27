@@ -167,11 +167,11 @@ published: true
 
 在web工程中，jar包必须存放在指定位置：
 
-![image-20231021101825708](image-20231021101825708.png)
+![image-20231021101825708](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image-20231021101825708.png)
 
 在使用Maven之后，通过配置依赖(jar包)的坐标，查找本地仓库中相应jar包，若本地仓库没有，则统一从镜像网站或中央仓库中下载：
 
-![image-20231021102831531](image-20231021102831531.png)
+![image-20231021102831531](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image-20231021102831531.png)
 
 ④jar包之间的依赖
 
@@ -179,7 +179,7 @@ published: true
 
 下面是前面例子中 jar 包之间的依赖关系：
 
-![images](img006.ab4f2e31.png)
+![images](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/img006.ab4f2e31.png)
 
 而实际上 jar 包之间的依赖关系是普遍存在的，如果要由程序员手动梳理无疑会增加极高的学习成本，而这些工作又对实现业务功能毫无帮助。
 
@@ -191,11 +191,11 @@ published: true
 
 你可以不使用 Maven，但是构建必须要做。当我们使用 IDEA 进行开发时，构建是 IDEA 替我们做的。
 
-![image-20231021103758624](image-20231021103758624.png)
+![image-20231021103758624](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image-20231021103758624.png)
 
 ②脱离 IDE 环境仍需构建
 
-![img](image.png)
+![img](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image.png)
 
 #### 1.3、结论
 
@@ -220,7 +220,7 @@ Maven就是一个软件，掌握安装、配置、以及基本功能 **（项目
 
    Maven 可以管理项目的编译、测试、打包、部署等构建过程。通过实现标准的构建生命周期，Maven 可以确保每一个构建过程都遵循同样的规则和最佳实践。同时，Maven 的插件机制也使得开发者可以对构建过程进行扩展和定制。主动触发构建，只需要简单的命令操作即可。
 
-   ![](image_OSOE45UACw.png)
+   ![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image_OSOE45UACw.png)
 
 **场景1：** 例如我们项目需要第三方依赖如：Druid连接池、MySQL数据库驱动和Jackson JSON等处理。那么我们可以将想要的依赖项的信息编写到Maven工程的配置文件，Maven就会自动下载并复制这些依赖项到项目中，无需自己导入jar包，管理jar!
 
@@ -228,7 +228,7 @@ Maven就是一个软件，掌握安装、配置、以及基本功能 **（项目
 
 ### 3. Maven软件工作原理模型图（了解）
 
-![](image_6AVFQbaXLj.png)
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image_6AVFQbaXLj.png)
 
 ## 二、Maven安装和配置
 
@@ -250,7 +250,7 @@ Maven就是一个软件，掌握安装、配置、以及基本功能 **（项目
 
 **软件结构：**
 
-![image-20231021110800113](image-20231021110800113.png)
+![image-20231021110800113](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image-20231021110800113.png)
 
 **bin**：含有Maven的运行脚本
 
@@ -266,10 +266,10 @@ LICENSE、NOTICE、README.txt：针对Maven版本，第三方软件等简要介�
 
 1.  配置MAVEN_HOME
 
-    ![image-20231021110938230](image-20231021110938230.png)
+    ![image-20231021110938230](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image-20231021110938230.png)
 2.  配置Path
 
-    ![](image_xNL5Fg_ucf.png)
+    ![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image_xNL5Fg_ucf.png)
 3.  命令测试（cmd窗口）
     ```bash
     mvn -v 
@@ -330,7 +330,7 @@ LICENSE、NOTICE、README.txt：针对Maven版本，第三方软件等简要介�
 
 选择本地maven软件
 
-![image-20231021112046512](image-20231021112046512.png)
+![image-20231021112046512](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image-20231021112046512.png)
 
 **注意**：
 
@@ -384,22 +384,22 @@ GAV遵循一下规则：
 
 自己后期可以在项目中随意修改！
 
-![image-20231021143559114](image-20231021143559114.png)
+![image-20231021143559114](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image-20231021143559114.png)
 
 创建工程之后，若第一次使用maven，或者使用的是新的**本地仓库**，idea右下角会出现以下进度条，表示maven正在下载相关插件，等待下载完毕，进度条消失即可
 
-![image-20231021145024505](image-20231021145024505.png)
+![image-20231021145024505](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image-20231021145024505.png)
 
 验证maven工程是否创建成功，当创建完毕maven工程之后，idea中会自动打开Maven视图，如下图：
 
-![image-20231021145713433](image-20231021145713433.png)
+![image-20231021145713433](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image-20231021145713433.png)
 
 ### 3. Idea构建Maven Java Web工程
 
 1.  手动创建
     1. 创建一个maven的javase工程
     
-       ![image-20231021150134082](image-20231021150134082.png)
+       ![image-20231021150134082](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image-20231021150134082.png)
     
     2. 修改pom.xml文件打包方式
     
@@ -416,28 +416,28 @@ GAV遵循一下规则：
     
        点击File-->Project Structure
     
-       ![image-20231021151040531](image-20231021151040531.png)
+       ![image-20231021151040531](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image-20231021151040531.png)
     
-       ![image-20231021151627161](image-20231021151627161.png)
+       ![image-20231021151627161](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image-20231021151627161.png)
     
-       ![image-20231021151753318](image-20231021151753318.png)
+       ![image-20231021151753318](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image-20231021151753318.png)
     
     4. 刷新和校验
     
-       ![image-20231021152310802](image-20231021152310802.png)
+       ![image-20231021152310802](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image-20231021152310802.png)
     
-       ![image-20231021151921943](image-20231021151921943.png)
+       ![image-20231021151921943](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image-20231021151921943.png)
     
 2.  插件创建
     1.  安装插件JBLJavaToWeb
 
         file / settings / plugins / marketplace
 
-        ![](image_cHUU_rABB6.png)
+        ![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image_cHUU_rABB6.png)
     2.  创建一个javasemaven工程
     3.  右键、使用插件快速补全web项目
 
-        ![](image_ZAPkM7VLgJ.png)
+        ![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image_ZAPkM7VLgJ.png)
 
 ### 4. Maven工程项目结构说明
 
@@ -488,7 +488,7 @@ Maven 是一个强大的构建工具，它提供一种标准化的项目结构�
 
 同时，项目构建还能够将多个开发人员的代码汇合到一起，并能够自动化项目的构建和部署，大大降低了项目的出错风险和提高开发效率。常见的构建工具包括 Maven、Gradle、Ant 等。
 
-![](image_REm5kk7DnX.png)
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image_REm5kk7DnX.png)
 
 ### 2. 命令方式项目构建
 
@@ -532,7 +532,7 @@ mvn test
 
 ### 3. 可视化方式项目构建
 
-![image-20231021153444864](image-20231021153444864.png)
+![image-20231021153444864](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image-20231021153444864.png)
 
 注意：打包（package）和安装（install）的区别是什么
 
@@ -704,7 +704,7 @@ Maven 依赖管理是 Maven 软件中最重要的功能之一。Maven 的依赖�
     ```
     文件：
 
-    ![](image_m3iQtBLARz.png)
+    ![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image_m3iQtBLARz.png)
 
 4. 或者可以将清除**lastUpdated文件**的操作写在一个脚本文件中，手动创建文件"clearLastUpdated.bat"，名字任意，但是后缀必须是bat，将以下内容复制到文件中
 
@@ -753,7 +753,7 @@ Maven 依赖管理是 Maven 软件中最重要的功能之一。Maven 的依赖�
    GOTO MENU 
    ```
 
-   ![image-20231021161615994](image-20231021161615994.png)
+   ![image-20231021161615994](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image-20231021161615994.png)
 
 ### 6. Maven工程Build构建配置
 
@@ -883,11 +883,11 @@ dependencies标签下引入开发需要的jar包！我们可以在build/plugins/
 
 分析：jackson需要三个依赖
 
-![](image_9ViibmeAvU.png)
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image_9ViibmeAvU.png)
 
 依赖传递关系：data-bind中，依赖其他两个依赖
 
-![](image_Wl0Lsj_BLk.png)
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image_Wl0Lsj_BLk.png)
 
 最佳导入：直接可以导入data-bind，自动依赖传递需要的依赖
 
@@ -905,7 +905,7 @@ dependencies标签下引入开发需要的jar包！我们可以在build/plugins/
 
 当直接引用或者间接引用出现了相同的jar包! 这时呢，一个项目就会出现相同的重复jar包，这就算作冲突！依赖冲突避免出现重复依赖，并且终止依赖传递！
 
-![](image_km7_szBRUw.png)
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image_km7_szBRUw.png)
 
 maven自动解决依赖冲突问题能力，会按照自己的原则，进行重复依赖选择。同时也提供了手动解决的冲突的方式，不过不推荐！
 
@@ -1120,7 +1120,7 @@ Maven 私服是一种特殊的Maven远程仓库，它是架设在局域网内的
 
 此外，一些无法从外部仓库下载到的构件，也能从本地上传到私服供其他人使用。
 
-![image-20231021164631791](image-20231021164631791.png)
+![image-20231021164631791](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image-20231021164631791.png)
 
 ②Maven私服的优势
 
@@ -1155,38 +1155,38 @@ Maven 私服是一种特殊的Maven远程仓库，它是架设在局域网内的
 
 首页地址：http://localhost:8081/，8081为默认端口号
 
-![images](img001.612496a3.png)
+![images](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/img001.612496a3.png)
 
 ### 3. 初始设置
 
-![images](img002.e1ac8197.png)
+![images](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/img002.e1ac8197.png)
 
-![image-20231031171116756](image-20231031171116756.png)
+![image-20231031171116756](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image-20231031171116756.png)
 
 这里参考提示：
 
 - 用户名：admin
 - 密码：查看 **E:\Server\nexus-3.61.0-02-win64\sonatype-work\nexus3\admin.password** 文件
 
-![image-20231031171242874](image-20231031171242874.png)
+![image-20231031171242874](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image-20231031171242874.png)
 
 继续执行初始化：
 
-![images](img005.4b81e5ab.png)
+![images](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/img005.4b81e5ab.png)
 
-![images](img006.43ebb0ac.png)
+![images](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/img006.43ebb0ac.png)
 
 匿名登录，启用还是禁用？由于启用匿名登录后，后续操作比较简单，这里我们演示禁用匿名登录的操作：
 
-![image-20231031171607378](image-20231031171607378.png)
+![image-20231031171607378](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image-20231031171607378.png)
 
 初始化完毕：
 
-![image-20231031171708085](image-20231031171708085.png)
+![image-20231031171708085](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image-20231031171708085.png)
 
 ### 4. Nexus上的各种仓库
 
-![images](img009.7f737ed7.png)
+![images](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/img009.7f737ed7.png)
 
 | 仓库类型 | 说明                                           |
 | -------- | ---------------------------------------------- |
@@ -1203,7 +1203,7 @@ Maven 私服是一种特殊的Maven远程仓库，它是架设在局域网内的
 
 初始状态下，这几个仓库都没有内容：
 
-![images](img010.e3573d0b.png)
+![images](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/img010.e3573d0b.png)
 
 ### 5. 通过 Nexus 下载 jar 包
 
@@ -1227,9 +1227,9 @@ Maven 私服是一种特殊的Maven远程仓库，它是架设在局域网内的
 
 这里的 url 标签是这么来的：
 
-![images](img012.5a3b1f11.png)
+![images](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/img012.5a3b1f11.png)
 
-![image-20231031172137288](image-20231031172137288.png)
+![image-20231031172137288](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image-20231031172137288.png)
 
 把上图中看到的地址复制出来即可。如果我们在前面允许了匿名访问，到这里就够了。但如果我们禁用了匿名访问，那么接下来我们还要继续配置 settings.xml：
 
@@ -1262,15 +1262,15 @@ mvn clean compile
 
 下载后，Nexus 服务器上就有了 jar 包：
 
-![images](img014.cc0e87c3.png)
+![images](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/img014.cc0e87c3.png)
 
 若下载速度太慢，可以设置私服中中央仓库的地址为阿里云仓库地址
 
-![image-20231031175035345](image-20231031175035345.png)
+![image-20231031175035345](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image-20231031175035345.png)
 
 修改为：http://maven.aliyun.com/nexus/content/groups/public/
 
-![image-20231031175134745](image-20231031175134745.png)
+![image-20231031175134745](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image-20231031175134745.png)
 
 ### 6. 将 jar 包部署到 Nexus
 
@@ -1313,7 +1313,7 @@ mvn deploy
 > [INFO] demo06-mysql-data-provider ......................... SUCCESS [ 6.779 s]
 > [INFO] demo07-redis-data-provider 1.0-SNAPSHOT ............ SUCCESS [ 0.273 s]
 
-![images](img015.b413af9d.png)
+![images](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/img015.b413af9d.png)
 
 ### 7. 引用别人部署的 jar 包
 
@@ -1339,7 +1339,7 @@ maven工程中配置：
 
 ### 1. 项目需求和结构分析
 
-![img](image123.png)
+![img](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image123.png)
 
 需求案例：搭建一个电商平台项目，该平台包括用户服务、订单服务、通用工具模块等。
 
@@ -1366,7 +1366,7 @@ maven工程中配置：
 
 创建工程：
 
-![image-20231023112630117](image-20231023112630117.png)
+![image-20231023112630117](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image-20231023112630117.png)
 
 pom.xml配置：
 
@@ -1449,9 +1449,9 @@ pom.xml配置：
 
 创建工程：
 
-![image-20231023114531521](image-20231023114531521.png)
+![image-20231023114531521](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image-20231023114531521.png)
 
-![image-20231023114649705](image-20231023114649705.png)
+![image-20231023114649705](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image-20231023114649705.png)
 
 pom.xml配置：
 
@@ -1508,9 +1508,9 @@ pom.xml配置：
 
 创建工程：
 
-![image-20231023115404302](image-20231023115404302.png)
+![image-20231023115404302](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image-20231023115404302.png)
 
-![image-20231023115707282](image-20231023115707282.png)
+![image-20231023115707282](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image-20231023115707282.png)
 
 pom.xml配置：
 
@@ -1550,13 +1550,13 @@ pom.xml配置：
 
 依赖传递结果：
 
-![image-20231023120621402](image-20231023120621402.png)
+![image-20231023120621402](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image-20231023120621402.png)
 
 #### ④订单模块 (order-service)
 
 创建工程，并使用插件转为web工程：
 
-![image-20231023120733029](image-20231023120733029.png)
+![image-20231023120733029](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image-20231023120733029.png)
 
 pom.xml配置：
 
