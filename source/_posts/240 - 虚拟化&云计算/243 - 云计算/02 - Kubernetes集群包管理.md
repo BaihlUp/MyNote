@@ -6,7 +6,7 @@ categories:
 tags:
   - Kubernetes
   - Helm
-published: false
+published: true
 ---
 # 一、引入helm原因
 
