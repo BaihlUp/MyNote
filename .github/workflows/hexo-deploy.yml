@@ -94,6 +94,8 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           user_name: ${{ env.GIT_USER }}
           user_email: ${{ env.GIT_EMAIL }}
+          external_repository: ${{ env.DEPLOY_REPO }}
+          publish_branch: ${{ env.DEPLOY_BRANCH }}
           commit_msg: ${{ github.event.head_commit.message }}  # (or delete this input setting to use hexo default settings)
       # Use the output from the `deploy` step(use for test action)
       - name: Get the output
