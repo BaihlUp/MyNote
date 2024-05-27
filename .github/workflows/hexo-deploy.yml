@@ -91,7 +91,7 @@ jobs:
         uses: peaceiris/actions-gh-pages@v4
         with:
           # deploy_key: ${{ secrets.HEXO_DEPLOY_KEY }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
           user_name: ${{ env.GIT_USER }}
           user_email: ${{ env.GIT_EMAIL }}
           external_repository: ${{ env.DEPLOY_REPO }}
