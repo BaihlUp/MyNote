@@ -335,8 +335,6 @@ NAME               STATUS   VOLUME                                     CAPACITY 
 mysql-1658996042   Bound    pvc-7fcb894e-5b8c-4f3e-945d-21b60b9309e5   8Gi        RWO            nfs-client     93s
 ~~~
 
-
-
 ~~~powershell
 [root@k8s-master01 ~]# kubectl get pv
 NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                      STORAGECLASS   REASON   AGE
@@ -361,9 +359,6 @@ mysql-1658996297        default         1               2022-07-28 16:18:19.2820
 ~~~
 
 
-
-
-
 ~~~powershell
 [root@k8s-master01 ~]# kubectl get pods
 NAME                                     READY   STATUS    RESTARTS   AGE
@@ -371,10 +366,6 @@ mysql-1658996042-755f5f64f6-j5s67        1/1     Running   0          45m
 mysql-1658996297-75f6f86d84-5qd8r        1/1     Running   0          41m
 nfs-client-provisioner-9d46587b5-7n2vf   1/1     Running   0          123m
 ~~~
-
-
-
-
 
 ~~~powershell
 [root@k8s-master01 ~]# kubectl exec -it mysql-1658996042-755f5f64f6-j5s67 -- bash
