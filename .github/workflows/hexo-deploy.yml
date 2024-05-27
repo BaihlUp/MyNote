@@ -80,9 +80,8 @@ jobs:
           npm install
           npm install hexo-renderer-pug hexo-renderer-stylus --save
 
-      # - name: Deploy hexo
-      #   run: |
-      #     npm run deploy
+      - run: npm ci
+      - run: npm run build
 
       # Deploy hexo blog website.
       - name: Deploy
@@ -90,7 +89,6 @@ jobs:
         # uses: sma11black/hexo-action@v1.0.4
         uses: peaceiris/actions-gh-pages@v4
         with:
-          # deploy_key: ${{ secrets.HEXO_DEPLOY_KEY }}
           deploy_key: ${{ secrets.HEXO_DEPLOY_KEY }}
           user_name: ${{ env.GIT_USER }}
           user_email: ${{ env.GIT_EMAIL }}
