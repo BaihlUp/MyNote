@@ -16,41 +16,41 @@ published: false
 
 1、创建或者编写deployment模板
 
-~~~powershell
+```powershell
 # kubectl create deployment nginx --image=nginx --dry-run=client -o yaml > deployment.yaml
-~~~
+```
 
 2、启动nginx的pod
 
-~~~powershell
+```powershell
 # kubectl apply -f deployment.yaml
-~~~
+```
 
 3、检查pod服务
 
-~~~powershell
+```powershell
 # kubectl get pod
-~~~
+```
 
 4、创建service
 
-~~~powershell
+```powershell
 # kubectl expose deployment  nginx --port=8099 --target-port=80 --type=NodePort --dry-run=client -o yaml > service.yaml
-~~~
+```
 
 
 
 5、启动service服务
 
-~~~powershell
+```powershell
 # kubectl apply -f service.yaml
-~~~
+```
 
 6、检查service端口
 
-~~~powershell
+```powershell
 # kubectl get svc
-~~~
+```
 
 7、访问nginx服务
 
@@ -122,48 +122,48 @@ Helm客户端使用REST+JSON的方式与K8s中的apiserver进行交互，进而�
 ![image-20220728141101419](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/image-20220728141101419.png)
 
 
-~~~powershell
+```powershell
 [root@k8s-master01 ~]# wget https://get.helm.sh/helm-v3.9.2-linux-amd64.tar.gz
-~~~
+```
 
-~~~powershell
+```powershell
 [root@k8s-master01 ~]#  ls
 helm-v3.9.2-linux-amd64.tar.gz
-~~~
+```
 
-~~~powershell
+```powershell
 [root@k8s-master01 ~]# tar xf helm-v3.9.2-linux-amd64.tar.gz
-~~~
+```
 
-~~~powershell
+```powershell
 [root@k8s-master01 ~]# ls
 linux-amd64
-~~~
+```
 
-~~~powershell
+```powershell
 [root@k8s-master01 ~]# cd linux-amd64/
 [root@k8s-master01 linux-amd64]# ls
 helm  LICENSE  README.md
-~~~
+```
 
-~~~powershell
+```powershell
 [root@k8s-master01 linux-amd64]# mv helm /usr/bin
-~~~
+```
 
-~~~powershell
+```powershell
 [root@k8s-master01 linux-amd64]# helm version
 version.BuildInfo{Version:"v3.9.2", GitCommit:"1addefbfe665c350f4daf868a9adc5600cc064fd", GitTreeState:"clean", GoVersion:"go1.17.12"}
-~~~
+```
 
 # 五、helm基础使用
 
 ## 5.1 添加及删除仓库
 ### 5.1.1 查看仓库
 
-~~~powershell
+```powershell
 [root@master1 ~]# helm repo list
 Error: no repositories to show
-~~~
+```
 
 ### 5.1.2 添加新的仓库地址
 ``` powershell
@@ -178,11 +178,11 @@ prometheus源
 ```
 
 ### 5.1.3 查看已经添加的仓库
-~~~powershell
+```powershell
 [root@k8s-master01 ~]# helm repo list
 NAME    URL
 stable  http://mirror.azure.cn/kubernetes/charts/
-~~~
+```
 
 ### 5.1.4 更新仓库
 ```powershell
@@ -193,28 +193,28 @@ Update Complete. ⎈Happy Helming!⎈
 ```
 
 **再查看**
-~~~powershell
+```powershell
 [root@master ~]# helm repo list
 NAME    URL
 stable  http://mirror.azure.cn/kubernetes/charts/
-~~~
+```
 ### 5.1.5 删除仓库
 
-~~~powershell
+```powershell
 [root@k8s-master01 ~]# helm repo remove stable
 "stable" has been removed from your repositories
-~~~
+```
 
-~~~powershell
+```powershell
 [root@k8s-master01 ~]# helm repo list
 Error: no repositories to show
-~~~
+```
 
 ## 5.2 查看charts
 
 使用`helm search repo 关键字`可以查看相关charts
 
-~~~powershell
+```powershell
 [root@k8s-master01 ~]# helm search repo stable
 NAME                                    CHART VERSION   APP VERSION             DESCRIPTION
 stable/acs-engine-autoscaler            2.2.2           2.1.1                   DEPRECATED Scales worker nodes within agent pools
@@ -233,22 +233,22 @@ stable/aws-iam-authenticator            0.1.5           1.0                     
 stable/bitcoind                         1.0.2           0.17.1                  DEPRECATED Bitcoin is an innovative payment net...
 stable/bookstack                        1.2.4           0.27.5                  DEPRECATED BookStack is a simple, self-hosted, ...
 ......
-~~~
+```
 
-~~~powershell
+```powershell
 [root@k8s-master01 ~]# helm search repo nginx
 NAME                            CHART VERSION   APP VERSION     DESCRIPTION
 stable/nginx-ingress            1.41.3          v0.34.1         DEPRECATED! An nginx Ingress controller that us...
 stable/nginx-ldapauth-proxy     0.1.6           1.13.5          DEPRECATED - nginx proxy with ldapauth
 stable/nginx-lego               0.3.1                           Chart for nginx-ingress-controller and kube-lego
 stable/gcloud-endpoints         0.1.2           1               DEPRECATED Develop, deploy, protect and monitor...
-~~~
+```
 
-~~~powershell
+```powershell
 [root@k8s-master01 ~]# helm search repo tomcat
 NAME            CHART VERSION   APP VERSION     DESCRIPTION
 stable/tomcat   0.4.3           7.0             DEPRECATED - Deploy a basic tomcat application ...
-~~~
+```
 ## 5.3 部署应用 MySQL
 
 > 环境说明：k8s集群中存在storageclass:nfs-client
@@ -256,21 +256,17 @@ stable/tomcat   0.4.3           7.0             DEPRECATED - Deploy a basic tomc
 
 我们现在安装一个 `mysql` 应用：
 
-~~~powershell
+```powershell
 [root@k8s-master01 ~]# helm search repo mysql
 NAME                                    CHART VERSION   APP VERSION     DESCRIPTION
 stable/mysql                            1.6.9           5.7.30          DEPRECATED - Fast, reliable, scalable, and easy...
-~~~
+```
 
-
-
-~~~powershell
+```powershell
 [root@k8s-master01 ~]# helm install stable/mysql --generate-name  --set persistence.storageClass=nfs-client --set mysqlRootPassword=test123
-~~~
+```
 
-
-
-~~~powershell
+```powershell
 部署过程输出的信息：
 NAME: mysql-1658996042
 LAST DEPLOYED: Thu Jul 28 16:14:03 2022
@@ -306,74 +302,66 @@ To connect to your database directly from outside the K8s cluster:
     kubectl port-forward svc/mysql-1658996042 3306
 
     mysql -h ${MYSQL_HOST} -P${MYSQL_PORT} -u root -p${MYSQL_ROOT_PASSWORD}
-~~~
+```
 
-
-
-
-
-~~~powershell
+```powershell
 [root@k8s-master01 ~]# helm list
 NAME                    NAMESPACE       REVISION        UPDATED                                 STATUS          CHART           APP VERSION
 
 mysql-1658996042        default         1               2022-07-28 16:14:03.530489788 +0800 CST deployed        mysql-1.6.9     5.7.30
-~~~
+```
 
-
-
-~~~powershell
+```powershell
 [root@k8s-master01 ~]# kubectl get pods
 NAME                                     READY   STATUS    RESTARTS   AGE
 mysql-1658996042-755f5f64f6-j5s67        1/1     Running   0          82s
-~~~
+```
 
-
-
-~~~powershell
+```powershell
 [root@k8s-master01 ~]# kubectl get pvc
 NAME               STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
 mysql-1658996042   Bound    pvc-7fcb894e-5b8c-4f3e-945d-21b60b9309e5   8Gi        RWO            nfs-client     93s
-~~~
+```
 
-~~~powershell
+```powershell
 [root@k8s-master01 ~]# kubectl get pv
 NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                      STORAGECLASS   REASON   AGE
 pvc-7fcb894e-5b8c-4f3e-945d-21b60b9309e5   8Gi        RWO            Delete           Bound    default/mysql-1658996042   nfs-client              97s
-~~~
+```
 
 
 
 **一个 chart 包是可以多次安装到同一个集群中的，每次安装都会产生一个release, 每个release都可以独立管理和升级。**
 
-~~~powershell
+```powershell
 [root@k8s-master01 ~]# helm install stable/mysql --generate-name  --set persistence.storageClass=nfs-client --set mysqlRootPassword=root
-~~~
+```
 
 
 
-~~~powershell
+```powershell
 [root@k8s-master01 ~]# helm ls
 NAME                    NAMESPACE       REVISION        UPDATED                                 STATUS          CHART           APP VERSION
 mysql-1658996042        default         1               2022-07-28 16:14:03.530489788 +0800 CST deployed        mysql-1.6.9     5.7.30
 mysql-1658996297        default         1               2022-07-28 16:18:19.282074215 +0800 CST deployed        mysql-1.6.9     5.7.30
-~~~
+```
 
 
-~~~powershell
+```powershell
 [root@k8s-master01 ~]# kubectl get pods
 NAME                                     READY   STATUS    RESTARTS   AGE
 mysql-1658996042-755f5f64f6-j5s67        1/1     Running   0          45m
 mysql-1658996297-75f6f86d84-5qd8r        1/1     Running   0          41m
 nfs-client-provisioner-9d46587b5-7n2vf   1/1     Running   0          123m
-~~~
+```
 
-~~~powershell
+```powershell
 [root@k8s-master01 ~]# kubectl exec -it mysql-1658996042-755f5f64f6-j5s67 -- bash
-~~~
+```
 
 
 
-~~~powershell
+```powershell
 root@mysql-1658996042-755f5f64f6-j5s67:/# mysql -uroot -ptest123
 mysql: [Warning] Using a password on the command line interface can be insecure.
 Welcome to the MySQL monitor.  Commands end with ; or \g.
@@ -398,7 +386,7 @@ mysql> show databases;
 | sys                |
 +--------------------+
 4 rows in set (0.01 sec)
-~~~
+```
 
 ## 5.4 查看chart资源
 
@@ -457,11 +445,11 @@ release "mysql-1605195227" uninstalled
 
 `uninstall` 命令会从 Kubernetes 中删除 release，也会删除与 release 相关的所有 Kubernetes 资源以及 release 历史记录。
 
-~~~powershell
+```powershell
 [root@k8s-master01 ~]# helm ls
 NAME              NAMESPACE     REVISION     UPDATED    STATUS        CHART           APP VERSION
 mysql-1605192239     default     1        .........     deployed      mysql-1.6.9       5.7.30
-~~~
+```
 
 在删除的时候使用 `--keep-history` 参数，则会保留 release 的历史记录，该 release 的状态就是 `UNINSTALLED`，
 
@@ -478,7 +466,7 @@ mysql-1605192239        default         1              ........    uninstalled  
 审查历史时甚至可以取消删除`release`。
 `Usage:  helm rollback <RELEASE> [REVISION] [flags]`
 
-~~~powershell
+```powershell
 [root@k8s-master01 ~]# helm rollback mysql-1605192239 1
 Rollback was a success! Happy Helming!
 
@@ -486,7 +474,7 @@ Rollback was a success! Happy Helming!
 NAME              NAMESPACE     REVISION     UPDATED    STATUS        CHART           APP VERSION
 mysql-1605192239     default     2        .........     deployed      mysql-1.6.9       5.7.30
 rollback后，又回到deployed状态
-~~~
+```
 
 ## 5.6 定制参数部署应用
 
@@ -504,13 +492,13 @@ rollback后，又回到deployed状态
 
 1，准备参数文件
 
-~~~powershell
+```powershell
 [root@k8s-master01 ~]# vim mysql-config.yml
 mysqlDatabase: helm
 persistence:
   enabled: true  # 没有存储卷情况下，改为false
   storageClass: nfs-client
-~~~
+```
 
 2, 使用`-f mysql-config.yml`安装应用并覆盖参数
 
@@ -518,7 +506,7 @@ persistence:
 [root@k8s-master01 ~]# helm install mysql -f mysql-config.yml stable/mysql
 ```
 
-~~~powershell
+```powershell
 输出内容：
 
 NAME: mysql
@@ -555,22 +543,22 @@ To connect to your database directly from outside the K8s cluster:
     kubectl port-forward svc/mysql 3306
 
     mysql -h ${MYSQL_HOST} -P${MYSQL_PORT} -u root -p${MYSQL_ROOT_PASSWORD}
-~~~
+```
 
 3, 查看覆盖的参数
 
-~~~powershell
+```powershell
 [root@master ~]# helm get values mysql
 USER-SUPPLIED VALUES:
 mysqlDatabase: helm
 persistence:
   enabled: true
   storageClass: nfs-client
-~~~
+```
 
 4, 查看部署的相关资源
 
-~~~powershell
+```powershell
 [root@k8s-master01 helmdir]# kubectl get all -l release=mysql
 NAME                         READY   STATUS    RESTARTS   AGE
 pod/mysql-855976764d-npvgm   1/1     Running   0          40m
@@ -583,39 +571,39 @@ deployment.apps/mysql   1/1     1            1           40m
 
 NAME                               DESIRED   CURRENT   READY   AGE
 replicaset.apps/mysql-855976764d   1         1         1       40m
-~~~
+```
 
 5, 查看pod的IP
 
-~~~powershell
+```powershell
 [root@k8s-master01 helmdir]# kubectl get pods -o wide -l release=mysql
 NAME                     READY   STATUS    RESTARTS   AGE   IP              NODE           NOMINATED NODE   READINESS GATES
 mysql-855976764d-npvgm   1/1     Running   0          41m   100.119.84.71   k8s-worker01   <none>           <none>
 
 得到pod的IP为100.119.84.71
-~~~
+```
 
 6, 安装mysql客户端并连接测试
 
-~~~powershell
+```powershell
 [root@k8s-master01 ~]# yum install mariadb -y
-~~~
+```
 
-~~~powershell
+```powershell
 [root@k8s-master01 ~]# kubectl get secret --namespace default mysql -o jsonpath="{.data.mysql-root-password}" | base64 --decode; echo
 wL2SD0RCsT
-~~~
+```
 
-~~~powershell
+```powershell
 [root@k8s-master01 ~]# kubectl get svc
 NAME         TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)    AGE
 kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP    27h
 mysql        ClusterIP   10.96.0.84   <none>        3306/TCP   5m21s
-~~~
+```
 
 
 
-~~~powershell
+```powershell
 [root@k8s-master01 helmdir]# mysql -h 10.96.0.84 -uroot -pwL2SD0RCsT -e "show databases;"
 +--------------------+
 | Database           |
@@ -626,19 +614,19 @@ mysql        ClusterIP   10.96.0.84   <none>        3306/TCP   5m21s
 | performance_schema |
 | sys                |
 +--------------------+
-~~~
+```
 
 
 
-~~~powershell
+```powershell
 [root@k8s-master01 ~]# kubectl get pods -o wide -l release=mysql
 NAME                     READY   STATUS    RESTARTS   AGE   IP              NODE           NOMINATED NODE   READINESS GATES
 mysql-855976764d-npvgm   1/1     Running   0          41m   100.119.84.71   k8s-worker01   <none>           <none>
-~~~
+```
 
 
 
-~~~powershell
+```powershell
 [root@k8s-master01 ~]# mysql -h 100.119.84.71 -uroot -pwL2SD0RCsT -e "show databases;"
 +--------------------+
 | Database           |
@@ -649,7 +637,7 @@ mysql-855976764d-npvgm   1/1     Running   0          41m   100.119.84.71   k8s-
 | performance_schema |
 | sys                |
 +--------------------+
-~~~
+```
 
 
 
@@ -661,7 +649,7 @@ mysql-855976764d-npvgm   1/1     Running   0          41m   100.119.84.71   k8s-
 
 1, 升级前查看版本
 
-~~~powershell
+```powershell
 [root@k8s-master01 helmdir]# mysql -h 10.96.0.84 -uroot -pwL2SD0RCsT -e "select version()"
 +-----------+
 | version() |
@@ -673,7 +661,7 @@ mysql-855976764d-npvgm   1/1     Running   0          41m   100.119.84.71   k8s-
 NAME    READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS   IMAGES         SELECTOR
 mysql   1/1     1            1           54m   mysql        mysql:5.7.30   app=mysql,release=mysql
 images版本为5.7.30
-~~~
+```
 
 2，修改配置并升级
 
@@ -693,7 +681,7 @@ persistence:
 
 
 
-~~~powershell
+```powershell
 升级过程中的输出：
 
 WARNING: This chart is deprecated
@@ -734,7 +722,7 @@ To connect to your database directly from outside the K8s cluster:
     mysql -h ${MYSQL_HOST} -P${MYSQL_PORT} -u root -p${MYSQL_ROOT_PASSWORD}
     
  注意：更新过程中，密码会被更新，但是实际使用中，密码并未更新。
-~~~
+```
 
 
 
@@ -746,56 +734,56 @@ NAME    READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS   IMAGES         SELEC
 mysql   1/1     1            1           58m   mysql        mysql:5.7.31   app=mysql,release=mysql
 ```
 
-~~~powershell
+```powershell
 [root@k8s-master01 helmdir]# kubectl get pods -o wide
 NAME                                     READY   STATUS    RESTARTS       AGE     IP              NODE           NOMINATED NODE   READINESS GATES
 mysql-6f57f64c9d-sc72v                   1/1     Running   0              2m20s   100.119.84.72   k8s-worker01   <none>           <none>
-~~~
+```
 
 
 
-~~~powershell
+```powershell
 [root@k8s-master01 helmdir]# mysql -h 100.119.84.72 -uroot -pwL2SD0RCsT -e "select version()"
 +-----------+
 | version() |
 +-----------+
 | 5.7.31    |   	版本升级为5.7.31
 +-----------+
-~~~
+```
 
 
 
 4, 回滚
 
-~~~powershell
+```powershell
 [root@k8s-master01 helmdir]# helm history mysql
 REVISION        UPDATED                         STATUS          CHART           APP VERSION     DESCRIPTION
 1               Fri Jul 29 14:07:17 2022        superseded      mysql-1.6.9     5.7.30          Install complete
 2               Fri Jul 29 15:04:20 2022        deployed        mysql-1.6.9     5.7.30          Upgrade complete
-~~~
+```
 
-~~~powershell
+```powershell
 [root@k8s-master01 helmdir]# helm rollback mysql 1
 Rollback was a success! Happy Helming!
-~~~
+```
 
 5, 验证
 
-~~~powershell
+```powershell
 [root@k8s-master01 helmdir]# kubectl get deployment mysql -o wide
 NAME    READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS   IMAGES         SELECTOR
 mysql   1/1     1            1           65m   mysql        mysql:5.7.30   app=mysql,release=mysql
-~~~
+```
 
 
 
-~~~powershell
+```powershell
 [root@k8s-master01 helmdir]# helm history mysql
 REVISION        UPDATED                         STATUS          CHART           APP VERSION     DESCRIPTION
 1               Fri Jul 29 14:07:17 2022        superseded      mysql-1.6.9     5.7.30          Install complete
 2               Fri Jul 29 15:04:20 2022        superseded      mysql-1.6.9     5.7.30          Upgrade complete
 3               Fri Jul 29 15:12:24 2022        deployed        mysql-1.6.9     5.7.30          Rollback to 1
-~~~
+```
 
 
 
@@ -806,14 +794,14 @@ REVISION        UPDATED                         STATUS          CHART           
 - chart 仓库
 - 本地 chart 压缩包
 
-~~~powershell
+```powershell
 [root@k8s-master01 helmdir]# helm pull stable/mysql
 
 [root@k8s-master01 helmdir]# ls mysql-1.6.9.tgz
 mysql-1.6.9.tgz
 
 [root@k8s-master01 helmdir]# helm install mysql2 mysql-1.6.9.tgz
-~~~
+```
 
 - 在线的 URL（helm install fool https://example.com/charts/foo-1.2.3.tgz）
 
@@ -821,7 +809,7 @@ mysql-1.6.9.tgz
 ## 6.1 Chart 目录结构   
 ![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/20240422102446.png)
 
-~~~powershell
+```powershell
 [root@k8s-master01 helmdir]# helm create foo
 
 [root@k8s-master01 helmdir]# tree foo
@@ -839,9 +827,9 @@ foo
 │   └── tests
 │       └── test-connection.yaml
 └── values.yaml
-~~~
+```
 
-~~~powershell
+```powershell
 [root@master ~]# helm pull stable/mysql
 
 [root@master ~]# tar xf mysql-1.6.8.tgz
@@ -862,7 +850,7 @@ total 48
 -rwxr-xr-x 1 root root  800 Jan  1  1970 servicemonitor.yaml
 -rwxr-xr-x 1 root root 1231 Jan  1  1970 svc.yaml
 drwxr-xr-x 2 root root   50 Nov 13 18:43 tests
-~~~
+```
 
 | 文件              | 说明                                                         |
 | ----------------- | ------------------------------------------------------------ |
@@ -935,7 +923,7 @@ spec:
 
 ### 4, 使用chart安装应用
 
-~~~powershell
+```powershell
 [root@k8s-master01 nginx]# helm install /helm/nginx --generate-name
 NAME: nginx-1659144826
 LAST DEPLOYED: Sat Jul 30 09:33:46 2022
@@ -943,17 +931,17 @@ NAMESPACE: default
 STATUS: deployed
 REVISION: 1
 TEST SUITE: None
-~~~
+```
 
 ### 5, 查看与验证
 
-~~~powershell
+```powershell
 [root@k8s-master01 nginx]# helm ls
 NAME                    NAMESPACE       REVISION        UPDATED                                 STATUS          CHART                   APP VERSION
 nginx-1659144826        default         1               2022-07-30 09:33:46.881083524 +0800 CST deployed        helm-nginx-1.0.0
-~~~
+```
 
-~~~powershell
+```powershell
 [root@k8s-master01 nginx]# kubectl get pods,service
 NAME                                         READY   STATUS    RESTARTS      AGE
 pod/helm-nginx-65f57fb758-nrpvf              1/1     Running   0             51s
@@ -961,7 +949,7 @@ pod/nfs-client-provisioner-9d46587b5-7n2vf   1/1     Running   4 (31m ago)   42h
 
 NAME                 TYPE        CLUSTER-IP    EXTERNAL-IP   PORT(S)   AGE
 service/helm-nginx   ClusterIP   10.96.2.120   <none>        80/TCP    51s
-~~~
+```
 
 ```powershell
 [root@k8s-master01 nginx]# curl http://10.96.2.120
@@ -992,10 +980,10 @@ Commercial support is available at
 
 ### 6 删除
 
-~~~powershell
+```powershell
 [root@k8s-master01 ~]# helm uninstall nginx-1659144826
 release "nginx-1659144826" uninstalled
-~~~
+```
 
 ## 6.3 创建可配置的Chart
 
@@ -1054,7 +1042,7 @@ spec:
 
 > deployment.yaml将直接使用values.yaml中的配置
 
-~~~powershell
+```powershell
 [root@k8s-master01 nginx]# helm install helm-nginx-new /helm/nginx
 NAME: helm-nginx-new
 LAST DEPLOYED: Sat Jul 30 09:44:21 2022
@@ -1062,20 +1050,20 @@ NAMESPACE: default
 STATUS: deployed
 REVISION: 1
 TEST SUITE: None
-~~~
+```
 
-~~~powershell
+```powershell
 [root@k8s-master01 nginx]# kubectl get pods
 NAME                                     READY   STATUS    RESTARTS      AGE
 helm-nginx-65f57fb758-pcmkg              1/1     Running   0             38s
 helm-nginx-65f57fb758-rmmv5              1/1     Running   0             38s
-~~~
+```
 
 #### 6.3.4.2 通过命令行设置变量后干运行测试
 
 > 通过在命令行设置变量为deployment.yaml赋值，使用--set选项，使用`--dry-run`选项来打印出生成的清单文件内容，而不执行部署
 
-~~~powershell
+```powershell
 [root@k8s-master01 nginx]# helm install helm-nginx --set replicas=3 /helm/nginx/ --dry-run
 NAME: helm-nginx
 LAST DEPLOYED: Fri Nov 13 20:57:45 2020
@@ -1118,7 +1106,7 @@ spec:
       - name: helm-nginx
         image: nginx:1.15-alpine							镜像名:TAG 传参成功
         imagePullPolicy: IfNotPresent
-~~~
+```
 
 ```powershell
 [root@k8s-master01 nginx]# helm install helm-nginx --set replicas=3 /helm/nginx
@@ -1138,7 +1126,7 @@ helm-nginx      default         1               2022-07-30 09:54:00.744748457 +0
 
 ```
 
-~~~powershell
+```powershell
 [root@k8s-master01 nginx]# kubectl get pods,svc
 NAME                                         READY   STATUS    RESTARTS      AGE
 pod/helm-nginx-65f57fb758-j768m              1/1     Running   0             59s
@@ -1148,7 +1136,7 @@ pod/helm-nginx-65f57fb758-s6qqj              1/1     Running   0             58s
 
 NAME                 TYPE        CLUSTER-IP    EXTERNAL-IP   PORT(S)   AGE
 service/helm-nginx   ClusterIP   10.96.1.197   <none>        80/TCP    59s
-~~~
+```
 
 ### 6.3.5将Chart包进行打包
 
@@ -1159,17 +1147,17 @@ service/helm-nginx   ClusterIP   10.96.1.197   <none>        80/TCP    59s
 Successfully packaged chart and saved it to: /helm/nginx/helm-nginx-1.0.0.tgz
 ```
 
-~~~powershell
+```powershell
 [root@k8s-master01 nginx]# ls
 Chart.yaml  helm-nginx-1.0.0.tgz  templates  values.yaml
 打包出mychart-0.1.0.tgz文件
-~~~
+```
 
 ### 6.3.6 使用Chart安装
 
-~~~powershell
+```powershell
 [root@master nginx]# helm install helm-nginx2 /helm/nginx/helm-nginx-1.0.0.tgz
-~~~
+```
 
 # 七、Chart包托管至Harbor方案
 
@@ -1177,71 +1165,71 @@ Chart.yaml  helm-nginx-1.0.0.tgz  templates  values.yaml
 
 ### 7.1.1 docker-ce安装
 
-~~~powershell
+```powershell
 wget https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo -O /etc/yum.repos.d/docker-ce.repo
-~~~
+```
 
 
 
-~~~powershell
+```powershell
 [root@nfsserver harbor]# yum -y install docker-ce
-~~~
+```
 
 
 
-~~~powershell
+```powershell
 [root@nfsserver harbor]# systemctl enable --now docker
-~~~
+```
 
 
 
 ### 7.1.2 docker-compose安装
 
-~~~powershell
+```powershell
 [root@nfsserver ~]# wget https://github.com/docker/compose/releases/download/1.25.0/docker-compose-Linux-x86_64
-~~~
+```
 
 
 
-~~~powershell
+```powershell
 [root@nfsserver ~]# mv docker-compose-Linux-x86_64 /usr/bin/docker-compose
 [root@nfsserver ~]# chmod +x /usr/bin/docker-compose
-~~~
+```
 
 
 
-~~~powershell
+```powershell
 [root@nfsserver ~]# docker-compose version
 docker-compose version 1.25.0, build 0a186604
 docker-py version: 4.1.0
 CPython version: 3.7.4
 OpenSSL version: OpenSSL 1.1.0l  10 Sep 2019
-~~~
+```
 
 
 
 ### 7.1.3 harbor服务器安装
 
-~~~powershell
+```powershell
 [root@nfsserver ~]# wget https://github.com/goharbor/harbor/releases/download/v2.5.3/harbor-offline-installer-v2.5.3.tgz
-~~~
+```
 
 
 
-~~~powershell
+```powershell
 [root@nfsserver harbor]# ls
 6864844_kubemsb.com.key  6864844_kubemsb.com.pem  common.sh  harbor.v2.5.3.tar.gz  harbor.yml.tmpl  install.sh  LICENSE  prepare
-~~~
+```
 
 
 
-~~~powershell
+```powershell
 [root@nfsserver harbor]# mv harbor.yml.tmpl harbor.yml
-~~~
+```
 
 
 
-~~~powershell
+```powershell
 # vim harbor.yaml
 
 # Configuration file of Harbor
@@ -1280,36 +1268,36 @@ https:
 harbor_admin_password: 12345
 
 # Harbor DB configuration
-~~~
+```
 
 
 
-~~~powershell
+```powershell
 [root@nfsserver harbor]# ./prepare
-~~~
+```
 
 
 
-~~~powershell
+```powershell
 [root@nfsserver harbor]# ./install.sh -h
 
 Note: Please set hostname and other necessary attributes in harbor.yml first. DO NOT use localhost or 127.0.0.1 for hostname, because Harbor needs to be accessed by external clients.
 Please set --with-notary if needs enable Notary in Harbor, and set ui_url_protocol/ssl_cert/ssl_cert_key in harbor.yml bacause notary must run under https.
 Please set --with-trivy if needs enable Trivy in Harbor
 Please set --with-chartmuseum if needs enable Chartmuseum in Harbor
-~~~
+```
 
 
 
-~~~powershell
+```powershell
 [root@nfsserver harbor]# ./install.sh --with-chartmuseum
-~~~
+```
 
 
 
-~~~powershell
+```powershell
 [root@nfsserver harbor]# docker ps
-~~~
+```
 
 
 
@@ -1359,32 +1347,32 @@ Please set --with-chartmuseum if needs enable Chartmuseum in Harbor
 
 
 
-~~~powershell
+```powershell
 [root@k8s-master01 ~]# helm repo add harborhelm https://www.kubemsb.com/chartrepo/nginx --username admin --password 12345
 "harborhelm" has been added to your repositories
-~~~
+```
 
 
 
-~~~powershell
+```powershell
 [root@k8s-master01 ~]# helm repo list
 NAME                    URL
 micosoft                http://mirror.azure.cn/kubernetes/charts/
 prometheus-community    https://prometheus-community.github.io/helm-charts
 harborhelm              https://www.kubemsb.com/chartrepo/nginx
-~~~
+```
 
 
 
-~~~powershell
+```powershell
 [root@k8s-master01 ~]# helm search repo helm-nginx
 NAME                    CHART VERSION   APP VERSION     DESCRIPTION
 harborhelm/helm-nginx   1.0.0
-~~~
+```
 
 
 
-~~~powershell
+```powershell
 [root@k8s-master01 ~]# helm install helm-nginx-test harborhelm/helm-nginx
 NAME: helm-nginx-test
 LAST DEPLOYED: Sat Jul 30 20:32:05 2022
@@ -1392,24 +1380,24 @@ NAMESPACE: default
 STATUS: deployed
 REVISION: 1
 TEST SUITE: None
-~~~
+```
 
 
 
-~~~powershell
+```powershell
 [root@k8s-master01 ~]# helm ls
 NAME            NAMESPACE       REVISION        UPDATED                                 STATUS          CHART                   APP VERSION
 helm-nginx-test default         1               2022-07-30 20:32:05.138180077 +0800 CST deployed        helm-nginx-1.0.0
-~~~
+```
 
 
 
-~~~powershell
+```powershell
 [root@k8s-master01 ~]# kubectl get pods
 NAME                                     READY   STATUS    RESTARTS      AGE
 helm-nginx-65f57fb758-2hkl6              1/1     Running   0             8s
 helm-nginx-65f57fb758-v427b              1/1     Running   0             8s
-~~~
+```
 
 
 
@@ -1423,20 +1411,20 @@ helm-nginx-65f57fb758-v427b              1/1     Running   0             8s
 
 
 
-~~~powershell
+```powershell
 [root@k8s-master01 nginx]# helm plugin install https://github.com/chartmuseum/helm-push
 Downloading and installing helm-push v0.10.3 ...
 https://github.com/chartmuseum/helm-push/releases/download/v0.10.3/helm-push_0.10.3_linux_amd64.tar.gz
 Installed plugin: cm-push
 
-~~~
+```
 
 
 
-~~~powershell
+```powershell
 [root@k8s-master01 nginx]# ls /root/.local/share/helm/plugins/helm-push/bin/
 .  ..  helm-cm-push
-~~~
+```
 
 
 
@@ -1444,7 +1432,7 @@ Installed plugin: cm-push
 
 
 
-~~~powershell
+```powershell
 [root@k8s-master01 nginx]# ls
 Chart.yaml  templates  values.yaml
 
@@ -1457,27 +1445,27 @@ version: 1.1.0
 Successfully packaged chart and saved it to: /helm/nginx/helm-nginx-1.1.0.tgz
 [root@k8s-master01 nginx]# ls
 Chart.yaml  helm-nginx-1.1.0.tgz  templates  values.yaml
-~~~
+```
 
 
 
-~~~powershell
+```powershell
 [root@k8s-master01 nginx]# helm -h
 The Kubernetes package manager
 ...
 Available Commands:
   cm-push     Please see https://github.com/chartmuseum/helm-push for usage
-~~~
+```
 
 
 
 
 
-~~~powershell
+```powershell
 [root@k8s-master01 nginx]# helm cm-push --username admin --password 12345 helm-nginx-1.1.0.tgz harborhelm
 Pushing helm-nginx-1.1.0.tgz to harborhelm...
 Done.
-~~~
+```
 
 
 
@@ -1509,25 +1497,25 @@ Kubeapps提供了一个开源的Helm UI界面，方便以图形界面的形式�
 
 
 
-~~~powershell
+```powershell
 [root@k8s-master01 ~]# helm repo add bitnami https://charts.bitnami.com/bitnami
 "bitnami" has been added to your repositories
-~~~
+```
 
 
 
-~~~powershell
+```powershell
 [root@k8s-master01 ~]# helm repo list
 NAME                    URL
 micosoft                http://mirror.azure.cn/kubernetes/charts/
 prometheus-community    https://prometheus-community.github.io/helm-charts
 harborhelm              https://www.kubemsb.com/chartrepo/nginx
 bitnami                 https://charts.bitnami.com/bitnami
-~~~
+```
 
 
 
-~~~powershell
+```powershell
 [root@k8s-master01 ~]# helm repo update
 Hang tight while we grab the latest from your chart repositories...
 ...Successfully got an update from the "harborhelm" chart repository
@@ -1535,34 +1523,34 @@ Hang tight while we grab the latest from your chart repositories...
 ...Successfully got an update from the "micosoft" chart repository
 ...Successfully got an update from the "bitnami" chart repository
 Update Complete. ⎈Happy Helming!⎈
-~~~
+```
 
 
 
-~~~powershell
+```powershell
 [root@k8s-master01 ~]# helm search repo kubeapps
 NAME                    CHART VERSION   APP VERSION     DESCRIPTION
 bitnami/kubeapps        10.0.2          2.4.6           Kubeapps is a web-based UI for launching and ma...
-~~~
+```
 
 
 
 
 
-~~~powershell
+```powershell
 [root@k8s-master01 ~]# kubectl create ns kubeapps
 namespace/kubeapps created
-~~~
+```
 
 
 
-~~~powershell
+```powershell
 [root@k8s-master01 ~]# helm install kubeapps bitnami/kubeapps --namespace kubeapps
-~~~
+```
 
 
 
-~~~powershell
+```powershell
 输出信息：
 NAME: kubeapps
 LAST DEPLOYED: Sun Jul 31 00:00:03 2022
@@ -1590,11 +1578,11 @@ To access Kubeapps from outside your K8s cluster, follow the steps below:
    kubectl port-forward --namespace kubeapps service/kubeapps 8080:80
 
 2. Open a browser and access Kubeapps using the obtained URL.
-~~~
+```
 
 
 
-~~~powershell
+```powershell
 [root@k8s-master01 ~]# kubectl get pods -n kubeapps
 NAME                                                         READY   STATUS    RESTARTS   AGE
 apprepo-kubeapps-sync-bitnami-w5jlr-6nvsl                    1/1     Running   0          30s
@@ -1608,11 +1596,11 @@ kubeapps-internal-kubeappsapis-c5d8cbb7f-9jthp               1/1     Running   0
 kubeapps-internal-kubeops-58794f58c8-bkjtc                   1/1     Running   0          96s
 kubeapps-internal-kubeops-58794f58c8-qk655                   1/1     Running   0          96s
 kubeapps-postgresql-0                                        1/1     Running   0          96s
-~~~
+```
 
 
 
-~~~powershell
+```powershell
 [root@k8s-master01 ~]# kubectl get svc -n kubeapps
 NAME                             TYPE        CLUSTER-IP    EXTERNAL-IP   PORT(S)    AGE
 kubeapps                         ClusterIP   10.96.2.39    <none>        80/TCP     2m18s
@@ -1621,7 +1609,7 @@ kubeapps-internal-kubeappsapis   ClusterIP   10.96.2.40    <none>        8080/TC
 kubeapps-internal-kubeops        ClusterIP   10.96.3.116   <none>        8080/TCP   2m18s
 kubeapps-postgresql              ClusterIP   10.96.0.235   <none>        5432/TCP   2m18s
 kubeapps-postgresql-hl           ClusterIP   None          <none>        5432/TCP   2m18s
-~~~
+```
 
 
 
@@ -1631,7 +1619,7 @@ kubeapps-postgresql-hl           ClusterIP   None          <none>        5432/TC
 
 
 
-~~~powershell
+```powershell
 [root@k8s-master01 ~]# vim kubeapps-ingress.yaml
 
 [root@k8s-master01 ~]# cat kubeapps-ingress.yaml
@@ -1655,14 +1643,14 @@ spec:
             name: kubeapps     # 对应上面创建的service名称
             port:
               number: 80
-~~~
+```
 
 
 
-~~~powershell
+```powershell
 [root@k8s-master01 ~]# kubectl apply -f kubeapps-ingress.yaml
 ingress.networking.k8s.io/ingress-kubeapps created
-~~~
+```
 
 
 
@@ -1682,25 +1670,25 @@ ingress.networking.k8s.io/ingress-kubeapps created
 
 
 
-~~~powershell
+```powershell
 创建用户
 [root@k8s-master01 ~]# kubectl create --namespace default serviceaccount kubeapps-operator
 serviceaccount/kubeapps-operator created
-~~~
+```
 
 
 
-~~~powershell
+```powershell
 绑定集群管理员角色
 [root@k8s-master01 ~]# kubectl create clusterrolebinding kubeapps-operator --clusterrole=cluster-admin --serviceaccount=default:kubeapps-operator
 clusterrolebinding.rbac.authorization.k8s.io/kubeapps-operator created
-~~~
+```
 
 
 
 
 
-~~~powershell
+```powershell
 [root@k8s-master01 ~]# cat <<EOF | kubectl apply -f -
 apiVersion: v1
 kind: Secret
@@ -1715,15 +1703,15 @@ EOF
 
 输出：
 secret/kubeapps-operator-token created
-~~~
+```
 
 
 
-~~~powershell
+```powershell
 获取访问token
 [root@k8s-master01 ~]# kubectl get --namespace default secret kubeapps-operator-token -o jsonpath='{.data.token}' -o go-template='{{.data.token | base64decode}}' && echo
 eyJhbGciOiJSUzI1NiIsImtpZCI6ImRneWtqS2s2OWFsZU94UklERWh5SlhMSk56SUZZQzZOYlhHbUZIaDZpcTQifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkZWZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6Imt1YmVhcHBzLW9wZXJhdG9yLXRva2VuIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6Imt1YmVhcHBzLW9wZXJhdG9yIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQudWlkIjoiYjgzMjM3MDAtODI3MC00ODI5LWFmNmUtODg3N2FlNGM4OWQ3Iiwic3ViIjoic3lzdGVtOnNlcnZpY2VhY2NvdW50OmRlZmF1bHQ6a3ViZWFwcHMtb3BlcmF0b3IifQ.NF4A7N394MwcRDQbHOTkahg_ODqi7OCV9CzP7zcb5kXwHo-DeQ20cf7CTYmyQCw1aKaYae-Vdi_ncJ9araSdapshoBX9zfQ4dl6rP6Z_g_rtHZBIe4rCopOPUqncY-OjonQL1R0MY8ODqE2BVPF3kHwcBnamT9c1nmib42fB_cIBqwu72c71LURvQifwiluriQZRJQWh20pM7p8aUkNXqvFId03iMdgmPXdOd5W2Kl1Rys2DUfPmRV1tmqXHuZOcMnHmSU7DzcaXcnoGesZUnB7sqtL2HhTn7iLnk323MaXzhNY5pWt2nZC-6U2ZFkPSkV2LZ1K6D2IxaImkZxRPVQ
-~~~
+```
 
 
 
@@ -1767,12 +1755,12 @@ eyJhbGciOiJSUzI1NiIsImtpZCI6ImRneWtqS2s2OWFsZU94UklERWh5SlhMSk56SUZZQzZOYlhHbUZI
 
 
 
-~~~powershell
+```powershell
 [root@k8s-master01 nginx]# kubectl get pods -n kubeapps
 NAME                                                         READY   STATUS                       RESTARTS      AGE
 ......
 kubemsb-web-nginx-55fdb5bfd6-4cfpg                           1/1     Running                      0             57s
-~~~
+```
 
 
 
@@ -1824,12 +1812,12 @@ snv
 
 
 
-~~~powershell
+```powershell
 [root@k8s-master01 ~]# kubectl get pods
 NAME                                     READY   STATUS    RESTARTS      AGE
 kubemsb-web-db-mysql-primary-0           1/1     Running   0             5h29m
 kubemsb-web-db-mysql-secondary-0         1/1     Running   0             5h29m
-~~~
+```
 
 
 
