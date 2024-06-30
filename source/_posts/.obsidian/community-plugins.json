@@ -1,7 +1,6 @@
 [
   "file-explorer-note-count",
   "editing-toolbar",
-  "obsidian-git",
   "obsidian-quiet-outline",
   "chronology",
   "remotely-save",
@@ -10,5 +9,6 @@
   "quickadd",
   "editor-width-slider",
   "obsidian-annotator",
-  "obsidian-image-auto-upload-plugin"
+  "obsidian-image-auto-upload-plugin",
+  "obsidian-git"
 ]
