@@ -218,17 +218,15 @@ https://www.jetbrains.com/help/idea/meet-intellij-idea.html
 ### 3.1 新建Project - Class
 
 选择"New Project"：
-![](images/image-20221019174051967.png)
+![image-20221019174051967.png](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/202406301501571.png)
 
 指名工程名、使用的JDK版本等信息。如下所示：
-
-![image-20221019174355370](images/image-20221019174355370.png)
+![image-20221019174355370.png](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/202406301501076.png)
 
 接着创建Java类：
+![image-20221019174505876.png](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/202406301500285.png)
 
-![image-20221019174505876](images/image-20221019174505876.png)
-
-![image-20221019174551606](images/image-20221019174551606.png)
+![image-20221019174551606.png](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/202406301500406.png)
 
 ### 3.2 编写代码
 
@@ -242,9 +240,9 @@ public class HelloWorld {
 
 ### 3.3 运行
 
-![image-20221019174716442](images/image-20221019174716442.png)
+![](images/image-20221019174716442.png)
 
-![image-20221019174801370](images/image-20221019174801370.png)
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/202406301450076.png)
 
 ## 4. JDK相关设置
 
@@ -252,9 +250,9 @@ public class HelloWorld {
 
 `File-->Project Structure...-->Platform Settings -->SDKs`
 
-![image-20221019174847921](images/image-20221019174847921.png)
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/202406301450077.png)
 
-![image-20221019175030852](images/image-20221019175030852.png)
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/202406301450078.png)
 
 - 注1：SDKs全称是Software Development Kit ，这里一定是选择JDK的安装根目录，不是JRE的目录。
 - 注2：这里还可以从本地添加多个JDK。使用“+”即可实现。
@@ -263,7 +261,7 @@ public class HelloWorld {
 
 `File-->Project Structure...-->Project Settings -->Project`
 
-![image-20221019175358200](images/image-20221019175358200.png)
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/202406301450079.png)
 
 ## 5. 详细设置
 
@@ -271,19 +269,19 @@ public class HelloWorld {
 
 1、显示工具栏
 
-![image-20221019175536721](images/image-20221019175536721.png)
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/202406301450080.png)
 
 2、选择详细配置菜单或按钮
 
-![image-20221019175620422](images/image-20221019175620422.png)
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/202406301450081.png)
 
-![image-20221019175953767](images/image-20221019175953767.png)
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/202406301450082.png)
 
 ### 5.2 系统设置
 
 #### 1、默认启动项目配置
 
-![image-20221019180050832](images/image-20221019180050832.png)
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/202406301450083.png)
 
 启动IDEA时，默认自动打开上次开发的项目？还是自己选择？
 
@@ -296,7 +294,6 @@ public class HelloWorld {
 Settings-->Appearance & Behavior->System Settings -> Updates
 
 ![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/202406301308611.png)
-
 默认都打√了，建议检查IDE更新的√去掉，检查插件更新的√选上。
 
 ### 5.3 设置整体主题
@@ -366,7 +363,7 @@ IntelliJ IDEA 的代码提示和补充功能有一个特性：`区分大小写`�
 
 ### 5.8 设置项目文件编码（一定要改）
 
-![image-20220615190832482](images/image-20220615190832482.png)
+![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/202406301450084.png)
 
 说明： Transparent native-to-ascii conversion主要用于转换ascii，显式原生内容。一般都要勾选。
 
@@ -534,7 +531,7 @@ project(工程) - module(模块) - package(包) - class(类)
 
 （2）查看Project Structure，选择import module
 
-![image-20220615213827271](images/image-20220615213827271.png)
+![image-20220615213827271](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/202406301450085.png)
 
 ![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/202406301308641.png)
 
