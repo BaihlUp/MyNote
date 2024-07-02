@@ -555,386 +555,255 @@ import com.geekbang.supermarket.MerchandiseV2;
 * 没有访问修饰符的属性，称作缺省的访问修饰符，可以被本包内的其他类和自己的对象
 * 访问修饰符是一种限制或者允许属性访问的修饰符
 
-2. 类的全限定名
+2. 属性访问修饰符：protected
+- 被protected修饰，可以在本类使用
+- 可以在本包子类和非子类使用
+- 在其他包中仅限子类可见
+
+3. 属性访问修饰符：priviate，仅可在本类可见
+4. 属性访问修饰符：缺省，可在本类和本包子类非子类可见，其他包不可见
+
+实现封装就是控制类或成员的可见性范围。这就需要依赖访问控制修饰符，也称为权限修饰符来控制。
+
+| 修饰符       | 本类  | 本包            | 其他包子类          | 其他包非子类 |
+| --------- | --- | ------------- | -------------- | ------ |
+| private   | √   | ×             | ×              | ×      |
+| 缺省        | √   | √（本包子类非子类都可见） | ×              | ×      |
+| protected | √   | √（本包子类非子类都可见） | √（其他包仅限于子类中可见） | ×      |
+| public    | √   | √             | √              | √      |
+6. 类的全限定名
 
 * 包名 + 类名 = 类的全限定名。也可以简称为类的全名
 * 同一个 Java 程序中全限定名字不可重复
+# 3 关键字：this
 
-实现封装就是控制类或成员的可见性范围。这就需要依赖访问控制修饰符，也称为权限修饰符来控制。
-![image.png](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/20240701222923.png)
+## 3.1 实例方法或构造器中使用当前对象的成员
 
-# 3 隐藏this的自引用
-通过this自引用访问类的成员变量，this指向的地址也是类的实例的地址。
+当形参与成员变量同名时，如果在方法内或构造器内需要使用成员变量，必须添加this来表明该变量是类的成员变量。即：我们可以用this来区分`成员变量`和`局部变量`。比如：
 
+![image.png](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/20240702144938.png)
+> 使用this访问属性和方法时，如果在本类中未找到，会从父类中查找。
 
-
-# 5 static代码块和static变量
-**示例：**
-```java
-package com.geekbang.supermarket;
-
-public class DiscountMgr {
-
-    public static void main(String[] args) {
-        System.out.println("最终main 方法中使用的SVIP_DISCOUNT是" + SVIP_DISCOUNT);
-    }
-
-    public static double BASE_DISCOUNT;
-
-    public static double VIP_DISCOUNT;
-
-    // >> TODO 使用某个静态变量的代码块必须在静态变量后面
-    public static double SVIP_DISCOUNT;
-
-
-    static {
-        BASE_DISCOUNT = 0.99;
-        VIP_DISCOUNT = 0.85;
-        SVIP_DISCOUNT = 0.75;
-
-        // >> TODO 静态代码块里当然可以有任意的合法代码
-        System.out.println("静态代码块1里的SVIP_DISCOUNT" + SVIP_DISCOUNT);
-
-        // >> TODO 这段代码在哪个方法中呢？<clinit>，即class init。会在每个class初始化的时候被调用一次
-//         SVIP_DISCOUNT = 9/0;
-    }
-
-    // >> TODO 其实给静态变量赋值也是放在代码块里的，static代码块可以有多个，是从上向下顺序执行的。
-    //    TODO 可以认为这些代码都被组织到了一个clinit方法里
-    // public static double WHERE_AM_I = 9/0;
-
-//     public static double SVIP_DISCOUNT;
-
-    static {
-        SVIP_DISCOUNT = 0.1;
-        System.out.println("静态代码块2里的SVIP_DISCOUNT" + SVIP_DISCOUNT);
-    }
-
-
-}
-```
-输出：
-```
-静态代码块1里的SVIP_DISCOUNT0.75
-静态代码块2里的SVIP_DISCOUNT0.1
-最终main 方法中使用的SVIP_DISCOUNT是0.1
-```
-
-### 2.11 方法和属性的可见性修饰符
-- 可见性修饰符用在类、 成员方法、 构造方法、 静态方法和属性上， 其可见性的范围是一样的
-- 可见性修饰符：
-    - public：全局可见
-    - 缺省：当前包可见
-    - private：当前类可见
-- 成员变量应该是private的，不需要让外部使用的方法应该都是private的。
+## 3.2 同一个类中构造器互相调用
+- this()：调用本类的无参构造器
+- this(实参列表)：调用本类的有参构造器
+- this()和this(实参列表)只能声明在构造器首行。
 
 ```java
-package com.geekbang.supermarket;
-
-// >> TODO 类，静态方法，静态变量，成员变量，构造方法，成员方法都可以使用访问修饰符
-public class MerchandiseV2 {
-
-    // >> TODO 成员变量应该都声明为private
-    // >> TODO 如果要读写这些成员变量，最好使用get set方法，这些方法应该是public的
-    // >> TODO 这样做的好处是，如果有需要，可以通过代码，检查每个属性值是否合法。
+public class Student {
     private String name;
-    private String id;
-    private int count;
-    private double soldPrice;
-    private double purchasePrice;
-    private NonPublicClassCanUseAnyName nonPublicClassCanUseAnyName;
-    public static double DISCOUNT = 0.1;
+    private int age;
 
-    // >> TODO 构造方法如果是private的，那么就只有当前的类可以调用这个构造方法
-    public MerchandiseV2(String name, String id, int count, double soldPrice, double purchasePrice) {
+    // 无参构造
+    public Student() {
+//        this("",18);//调用本类有参构造器
+    }
+
+    // 有参构造
+    public Student(String name) {
+        this();//调用本类无参构造器
         this.name = name;
-        this.id = id;
-        this.count = count;
-        this.soldPrice = soldPrice;
-        this.purchasePrice = purchasePrice;
-        // soldPrice = 9/0;
     }
-
-    // >> TODO 有些时候，会把所有的构造方法都定义成private的，然后使用静态方法调用构造方法
-    // >> TODO 同样的，这样的好处是可以通过代码，检查每个属性值是否合法。
-    public static MerchandiseV2 createMerchandise(String name, String id, int count,
-                                                  double soldPrice, double purchasePrice) {
-        if (soldPrice < 0 || purchasePrice < 0) {
-            return null;
-        }
-        return new MerchandiseV2(name, id, count, soldPrice, purchasePrice);
-    }
-
-    public MerchandiseV2(String name, String id, int count, double soldPrice) {
-        this(name, id, count, soldPrice, soldPrice * 0.8);
-    }
-
-    public MerchandiseV2() {
-        this("无名", "000", 0, 1, 1.1);
-    }
-
-    // >> TODO public的方法类似一种约定，既然外面的代码可以使用，就意味着不能乱改。比如签名不能改之类的
-    public void describe() {
-        System.out.println("商品名字叫做" + name + "，id是" + id + "。 商品售价是" + soldPrice
-            + "。商品进价是" + purchasePrice + "。商品库存量是" + count +
-            "。销售一个的毛利润是" + (soldPrice - purchasePrice));
-        freeStyle();
-    }
-
-    // >> TODO 对于private的方法，因为类外面掉不到，所以无论怎么改，也不会影响（直接影响）类外面的代码
-    private void freeStyle() {
-
-    }
-
-    public double calculateProfit() {
-        double profit = soldPrice - purchasePrice;
-        return profit;
-    }
-
-    public double buy(int count) {
-        if (this.count < count) {
-            return -1;
-        }
-        return this.count -= count;
+    // 有参构造
+    public Student(String name,int age){
+        this(name);//调用本类中有一个String参数的构造器
+        this.age = age;
     }
 
     public String getName() {
         return name;
     }
-
     public void setName(String name) {
         this.name = name;
     }
-
-    public String getId() {
-        return id;
+    public int getAge() {
+        return age;
+    }
+    public void setAge(int age) {
+        this.age = age;
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public int getCount() {
-        return count;
-    }
-
-    public void setCount(int count) {
-        this.count = count;
-    }
-
-    public double getSoldPrice() {
-        return soldPrice;
-    }
-
-    public void setSoldPrice(double soldPrice) {
-        this.soldPrice = soldPrice;
-    }
-
-    public double getPurchasePrice() {
-        return purchasePrice;
-    }
-
-    public void setPurchasePrice(double purchasePrice) {
-        this.purchasePrice = purchasePrice;
+    public String getInfo(){
+        return "姓名：" + name +"，年龄：" + age;
     }
 }
 
 ```
-- 非public的类，类名可以和文件名不相同
-- 非public的类不能在包外使用，可以被包内的其他类使用
 
-
-### 2.12 Math和Scanner的使用
-- Scanner
-
+# 4 继承
+## 4.1 继承的语法
+通过 `extends` 关键字，可以声明一个类B继承另外一个类A，定义格式如下：
 ```java
-package com.geekbang.learn;
-
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.Scanner;
-
-public class LearnScanner {
-    public static void main(String[] args) {
-        // TODO Scanner是一个方便的可以帮我们从标准输入读取并转换数据的类
-        // TODO 注释里 @since   1.5 表示它是从Java5才开始有的。
-        Scanner scanner = new Scanner(System.in);
-
-        // TODO 但是这并是说从Java5开始，这个类就没有变化过了
-        // TODO 在源代码里搜索一下@since，会发现很多方法是在后续的 Java 版本中加进去的
-        // TODO 但是private方法就不会有这个文档标示，因为private方法本来就不给用。
-
-        System.out.println("请输入一个巨大的正数");
-        BigInteger bigInteger = scanner.nextBigInteger();
-        System.out.println("请输入想给这个数加多少");
-        BigInteger toBeAdd = scanner.nextBigInteger();
-        System.out.println("结果为：" + bigInteger.add(toBeAdd));
-
-    }
+[修饰符] class 类A {
+	...
 }
 
-```
-
-- Math
-
-```java
-package com.geekbang.learn;
-
-
-import java.util.Random;
-
-public class LearnMath {
-
-    public double abc;
-
-    public static void main(String[] args) {
-
-        // TODO 我们调用的都是 Math 里的静态方法，Math的构造函数就是private的，意味着不能创建Math类的实例
-        System.out.println(Math.random());
-        // TODO 原来归根结底，Math的random是用的Random类来实现的。它在java.util包里
-        Random random = new Random();
-        for (int i = 0; i < 5; i++) {
-            // TODO nextInt的返回值竟然有正数有负数哦！所以使用别人的类之前，一定要看看文档，避免出问题
-            System.out.println(Math.abs(random.nextInt()));
-        }
-
-        System.out.println(Math.abs(-9)); // 9
-
-        System.out.println(Math.round(-9.2)); // -9
-        System.out.println(Math.round(-9.5)); // -9
-        System.out.println(Math.round(-9.8)); // -10
-        System.out.println(Math.round(9.2)); // 9
-        System.out.println(Math.round(9.5)); // 10
-        System.out.println(Math.round(9.8)); // 10
-    }
+[修饰符] class 类B extends 类A {
+	...
 }
 ```
-输出:
 
-Math类中包含了很多数学工具方法。各方法都是static，所以不用创建Math实例则可以直接通过类名调用。
-Match类的文档：[https://docs.oracle.com/en/java/javase/12/docs/api/java.base/java/lang/Math.html](https://docs.oracle.com/en/java/javase/12/docs/api/java.base/java/lang/Math.html)
+## 4.2 继承中的基本概念
+类B，称为子类、派生类(derived class)、SubClass
+类A，称为父类、超类、基类(base class)、SuperClass
 
-
-### 2.13 String和StringBuilder
-- **String**
-
-String不可变，String用来存储字符的数据是private的，而且不提供任何修改内容的方法，所以String对象一旦生成，内容就是完全不可能被修改的。
-
-String类的文档：[https://docs.oracle.com/en/java/javase/12/docs/api/java.base/java/lang/String.html](https://docs.oracle.com/en/java/javase/12/docs/api/java.base/java/lang/String.html)
-
-- **StringBuiler**
-
-StringBuilder首先是可变的
-```java
-package com.geekbang.learn;
-
-public class LearnStringBuilder {
-
-    public static void main(String[] args) {
-
-        // TODO StringBuilder首先是可变的
-        // TODO 而且对它进行操作的方法，都会返回this自引用。这样我们就可以一直点下去，对String进行构造。
-        StringBuilder strBuilder = new StringBuilder();
-
-        long longVal = 123456789;
-
-        strBuilder.append(true).append("abc").append(longVal);
-
-        System.out.println(strBuilder.toString());
-        System.out.println(strBuilder.reverse().toString());
-        System.out.println(strBuilder.reverse().toString());
-        System.out.println(strBuilder.toString());
-
-        System.out.println(strBuilder.delete(0, 4).toString());
-
-        System.out.println(strBuilder.insert(3,"LLLLL").toString());
-
-
-    }
-
-}
-```
-输出：
-```
-trueabc123456789
-987654321cbaeurt
-trueabc123456789
-trueabc123456789
-abc123456789
-abcLLLLL123456789
-```
-
-### 2.14 main方法和System类
-1. main方法
-
-- main方法只是一个静态的，有String[]做参数的，没有返回值的方法而已，Java可以把main方法作为程序入口。
-- 通过执行程序给main方法传递参数
-
-2. System类
-
-- System类中有很多和系统相关的方法，用的最多的是in和out来读取和输出数据
-- System的文档：[https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/System.html](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/System.html)
-
-```java
-package com.geekbang.learn;
-
-public class LearnSystem {
-    public static void main(String[] args) {
-        long startMS = System.currentTimeMillis();
-
-        int counter = 0;
-        for (int i = 0; i < 1000; i++) {
-            counter++;
-        }
-        //获取当前时间，单位毫秒
-        long endMS = System.currentTimeMillis();
-        System.out.println("程序执行使用了几个毫秒？" + (endMS - startMS));
-
-        //获取当前时间，单位纳秒
-        long startNS = System.nanoTime();
-        counter = 0;
-        for (int i = 0; i < 1000; i++) {
-            counter++;
-        }
-
-        long endNS = System.nanoTime();
-        System.out.println("程序执行使用了几个纳秒？" + (endNS - startNS));
-    }
-}
-
-```
-
-### 2.15 继承
-1. 继承
-
+## 4.3 继承性的细节
 - 子类继承了父类的方法和属性
-- 使用子类的引用可以调用父类的共有方法
-- 使用子类的引用可以访问父类的共有属性
-- 就好像子类的引用可以一物二用，既可以当作父类的引用使用，又可以当作子类的引用使用
+- 使用子类的引用可以调用父类的公有方法
+- 使用子类的引用可以访问父类的公有属性
+- 子类不能直接访问父类中私有的(private)的成员变量和方法，可通过继承的get/set方法进行访问。如图所示：
 
-* 继承的语法就是在类名后面使用extends 加 要继承的类名
-* Java中只允许一个类有一个直接的父类（Parent Class），即所谓的单继承
-* 子类继承了父类什么呢？所有的属性和方法。
+![image.png](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/20240702150117.png)
 
-但是子类并不能访问父类的private的成员（包括方法和属性）。
+- Java只支持单继承，不支持多重继承
 
-2. 组合和继承
+![image.png](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/20240702150258.png)
 
-* 继承，其实表达的是一种"is-a"的关系，也就是说，在你用类构造的世界中，"子类是父类的一种特殊类别"
-* 继承不是组合，继承也不只是为了能简单的拿来父类的属性和方法。如果仅仅如此，原封不动的拿来主义，组合也能做到。
-* 继承也不是通过组合的方式来实现的。和组合相比，继承更像是"融合"
+## 4.4 方法的重写（override/overwrite）
 
-3. 覆盖
+子类可以对从父类中继承来的方法进行改造，我们称为方法的`重写 (override、overwrite)`。也称为方法的`重置`、`覆盖`。
+```java
+package com.atguigu.inherited.method;
 
-覆盖才是继承的精髓和终极奥义，可以通过覆盖父类的方法，重新实现子类的逻辑。
+public class Phone {
+    public void sendMessage(){
+        System.out.println("发短信");
+    }
+    public void call(){
+        System.out.println("打电话");
+    }
+    public void showNum(){
+        System.out.println("来电显示号码");
+    }
+}
+```
 
-通过使用和父类方法签名一样，而且返回值也必须一样的方法，可以让子类覆盖(override)掉父类的方法
+```java
+package com.atguigu.inherited.method;
 
-4. super：和父类对象沟通的桥梁
+//SmartPhone：智能手机
+public class SmartPhone extends Phone{
+    //重写父类的来电显示功能的方法
+	@Override
+    public void showNum(){
+        //来电显示姓名和图片功能
+        System.out.println("显示来电姓名");
+        System.out.println("显示头像");
+    }
+    //重写父类的通话功能的方法
+    @Override
+    public void call() {
+        System.out.println("语音通话 或 视频通话");
+    }
+}
+```
 
-子类对象里可以认为有一个特殊的父类对象，这个父类对象和子类对象之间通过super关键字来沟通。
+>@Override使用说明：
+写在方法上面，用来检测是不是满足重写方法的要求。这个注解就算不写，只要满足要求，也是正确的方法覆盖重写。建议保留，这样编译器可以帮助我们检查格式，另外也可以让阅读源代码的程序员清晰的知道这是一个重写的方法。
 
-5. 继承里的静态方法：
+1. 子类重写的方法`必须`和父类被重写的方法具有相同的`方法名称`、`参数列表`。
+2. 子类重写的方法的返回值类型`不能大于`父类被重写的方法的返回值类型。（例如：Student < Person）。
+> 注意：如果返回值类型是基本数据类型和void，那么必须是相同
+3. 子类重写的方法使用的访问权限`不能小于`父类被重写的方法的访问权限。（public > protected > 缺省 > private）
+> 注意：① 父类私有方法不能重写 ② 跨包的父类缺省的方法也不能重写
+4. 子类方法抛出的异常不能大于父类被重写方法的异常
+此外，子类与父类中同名同参数的方法必须同时声明为非static的(即为重写)，或者同时声明为static的（不是重写）。因为static方法是属于类的，子类无法覆盖父类的方法。
+## 4.5 关键字：super
+在Java类中使用super来调用父类中的指定操作：
+
+- super可用于访问父类中定义的属性
+- super可用于调用父类中定义的成员方法
+- super可用于在子类构造器中调用父类的构造器
+
+注意：
+
+- 尤其当子父类出现同名成员时，可以用super表明调用的是父类中的成员
+- super的追溯不仅限于直接父类
+- super和this的用法相像，this代表本类对象的引用，super代表父类的内存空间的标识
+
+### 4.5.1 子类中调用父类被重写的方法
+- 如果子类没有重写父类的方法，只要权限修饰符允许，在子类中完全可以直接调用父类的方法；
+- 如果子类重写了父类的方法，在子类中需要通过`super.`才能调用父类被重写的方法，否则默认调用的子类重写的方法
+
+```java
+package com.atguigu.inherited.method;
+
+public class Phone {
+    public void sendMessage(){
+        System.out.println("发短信");
+    }
+    public void call(){
+        System.out.println("打电话");
+    }
+    public void showNum(){
+        System.out.println("来电显示号码");
+    }
+}
+
+//smartphone：智能手机
+public class SmartPhone extends Phone{
+    //重写父类的来电显示功能的方法
+    public void showNum(){
+        //来电显示姓名和图片功能
+        System.out.println("显示来电姓名");
+        System.out.println("显示头像");
+
+        //保留父类来电显示号码的功能
+        super.showNum();//此处必须加super.，否则就是无限递归，那么就会栈内存溢出
+    }
+}
+```
+总结：
+- **方法前面没有super.和this.**
+	- 先从子类找匹配方法，如果没有，再从直接父类找，再没有，继续往上追溯
+- **方法前面有this.**
+    - 先从子类找匹配方法，如果没有，再从直接父类找，再没有，继续往上追溯
+- **方法前面有super.**
+    - 从当前子类的直接父类找，如果没有，继续往上追溯
+
+### 4.5.2 子类中调用父类中同名的成员变量
+- 如果实例变量与局部变量重名，可以在实例变量前面加this.进行区别
+- 如果子类实例变量和父类实例变量重名，并且父类的该实例变量在子类仍然可见，在子类中要访问父类声明的实例变量需要在父类实例变量前加super.，否则默认访问的是子类自己声明的实例变量
+- 如果父子类实例变量没有重名，只要权限修饰符允许，在子类中完全可以直接访问父类中声明的实例变量，也可以用this.实例访问，也可以用super.实例变量访问
+
+### 4.5.3 子类构造器中调用父类构造器
+① 子类继承父类时，不会继承父类的构造器。只能通过“super(形参列表)”的方式调用父类指定的构造器。
+② 规定：“super(形参列表)”，必须声明在构造器的首行。
+③ 我们前面讲过，在构造器的首行可以使用"this(形参列表)"，调用本类中重载的构造器，  
+结合②，结论：在构造器的首行，"this(形参列表)" 和 "super(形参列表)"只能二选一。
+④ 如果在子类构造器的首行既没有显示调用"this(形参列表)"，也没有显式调用"super(形参列表)"，  
+​ 则子类此构造器默认调用"super()"，即调用父类中空参的构造器。
+⑤ 由③和④得到结论：子类的任何一个构造器中，要么会调用本类中重载的构造器，要么会调用父类的构造器。  
+只能是这两种情况之一。
+⑥ 由⑤得到：一个类中声明有n个构造器，最多有n-1个构造器中使用了"this(形参列表)"，则剩下的那个一定使用"super(形参列表)"。
+
+> 开发中常见错误：
+> 如果子类构造器中既未显式调用父类或本类的构造器，且父类中又没有空参的构造器，则`编译出错`。
+
+```java
+class A{
+	A(int a){
+		System.out.println("A类有参构造器");
+	}
+}
+class B extends A{
+	B(){
+		System.out.println("B类无参构造器");
+	}
+}
+class Test05{
+    public static void main(String[] args){
+        B b = new B();
+        //A类显示声明一个有参构造，没有写无参构造，那么A类就没有无参构造了
+		//B类显示声明一个无参构造，        
+		//B类的无参构造没有写super(...)，表示默认调用A类的无参构造
+        //编译报错，因为A类没有无参构造
+    }
+}
+```
+![image.png](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/20240702152842.png)
+
+## 4. 6 继承里的静态方法：
 
 静态方法可以被继承，静态方法不支持多态逻辑，建议在使用静态方法时直接使用类名调用静态方法，如果此类下没有这个方法，则会调用其父类下的静态方法。
 
@@ -1073,7 +942,7 @@ public class Phone extends MerchandiseV2 {
 
 ```
 
-### 2.16 父类和子类的引用赋值关系
+## 4.7 父类和子类的引用赋值关系
 - 父类引用可以指向子类对象，子类引用不可以指向父类的对象
 - 可以进行强制类型转换，如果类型不对，会报错
 - 可以调用的方法，是受引用类型决定的
@@ -1153,34 +1022,204 @@ public class ReferenceAssign {
 
 ```
 
-### 2.17 多态：到底调用那个方法
 
-* 可以调用那些方法，取决于引用类型，具体调用那个方法，取决于实例所属的类是什么。
-* 覆盖是多态里最重要的一种形式。
+# 5 多态性
+## 5.1 多态的形式和体现
+对象的多态：在Java中，子类的对象可以替代父类的对象使用。所以，一个引用类型变量可能指向(引用)多种不同类型的对象
 
-* 无论一个方法是使用哪个引用被调用的，"它都是在实际的对象上执行的"。执行的任何一个方法，都是这个对象所属的类的方法。
-* 如果没有，就去父类找，再没有，就去父类的父类找，依次寻找，知道找到。
-* 换个角度理解。我们一直说子类里又一个（特殊的）父类的对象。这时候，这个特殊的父类的对象里的this自引用，是子类的引用。那么自然的，即使是在继承自父类的代码里，去调用一个方法，也是先从子类开始，一层层继承关系的找。
-* 这也是Java选择单继承的重要原因之一。在多继承的情况下，如果使用不当，多态可能会非常复杂，以至于使用的代价超过其带来的好处。
+Java引用变量有两个类型：`编译时类型`和`运行时类型`。编译时类型由`声明`该变量时使用的类型决定，运行时类型由`实际赋给该变量的对象`决定。简称：**编译时，看左边；运行时，看右边。**
 
-### 2.18 多态：语法点
-面向对象三要素：封装、继承和多态
+- 若编译时类型和运行时类型不一致，就出现了对象的多态性(Polymorphism)
+- 多态情况下，“看左边”：看的是父类的引用（父类中不具备子类特有的方法）  
+    “看右边”：看的是子类的对象（实际运行的是子类重写父类的方法）
 
-1. 静态多态：重载
+多态的使用前提：1. 类的继承关系 2. 方法的重写
 
-* 重载调用那个方法和参数引用类型相关
-* 如果在重载的传参时进行了强制类型转换，则还是调用强制转换的类型。
-* 如果传的引用类型没有完全匹配的重载函数，则会根据引用类型的继承关系，沿着当前类型向其父类找。
+**举例：**
 
+```java
+package com.atguigu.polymorphism.grammar;
 
-2. 动态多态：覆盖
+public class Pet {
+    private String nickname; //昵称
 
-程序的执行就是找到要执行的代码，并且知道执行的代码能访问那些数据，数据从哪里来。
-多态的核心问题就是：要调用那个类的那个方法，这个方法用到的数据（this引用）是谁。
+    public String getNickname() {
+        return nickname;
+    }
 
-> 在方法中使用this自引用时，要确定调用当前方法的对象到底是哪个，其不一定是这个方法所属的类，也可能是这个类的子类对象。这是用这个this自引用的则是子类的对象。
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }
 
-### 2.19 instanceof操作符
+    public void eat(){
+        System.out.println(nickname + "吃东西");
+    }
+}
+```
+
+```java
+package com.atguigu.polymorphism.grammar;
+
+public class Cat extends Pet {
+    //子类重写父类的方法
+    @Override
+    public void eat() {
+        System.out.println("猫咪" + getNickname() + "吃鱼仔");
+    }
+
+    //子类扩展的方法
+    public void catchMouse() {
+        System.out.println("抓老鼠");
+    }
+}
+```
+
+```java
+package com.atguigu.polymorphism.grammar;
+
+public class Dog extends Pet {
+    //子类重写父类的方法
+    @Override
+    public void eat() {
+        System.out.println("狗子" + getNickname() + "啃骨头");
+    }
+
+    //子类扩展的方法
+    public void watchHouse() {
+        System.out.println("看家");
+    }
+}
+```
+
+**1、方法内局部变量的赋值体现多态**
+
+```java
+package com.atguigu.polymorphism.grammar;
+
+public class TestPet {
+    public static void main(String[] args) {
+        //多态引用
+        Pet pet = new Dog();
+        pet.setNickname("小白");
+
+        //多态的表现形式
+        /*
+        编译时看父类：只能调用父类声明的方法，不能调用子类扩展的方法；
+        运行时，看“子类”，如果子类重写了方法，一定是执行子类重写的方法体；
+         */
+        pet.eat();//运行时执行子类Dog重写的方法
+//      pet.watchHouse();//不能调用Dog子类扩展的方法
+
+        pet = new Cat();
+        pet.setNickname("雪球");
+        pet.eat();//运行时执行子类Cat重写的方法
+    }
+}
+```
+
+**2、方法的形参声明体现多态**
+
+```java
+package com.atguigu.polymorphism.grammar;
+
+public class Person{
+    private Pet pet;
+    public void adopt(Pet pet) {//形参是父类类型，实参是子类对象
+        this.pet = pet;
+    }
+    public void feed(){
+        pet.eat();//pet实际引用的对象类型不同，执行的eat方法也不同
+    }
+}
+```
+
+```java
+package com.atguigu.polymorphism.grammar;
+
+public class TestPerson {
+    public static void main(String[] args) {
+        Person person = new Person();
+
+        Dog dog = new Dog();
+        dog.setNickname("小白");
+        person.adopt(dog);//实参是dog子类对象，形参是父类Pet类型
+        person.feed();
+
+        Cat cat = new Cat();
+        cat.setNickname("雪球");
+        person.adopt(cat);//实参是cat子类对象，形参是父类Pet类型
+        person.feed();
+    }
+}
+```
+
+**3、方法返回值类型体现多态**
+
+```java
+package com.atguigu.polymorphism.grammar;
+
+public class PetShop {
+    //返回值类型是父类类型，实际返回的是子类对象
+    public Pet sale(String type){
+        switch (type){
+            case "Dog":
+                return new Dog();
+            case "Cat":
+                return new Cat();
+        }
+        return null;
+    }
+}
+```
+
+```java
+package com.atguigu.polymorphism.grammar;
+
+public class TestPetShop {
+    public static void main(String[] args) {
+        PetShop shop = new PetShop();
+
+        Pet dog = shop.sale("Dog");
+        dog.setNickname("小白");
+        dog.eat();
+
+        Pet cat = shop.sale("Cat");
+        cat.setNickname("雪球");
+        cat.eat();
+    }
+}
+```
+
+## 5.2 多态的好处和弊端
+**好处**：变量引用的子类对象不同，执行的方法就不同，实现动态绑定。代码编写更灵活、功能更强大，可维护性和扩展性更好了。
+**弊端**：一个引用类型变量如果声明为父类的类型，但实际引用的是子类对象，那么该变量就不能再访问子类中添加的属性和方法。
+```java
+Student m = new Student();  
+m.school = "pku"; //合法,Student类有school成员变量  
+Person e = new Student();   
+e.school = "pku"; //非法,Person类没有school成员变量  
+​  
+// 属性是在编译时确定的，编译时e为Person类型，没有school成员变量，因而编译错误。
+```
+
+开发中：使用父类做方法的形参，是多态使用最多的场合。即使增加了新的子类，方法也无需改变，提高了扩展性，符合开闭原则。
+
+## 5.3 虚方法调用
+在Java中虚方法是指在编译阶段不能确定方法的调用入口地址，在运行阶段才能确定的方法，即可能被重写的方法。
+
+```java
+Person e = new Student();  
+e.getInfo();  //调用Student类的getInfo()方法
+```
+子类中定义了与父类同名同参数的方法，在多态情况下，将此时父类的方法称为虚方法，父类根据赋给它的不同子类对象，动态调用属于子类的该方法。这样的方法调用在编译期是无法确定的。
+![image.png](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/20240702154525.png)
+前提：Person类中定义了welcome()方法，各个子类重写了welcome()。
+
+拓展：
+`静态链接（或早起绑定）`：当一个字节码文件被装载进JVM内部时，如果被调用的目标方法在编译期可知，且运行期保持不变时。这种情况下将调用方法的符号引用转换为直接引用的过程称之为静态链接。那么调用这样的方法，就称为非虚方法调用。比如调用静态方法、私有方法、final方法、父类构造器、本类重载构造器等。
+`动态链接（或晚期绑定）`：如果被调用的方法在编译期无法被确定下来，也就是说，只能够在程序运行期将调用方法的符号引用转换为直接引用，由于这种引用转换过程具备动态性，因此也就被称之为动态链接。调用这样的方法，就称为虚方法调用。比如调用重写的方法（针对父类）、实现的方法（针对接口）。
+
+## 5.5 instanceof操作符
 instanceof 操作符，可以判断一个引用指向的对象是否是某一个类型或者其子类，是则返回true，否则返回false。
 
 ```java
@@ -1216,51 +1255,15 @@ public class InstanceOfTestAppMain {
     }
 }
 ```
-### 2.20 protected修饰符
 
-1. protected修饰的属性和方法，只有本包和子类可见，不同包里不可以访问protected。
-2. 子类覆盖父类的方法，不可以用可见性更低的修饰符，但是可以用更高的修饰符，比如：父类的方法使用protected修饰，子类就不可以使用可见性更低的private修饰覆盖的方法。
-3. 构造方法可以是protected，但是如果是private，子类就不可以覆盖了。
-4. 如果父类只有一个private的构造方法，相当于这个类不能有子类
-
-### 2.21 final 修饰符
-- final修饰类：不可被继承
-- final修饰方法：不可被子类覆盖
-
-1. 构造方法不能用final修饰
-2. 使用final修饰方法的形参后，则无法在方法内修改形参变量
-
-- final修饰变量：不可被赋值
-
-1. 修饰静态变量：需要初始化，或者在static块中初始化，并且初始化后无法修改。
-
-```java
-private final static int MAX_BUY_ONE_ORDER = 9;
-//或   选其一
-static {
-    MAX_BUY_ONE_ORDER = 1;
-}
-
-```
-2. 修饰属性：只能在定义时初始化或者构造方法中初始化，初始化后无法修改。
-3. 修饰引用：引用类型本身初始化后无法修改，但可以通过引用修改引用的对象内容。
-```java
-int[] array1 = new int[10];
-final int[] array = new int[10];
-array = array1;  //报错，无法修改final变量
-for(int b : array) {  //for循环的一种新形式
-    System.out.println(b);
-}
-```
-4. 修饰局部变量：只能初始化一次，后边不能再次修改
-
-### 2.22 Object类
+# 6 Object类的使用
+## 6.1 根父类
 所有的类，都直接或间接地继承自Object类。
 Object类的对象可以指向任意类，Object类中没有属性，只有方法，定义的对象如下：
 ![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/202308081038318.png)
 
-下边介绍一些Object类中的方法：
-1. **equals**
+## 6.2 Object类中的方法：
+### 6.2.1 equals
 
 在Object类中定义判断两个对象的逻辑如下：
 ![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/202308081043733.png)
@@ -1323,264 +1326,378 @@ s1和s2用 equals 判断结果：true
 ```
 
 String中定义的字符串是不可变的，所以按说在定义s1和s2时应该是不同的两个引用，但是在使用"\=="进行比较时发现是相等的。这是因为在Java中定义字符串时，如果底层有一个相同的字符串，则不会重新定义，会把新的引用指向之前的字符串。
-但是在定义的字符串很长时，则会突破这个优化，如上，输入了一个很长的字符串，使用"=="比较是不相同的，但是使用equals是相同的，下边看下String类中对equals方法的覆盖实现：
+但是在定义的字符串很长时，则会突破这个优化，如上，输入了一个很长的字符串，使用`"=="`比较是不相同的，但是使用equals是相同的，下边看下String类中对equals方法的覆盖实现：
 ![](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2023/202308081053010.png)
 String中重新实现了equals方法按字符进行遍历比较，所以再长的字符串的情况下依然可以比较。
 
-2. **hashCode**
+**面试题：**`==`和equals的区别
+- `==` 既可以比较基本类型也可以比较引用类型。对于基本类型就是比较值，对于引用类型就是比较内存地址
+- equals的话，它是属于java.lang.Object类里面的方法，如果该方法没有被重写过默认也是`==`;我们可以看到String等类的equals方法是被重写过的，而且String类在日常开发中用的比较多，久而久之，形成了equals是比较值的错误观点。
+- 具体要看自定义类里有没有重写Object的equals方法来判断。
+- 通常情况下，重写equals方法，会比较类中的相应属性是否都相等。
+### 6.2.2 hashCode
 
 hashCode可以翻译为哈希码，或者散列码。应该是一个表示对象的特征的int整数。
 自定义类中可以进行覆盖实现，来表示依次来表示类的唯一标识。
 
 > equals和hashCode是最常覆盖的两个方法，实现逻辑为，equals方法为true，则hashCode就相等，但hashCode相等，equals不一定为true。
 
-3. **toString**
+### 6.2.3 toString
+方法签名：public String toString()
+① 默认情况下，toString()返回的是“对象的运行时类型 @ 对象的hashCode值的十六进制形式"
+② 在进行String与其它类型数据的连接操作时，自动调用toString()方法
 
-toString方法默认也是存在在所有类中，在部分场景下默认会被调用。
 ```java
-package com.geekbang;
-
-import com.geekbang.supermarket.LittleSuperMarket;
-import com.geekbang.supermarket.MerchandiseV2;
-
-public class ToStringAppMain {
-    public static void main(String[] args) {
-        LittleSuperMarket superMarket = new LittleSuperMarket("大卖场",
-            "世纪大道1号", 500, 600, 100);
-
-        MerchandiseV2 m100 = superMarket.getMerchandiseOf(100);
-
-        StringBuilder strBuilder = new StringBuilder();
-
-        //append会调用m100中实现的toString方法
-        strBuilder.append("商品100是：").append(m100);
-
-        // >> TODO 因为toString是Object里的方法，所以任何一个Java的对象，都可以调用这个方法
-        // >> TODO 内容好像不大全，补充一下？
-        System.out.println(strBuilder.toString());
-        System.out.println(m100);
-
-    }
-
-}
+Date now=new Date();
+System.out.println(“now=”+now);  //相当于
+System.out.println(“now=”+now.toString()); 
 ```
 
-### 2.23 Class类
-Class类是代表类的类，每个Class类的实例，都代表一个类。通过Class中的方法可以获取对象中一些类的信息。
+③ 如果我们直接System.out.println(对象)，默认会自动调用这个对象的toString()
 
-**示例程序：**
+> 因为Java的引用数据类型的变量中存储的实际上时对象的内存地址，但是Java对程序员隐藏内存地址信息，所以不能直接将内存地址显示出来，所以当你打印对象时，JVM帮你调用了对象的toString()。
+
+④ 可以根据需要在用户自定义类型中重写toString()方法
+	如String 类重写了toString()方法，返回字符串的值。
+
 ```java
-package com.geekbang;
-
-import com.geekbang.supermarket.LittleSuperMarket;
-import com.geekbang.supermarket.MerchandiseV2;
-import com.geekbang.supermarket.ShellColorChangePhone;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
-public class ClassOfClassAppMain {
-
-
-    public static void main(String... args) throws NoSuchFieldException, NoSuchMethodException {
-        LittleSuperMarket superMarket = new LittleSuperMarket("大卖场",
-                "世纪大道1号", 500, 600, 100);
-
-        MerchandiseV2 m100 = superMarket.getMerchandiseOf(100);
-
-        // >> TODO
-        // Object类里的getClass方法，可以得到
-        // TODO 另一种获得Class实例的方法，直接类名点
-//        Class clazz = ShellColorChangePhone.class;
-         Class clazz = m100.getClass();
-
-        System.out.println(clazz.getName());  // com.geekbang.supermarket.ShellColorChangePhone
-        System.out.println(clazz.getSimpleName()); // ShellColorChangePhone
-
-        // TODO 通过一个类的Class实例，可以获取一个类所有的信息，包括成员变量，方法，等
-        Field countField = clazz.getField("count");
-        Field nameField = clazz.getField("count");
-        // countField: (public int com.geekbang.supermarket.MerchandiseV2.count) nameField: (public int com.geekbang.supermarket.MerchandiseV2.count)
-        System.out.println("countField: (" + countField.toString() + ") nameField: (" + nameField.toString() + ")"); 
-
-        // >> TODO 变长参数和它的等价形式
-        Method equalsMethod = clazz.getMethod("equals", Object.class);
-        Method buyMethod = clazz.getMethod("buy", int.class);
-
-        //equalsMethod: (public boolean com.geekbang.supermarket.MerchandiseV2.equals(java.lang.Object)) buyMethod: (public double com.geekbang.supermarket.Phone.buy(int))
-        System.out.println("equalsMethod: (" + equalsMethod.toString() + ") buyMethod: (" + buyMethod.toString() + ")");
-
-    }
-
-}
+s1="hello";
+System.out.println(s1);//相当于System.out.println(s1.toString());
 ```
 
-### 2.24 反射
-- 使用反射访问属性
-- 使用反射访问方法
-- 使用反射访问静态方法和属性
-- 通过反射访问 private 的方法和属性
-
-**示例：**
+例如自定义的Person类：
 ```java
-package com.geekbang;
-
-import com.geekbang.supermarket.LittleSuperMarket;
-import com.geekbang.supermarket.MerchandiseV2;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
-public class ReflectionAppMain {
-    public static void main(String... args) throws NoSuchFieldException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
-        LittleSuperMarket superMarket = new LittleSuperMarket("大卖场",
-                "世纪大道1号", 500, 600, 100);
-
-        MerchandiseV2 m100 = superMarket.getMerchandiseOf(100);
-
-        // TODO 另一种获得Class实例的方法，直接类名点
-        Class clazz = MerchandiseV2.class;
-
-        //通过反射访问对象的属性和方法
-        Field countField = clazz.getField("count");
-        System.out.println("通过反射获取count的值："+countField.get(m100)); //通过反射获取count的值：100
-
-        Method buyMethod = clazz.getMethod("buy", int.class);
-        System.out.println(buyMethod.invoke(m100, 10));  // 购买失败，手机一次最多只能买5个
-
-
-        // 针对private的属性 soldPrice，需要用如下方法获取
-        Field soldPriceField = clazz.getDeclaredField("soldPrice");
-        soldPriceField.setAccessible(true);  //设置属性可以修改
-        System.out.println(soldPriceField.get(m100));  //1999
-        soldPriceField.set(m100, 999);  // 修改为 999
-        System.out.println(soldPriceField.get(m100)); // 999.0
-//        System.out.println(m100.soldPrice);  //无法使用引用直接访问 private属性
-
-        printFields(clazz);
-        //访问static 属性，不再需要指定引用
-        Field field = clazz.getField("STATIC_MEMBER");
-        System.out.println(field.get(null));
-        
-        // 针对private的方法
-        Method descMethod = clazz.getDeclaredMethod("describe");
-        descMethod.setAccessible(true);
-        descMethod.invoke(m100);
-        descMethod.invoke(superMarket.getMerchandiseOf(0));
-        descMethod.invoke(superMarket.getMerchandiseOf(10));
-//        m100.describe();
-
-        //访问static 方法
-        Method staticMethod = clazz.getMethod("getNameOf", MerchandiseV2.class);
-        String str = (String) staticMethod.invoke(null, m100);
-        System.out.println(str);
-        
-//        public double buy(int count)
-        Method buyMethod = clazz.getMethod("buy", int.class);
-        buyMethod.invoke(m100, 1);
-        m100.buy(10);
-
-
-    }
-
-    public static void printFields(Class clazz) {
-        System.out.println(clazz.getName() + "里的field");
-        for (Field field : clazz.getFields()) {  //获取类中的所有属性和类型
-            System.out.println(field.getType() + " " + field.getName());
-        }
-    }
-
-}
-
-```
-
-### 2.25 枚举（enum）
-枚举的定义：
-
-```java
-package com.geekbang.supermarket;
-
-// >> TODO 使用enum而非class声明
-public enum Category {
-
-    // >> TODO 必须在开始的时候以这种形式，创建所有的枚举对象
-    FOOD(1),
-    // >> TODO 不可以重名
-//    FOOD(1),
-    COOK(3),
-    SNACK(5),
-    CLOTHES(7),
-    ELECTRIC(9);
-
-    // 可以有属性
-    private int id;
-
-    // >> TODO 构造方法必须是private的，不写也是private的
-    Category(int id) {
-        this.id = id;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-//    public void setId(int id) {
-//        this.id = id;
-//    }
-
+public class Person {  
+    private String name;
+    private int age;
 
     @Override
     public String toString() {
-        return "Category{" +
-            "id=" + id +
-            '}';
+        return "Person{" + "name='" + name + '\'' + ", age=" + age + '}';
     }
-
 }
 ```
-enum类型不再继承Object类，而是默认继承的Enum类，其中的一些方法都可以使用。**枚举的使用：**
+
+### 6.2.4 finalize()
+- 当对象被回收时，系统自动调用该对象的 finalize() 方法。（不是垃圾回收器调用的，是本类对象调用的）
+  - 永远不要主动调用某个对象的finalize方法，应该交给垃圾回收机制调用。
+- 什么时候被回收：当某个对象没有任何引用时，JVM就认为这个对象是垃圾对象，就会在之后不确定的时间使用垃圾回收机制来销毁该对象，在销毁该对象前，会先调用 finalize()方法。 
+- 子类可以重写该方法，目的是在对象被清理之前执行必要的清理操作。比如，在方法内断开相关连接资源。
+  - 如果重写该方法，让一个新的引用变量重新引用该对象，则会重新激活对象。
+- 在JDK 9中此方法已经被`标记为过时`的。
+
 ```java
-package com.geekbang;
+public class FinalizeTest {
+	public static void main(String[] args) {
+		Person p = new Person("Peter", 12);
+		System.out.println(p);
+		p = null;//此时对象实体就是垃圾对象，等待被回收。但时间不确定。
+		System.gc();//强制性释放空间
+	}
+}
 
-import com.geekbang.supermarket.Category;
+class Person{
+	private String name;
+	private int age;
 
-import java.util.Scanner;
+	public Person(String name, int age) {
+		super();
+		this.name = name;
+		this.age = age;
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public int getAge() {
+		return age;
+	}
+	public void setAge(int age) {
+		this.age = age;
+	}
+	//子类重写此方法，可在释放对象前进行某些操作
+	@Override
+	protected void finalize() throws Throwable {
+		System.out.println("对象被释放--->" + this);
+	}
+	@Override
+	public String toString() {
+		return "Person [name=" + name + ", age=" + age + "]";
+	}
+	
+}
+```
 
-public class UseEnum {
-    public static void main(String[] args) {
-        // >> TODO 获取所有枚举，看看枚举实例有哪些方法
-        for (Category category : Category.values()) {
-            System.out.println("-----------" + category.getId() + "------------");
-            System.out.println(category.ordinal());
-            System.out.println(category.name());
-            System.out.println(category.toString());
-        }
+### 6.2.5 getClass()
 
-        System.out.println();
-        // >> TODO 根据名字获取枚举
-        System.out.println(Category.valueOf("FOOD"));
-//        System.out.println(Category.valueOf("food"));  //没有这个枚举，会报错
+`public final Class<?> getClass()`：获取对象的运行时类型
 
-        Scanner in = new Scanner(System.in);
-        System.out.println("请输入枚举的名字：");
-        String categoryName = in.next();
-        Category enumInput = Category.valueOf(categoryName.trim().toUpperCase());
-        System.out.println("枚举的信息：" + enumInput.toString());
+> 因为Java有多态现象，所以一个引用数据类型的变量的编译时类型与运行时类型可能不一致，因此如果需要查看这个变量实际指向的对象的类型，需要用getClass()方法
 
-        System.out.println("请输入要比较的枚举的名字：");
-        String categoryName2 = in.next();
-        Category enumInput2 = Category.valueOf(categoryName2.trim().toUpperCase());
-        System.out.println("第二次输入的枚举的信息：" + enumInput2.toString());
+```java
+public static void main(String[] args) {
+	Object obj = new Person();
+	System.out.println(obj.getClass());//运行时类型
+}
+```
+结果：
+```java
+class com.atguigu.java.Person
+```
 
-        System.out.println(enumInput == enumInput2);  //枚举在定义时候就已经创建了实例
+# 7 关键字：static
+## 7.1 static 关键字
+- 使用范围：
+    - 在Java类中，可用static修饰属性、方法、代码块、内部类
+- 被修饰后的成员具备以下特点：
+    - 随着类的加载而加载
+    - 优先于对象存在
+    - 修饰的成员，被所有对象所共享
+    - 访问权限允许时，可不创建对象，直接被类调用
+
+## 7.2 静态变量
+- 静态变量的默认值规则和实例变量一样。
+- 静态变量值是所有对象共享。
+- 静态变量在本类中，可以在任意方法、代码块、构造器中直接使用。
+- 如果权限修饰符允许，在其他类中可以通过“`类名.静态变量`”直接访问，也可以通过“`对象.静态变量`”的方式访问（但是更推荐使用类名.静态变量的方式）。
+- 静态变量的get/set方法也静态的，当局部变量与静态变量`重名时`，使用“`类名.静态变量`”进行区分。
+
+## 7.3 静态方法
+- 静态方法在本类的任意方法、代码块、构造器中都可以直接被调用。
+- 只要权限修饰符允许，静态方法在其他类中可以通过“类名.静态方法“的方式调用。也可以通过”对象.静态方法“的方式调用（但是更推荐使用类名.静态方法的方式）。
+- 在static方法内部只能访问类的static修饰的属性或方法，不能访问类的非static的结构。
+- 静态方法可以被子类继承，但不能被子类重写。
+- 静态方法的调用都只看编译时类型。
+- 因为不需要实例就可以访问static方法，因此static方法内部不能有this，也不能有super。如果有重名问题，使用“类名.”进行区别。
+
+**示例：**
+```java
+package com.atguigu.keyword;
+
+public class Father {
+    public static void method(){
+        System.out.println("Father.method");
     }
+
+    public static void fun(){
+        System.out.println("Father.fun");
+    }
+}
+```
+
+```java
+package com.atguigu.keyword;
+
+public class Son extends Father{
+//    @Override //尝试重写静态方法，加上@Override编译报错，去掉Override不报错，但是也不是重写
+    public static void fun(){
+        System.out.println("Son.fun");
+    }
+}
+```
+
+```java
+package com.atguigu.keyword;
+
+public class TestStaticMethod {
+    public static void main(String[] args) {
+        Father.method();
+        Son.method();//继承静态方法
+
+        Father f = new Son();
+        f.method();//执行Father类中的method
+    }
+}
+```
+
+# 8 代码块
+## 8.1 静态代码块
+1. 可以有输出语句。
+2. 可以对类的属性、类的声明进行初始化操作。
+3. 不可以对非静态的属性初始化。即：**不可以调用非静态的属性和方法**。
+4. 若有多个静态的代码块，那么按照从上到下的顺序依次执行。
+5. 静态代码块的执行要先于非静态代码块。
+6. 静态代码块随着类的加载而加载，且只执行一次。
+
+```java
+package com.atguigu.keyword;
+
+public class Chinese {
+//    private static String country = "中国";
+
+    private static String country;
+    private String name;
+
+    {
+        System.out.println("非静态代码块，country = " + country);
+    }
+
+    static {
+        country = "中国";
+        System.out.println("静态代码块");
+    }
+
+    public Chinese(String name) {
+        this.name = name;
+    }
+}
+```
+## 8.2 非静态代码块
+如果多个重载的构造器有公共代码，并且这些代码都是先于构造器其他代码执行的，那么可以将这部分代码抽取到非静态代码块中，减少冗余代码。
+
+1. 可以有输出语句。
+2. 可以对类的属性、类的声明进行初始化操作。
+3. 除了调用非静态的结构外，还可以调用静态的变量或方法。
+4. 若有多个非静态的代码块，那么按照从上到下的顺序依次执行。
+5. 每次创建对象的时候，都会执行一次。且先于构造器执行。
+
+# 9 final 修饰符
+## 9.1 final修饰类：不可被继承
+```java
+final class Eunuch{//太监类
+	
+}
+class Son extends Eunuch{//错误
+	
+}
+```
+
+## 9.2 final修饰方法：不可被子类覆盖
+```java
+class Father{
+	public final void method(){
+		System.out.println("father");
+	}
+}
+class Son extends Father{
+	public void method(){//错误
+		System.out.println("son");
+	}
+}
+```
+
+## 9.3 final 修饰变量
+final修饰某个变量（成员变量或局部变量），一旦赋值，它的值就不能被修改，即常量，常量名建议使用大写字母。
+例如：`final double MY_PI = 3.14;`
+
+1. 构造方法不能用final修饰
+2. 使用final修饰方法的形参后，则无法在方法内修改形参变量
+
+1. 修饰静态变量：需要初始化，或者在static块中初始化，并且初始化后无法修改。
+
+```java
+private final static int MAX_BUY_ONE_ORDER = 9;
+//或   选其一
+static {
+    MAX_BUY_ONE_ORDER = 1;
 }
 
 ```
+2. 修饰属性：只能在定义时初始化或者构造方法中初始化，初始化后无法修改。
+```java
+public final class Test {
+    public static int totalNumber = 5;
+    public final int ID;
 
-### 2.26 接口（interface）
+    public Test() {
+        ID = ++totalNumber; // 可在构造器中给final修饰的“变量”赋值
+    }
+    public static void main(String[] args) {
+        Test t = new Test();
+        System.out.println(t.ID);
+    }
+}
+```
+
+1. 修饰引用：引用类型本身初始化后无法修改，但可以通过引用修改引用的对象内容。
+```java
+int[] array1 = new int[10];
+final int[] array = new int[10];
+array = array1;  //报错，无法修改final变量
+for(int b : array) {  //for循环的一种新形式
+    System.out.println(b);
+}
+```
+4. 修饰局部变量：只能初始化一次，后边不能再次修改
+```java
+public class TestFinal {
+    public static void main(String[] args){
+        final int MIN_SCORE ;
+        MIN_SCORE = 0;
+        final int MAX_SCORE = 100;
+        MAX_SCORE = 200; //非法
+    }
+}
+```
+
+# 10 抽象类与抽象方法
+## 10.1 语法格式
+* **抽象类**：被abstract修饰的类。
+* **抽象方法**：被abstract修饰没有方法体的方法。
+
+抽象类的语法格式
+```java
+[权限修饰符] abstract class 类名{
+    
+}
+[权限修饰符] abstract class 类名 extends 父类{
+    
+}
+```
+
+抽象方法的语法格式
+```java
+[其他修饰符] abstract 返回值类型 方法名([形参列表]);
+```
+> 注意：抽象方法没有方法体
+
+代码举例：
+```java
+public abstract class Animal {
+    public abstract void eat();
+}
+```
+
+```java
+public class Cat extends Animal {
+    public void eat (){
+      	System.out.println("小猫吃鱼和猫粮"); 
+    }
+}
+```
+
+```java
+public class CatTest {
+ 	 public static void main(String[] args) {
+        // 创建子类对象
+        Cat c = new Cat(); 
+       
+        // 调用eat方法
+        c.eat();
+  	}
+}
+```
+
+此时的方法重写，是子类对父类抽象方法的完成实现，我们将这种方法重写的操作，也叫做**实现方法**。
+
+## 10.2 使用说明
+1. 抽象类**不能创建对象**，如果创建，编译无法通过而报错。只能创建其非抽象子类的对象。
+> 理解：假设创建了抽象类的对象，调用抽象的方法，而抽象方法没有具体的方法体，没有意义。
+   抽象类是用来被继承的，抽象类的子类必须重写父类的抽象方法，并提供方法体。若没有重写全部的抽象方法，仍为抽象类。
+2. 抽象类中，也有构造方法，是供子类创建对象时，初始化父类成员变量使用的。
+>理解：子类的构造方法中，有默认的super()或手动的super(实参列表)，需要访问父类构造方法。
+3. 抽象类中，不一定包含抽象方法，但是有抽象方法的类必定是抽象类。
+> 理解：未包含抽象方法的抽象类，目的就是不想让调用者创建该类对象，通常用于某些特殊的类结构设计。
+4. 抽象类的子类，必须重写抽象父类中**所有的**抽象方法，否则，编译无法通过而报错。除非该子类也是抽象类。 
+> 理解：假设不重写所有抽象方法，则类中可能包含抽象方法。那么创建对象后，调用抽象的方法，没有意义。
+## 10.3 注意事项
+- 不能用abstract修饰变量、代码块、构造器；
+- 不能用abstract修饰私有方法、静态方法、final的方法、final的类。
+
+# 11 接口（interface）
+##  接口（interface）
 1. 接口的使用
 
 * 接口的定义使用interface，而非class
@@ -1748,116 +1865,6 @@ public interface Intf3 extends Intf1, Intf2{
 * 接口中的this自引用，this引用的是实现这个接口的类所定义的实例
 
 
-### 2.27 抽象类：接口和类的混合体
-
-* 抽象类用abstract修饰，抽象类可以继承别的类或者抽象类，也可以实现接口
-* 抽象类可以有抽象方法，抽象方法可以来自实现的接口，也可以自己定义
-* 抽象类不可以被实例化
-* 抽象类也可以没有抽象方法，没有抽象方法的抽象类，也不可以被实例化。
-* 简单来说，抽象类就两点特殊：1）被abstract修饰，可以有抽象方法 2）不可以被实例化
-
-**抽象类的定义：**
-```java
-package com.geekbang.supermarket;
-
-import java.util.Date;
-
-public abstract class AbstractExpireDateMerchandise extends MerchandiseV2 implements ExpireDateMerchandise {
-
-    private Date produceDate;
-    private Date expirationDate;
-
-    // >> TODO 抽象类里构造方法的语法和类一样。
-    public AbstractExpireDateMerchandise(String name, String id, int count, double soldPrice, double purchasePrice, Date produceDate, Date expirationDate) {
-        super(name, id, count, soldPrice, purchasePrice);
-        this.produceDate = produceDate;
-        this.expirationDate = expirationDate;
-    }
-
-    public AbstractExpireDateMerchandise(String name, String id, int count, double soldPrice, Date produceDate, Date expirationDate) {
-        super(name, id, count, soldPrice);
-        this.produceDate = produceDate;
-        this.expirationDate = expirationDate;
-    }
-
-    public AbstractExpireDateMerchandise(Date produceDate, Date expirationDate) {
-        this.produceDate = produceDate;
-        this.expirationDate = expirationDate;
-    }
-
-    // >> TODO @ 是Java中的注解（annotation），后面我们会详细讲述
-    // >> TODO @Override代表此方法覆盖了父类的方法/实现了继承的接口的方法，否则会报错
-    public boolean notExpireInDays(int days) {
-        return daysBeforeExpire() > 0;
-    }
-
-    public Date getProducedDate() {
-        return produceDate;
-    }
-
-    public Date getExpireDate() {
-        return expirationDate;
-    }
-
-    public double leftDatePercentage() {
-        return 1.0 * daysBeforeExpire() / (daysBeforeExpire() + daysAfterProduce());
-    }
-
-//    @Override  抽象类未实现继承接口的此方法
-//    public double actualValueNow(double leftDatePercentage) {
-//        return 0;
-//    }
-
-    // >> TODO 抽象类里自己定义的抽象方法，可以是protected，也可以是缺省的，这点和接口不一样
-//    protected abstract void test();
-
-
-    // TODO 这俩方法是私有的，返回值以后即使改成int，也没有顾忌
-    private long daysBeforeExpire() {
-        long expireMS = expirationDate.getTime();
-        long left = expireMS - System.currentTimeMillis();
-        if (left < 0) {
-            return -1;
-        }
-        // 返回值是long，是根据left的类型决定的
-        return left / (24 * 3600 * 1000);
-    }
-
-    private long daysAfterProduce() {
-        long produceMS = produceDate.getTime();
-        long past = System.currentTimeMillis() - produceMS;
-        if (past < 0) {
-            // 生产日期是未来的一个时间？315电话赶紧打起来。
-            return -1;
-        }
-        // 返回值是long，是根据left的类型决定的
-        return past / (24 * 3600 * 1000);
-    }
-}
-
-```
-抽象类只实现了继承接口中的部分方法，然后这样继承抽象类的类就不需要实现接口中所有的方法了，可以只实现抽象类中没有实现的接口的方法。
-```java
-package com.geekbang.supermarket;
-
-import java.util.Date;
-
-// >> TODO 一个类只能继承一个父类，即使是抽象类，也只能是一个
-public class GamePointCard extends AbstractExpireDateMerchandise implements VirtualMerchandise {
-
-    public GamePointCard(String name, String id, int count, double soldPrice, double purchasePrice, Date produceDate, Date expirationDate) {
-        super(name, id, count, soldPrice, purchasePrice, produceDate, expirationDate);
-    }
-    
-    @Override
-    public double actualValueNow(double leftDatePercentage) {
-        return super.getSoldPrice();
-    }
-
-}
-
-```
-GamePointCard类中只实现了抽象类中没有实现的actualValueNow方法。
 
 ### 2.28 有方法的代码的接口
 
@@ -1936,6 +1943,263 @@ public interface ExpireDateMerchandise {
 1. 默默继承，相当于类具有了这个方法的实现
 2. 覆盖，重新实现
 3. 把此方法声明为abstract，相当于把这个方法的实现拒之门外，但有abstrace方法的类，此类也就成了抽象类。
+
+
+# 12 Math和Scanner的使用
+- Scanner
+
+```java
+package com.geekbang.learn;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.Scanner;
+
+public class LearnScanner {
+    public static void main(String[] args) {
+        // TODO Scanner是一个方便的可以帮我们从标准输入读取并转换数据的类
+        // TODO 注释里 @since   1.5 表示它是从Java5才开始有的。
+        Scanner scanner = new Scanner(System.in);
+
+        // TODO 但是这并是说从Java5开始，这个类就没有变化过了
+        // TODO 在源代码里搜索一下@since，会发现很多方法是在后续的 Java 版本中加进去的
+        // TODO 但是private方法就不会有这个文档标示，因为private方法本来就不给用。
+
+        System.out.println("请输入一个巨大的正数");
+        BigInteger bigInteger = scanner.nextBigInteger();
+        System.out.println("请输入想给这个数加多少");
+        BigInteger toBeAdd = scanner.nextBigInteger();
+        System.out.println("结果为：" + bigInteger.add(toBeAdd));
+
+    }
+}
+
+```
+
+- Math
+
+```java
+package com.geekbang.learn;
+
+
+import java.util.Random;
+
+public class LearnMath {
+
+    public double abc;
+
+    public static void main(String[] args) {
+
+        // TODO 我们调用的都是 Math 里的静态方法，Math的构造函数就是private的，意味着不能创建Math类的实例
+        System.out.println(Math.random());
+        // TODO 原来归根结底，Math的random是用的Random类来实现的。它在java.util包里
+        Random random = new Random();
+        for (int i = 0; i < 5; i++) {
+            // TODO nextInt的返回值竟然有正数有负数哦！所以使用别人的类之前，一定要看看文档，避免出问题
+            System.out.println(Math.abs(random.nextInt()));
+        }
+
+        System.out.println(Math.abs(-9)); // 9
+
+        System.out.println(Math.round(-9.2)); // -9
+        System.out.println(Math.round(-9.5)); // -9
+        System.out.println(Math.round(-9.8)); // -10
+        System.out.println(Math.round(9.2)); // 9
+        System.out.println(Math.round(9.5)); // 10
+        System.out.println(Math.round(9.8)); // 10
+    }
+}
+```
+输出:
+
+Math类中包含了很多数学工具方法。各方法都是static，所以不用创建Math实例则可以直接通过类名调用。
+Match类的文档：[https://docs.oracle.com/en/java/javase/12/docs/api/java.base/java/lang/Math.html](https://docs.oracle.com/en/java/javase/12/docs/api/java.base/java/lang/Math.html)
+
+
+### 2.13 String和StringBuilder
+- **String**
+
+String不可变，String用来存储字符的数据是private的，而且不提供任何修改内容的方法，所以String对象一旦生成，内容就是完全不可能被修改的。
+
+String类的文档：[https://docs.oracle.com/en/java/javase/12/docs/api/java.base/java/lang/String.html](https://docs.oracle.com/en/java/javase/12/docs/api/java.base/java/lang/String.html)
+
+- **StringBuiler**
+
+StringBuilder首先是可变的
+```java
+package com.geekbang.learn;
+
+public class LearnStringBuilder {
+
+    public static void main(String[] args) {
+
+        // TODO StringBuilder首先是可变的
+        // TODO 而且对它进行操作的方法，都会返回this自引用。这样我们就可以一直点下去，对String进行构造。
+        StringBuilder strBuilder = new StringBuilder();
+
+        long longVal = 123456789;
+
+        strBuilder.append(true).append("abc").append(longVal);
+
+        System.out.println(strBuilder.toString());
+        System.out.println(strBuilder.reverse().toString());
+        System.out.println(strBuilder.reverse().toString());
+        System.out.println(strBuilder.toString());
+
+        System.out.println(strBuilder.delete(0, 4).toString());
+
+        System.out.println(strBuilder.insert(3,"LLLLL").toString());
+
+
+    }
+
+}
+```
+输出：
+```
+trueabc123456789
+987654321cbaeurt
+trueabc123456789
+trueabc123456789
+abc123456789
+abcLLLLL123456789
+```
+
+### 2.23 Class类
+Class类是代表类的类，每个Class类的实例，都代表一个类。通过Class中的方法可以获取对象中一些类的信息。
+
+**示例程序：**
+```java
+package com.geekbang;
+
+import com.geekbang.supermarket.LittleSuperMarket;
+import com.geekbang.supermarket.MerchandiseV2;
+import com.geekbang.supermarket.ShellColorChangePhone;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
+public class ClassOfClassAppMain {
+
+
+    public static void main(String... args) throws NoSuchFieldException, NoSuchMethodException {
+        LittleSuperMarket superMarket = new LittleSuperMarket("大卖场",
+                "世纪大道1号", 500, 600, 100);
+
+        MerchandiseV2 m100 = superMarket.getMerchandiseOf(100);
+
+        // >> TODO
+        // Object类里的getClass方法，可以得到
+        // TODO 另一种获得Class实例的方法，直接类名点
+//        Class clazz = ShellColorChangePhone.class;
+         Class clazz = m100.getClass();
+
+        System.out.println(clazz.getName());  // com.geekbang.supermarket.ShellColorChangePhone
+        System.out.println(clazz.getSimpleName()); // ShellColorChangePhone
+
+        // TODO 通过一个类的Class实例，可以获取一个类所有的信息，包括成员变量，方法，等
+        Field countField = clazz.getField("count");
+        Field nameField = clazz.getField("count");
+        // countField: (public int com.geekbang.supermarket.MerchandiseV2.count) nameField: (public int com.geekbang.supermarket.MerchandiseV2.count)
+        System.out.println("countField: (" + countField.toString() + ") nameField: (" + nameField.toString() + ")"); 
+
+        // >> TODO 变长参数和它的等价形式
+        Method equalsMethod = clazz.getMethod("equals", Object.class);
+        Method buyMethod = clazz.getMethod("buy", int.class);
+
+        //equalsMethod: (public boolean com.geekbang.supermarket.MerchandiseV2.equals(java.lang.Object)) buyMethod: (public double com.geekbang.supermarket.Phone.buy(int))
+        System.out.println("equalsMethod: (" + equalsMethod.toString() + ") buyMethod: (" + buyMethod.toString() + ")");
+
+    }
+
+}
+```
+
+### 2.25 枚举（enum）
+枚举的定义：
+
+```java
+package com.geekbang.supermarket;
+
+// >> TODO 使用enum而非class声明
+public enum Category {
+
+    // >> TODO 必须在开始的时候以这种形式，创建所有的枚举对象
+    FOOD(1),
+    // >> TODO 不可以重名
+//    FOOD(1),
+    COOK(3),
+    SNACK(5),
+    CLOTHES(7),
+    ELECTRIC(9);
+
+    // 可以有属性
+    private int id;
+
+    // >> TODO 构造方法必须是private的，不写也是private的
+    Category(int id) {
+        this.id = id;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+//    public void setId(int id) {
+//        this.id = id;
+//    }
+
+
+    @Override
+    public String toString() {
+        return "Category{" +
+            "id=" + id +
+            '}';
+    }
+
+}
+```
+enum类型不再继承Object类，而是默认继承的Enum类，其中的一些方法都可以使用。**枚举的使用：**
+```java
+package com.geekbang;
+
+import com.geekbang.supermarket.Category;
+
+import java.util.Scanner;
+
+public class UseEnum {
+    public static void main(String[] args) {
+        // >> TODO 获取所有枚举，看看枚举实例有哪些方法
+        for (Category category : Category.values()) {
+            System.out.println("-----------" + category.getId() + "------------");
+            System.out.println(category.ordinal());
+            System.out.println(category.name());
+            System.out.println(category.toString());
+        }
+
+        System.out.println();
+        // >> TODO 根据名字获取枚举
+        System.out.println(Category.valueOf("FOOD"));
+//        System.out.println(Category.valueOf("food"));  //没有这个枚举，会报错
+
+        Scanner in = new Scanner(System.in);
+        System.out.println("请输入枚举的名字：");
+        String categoryName = in.next();
+        Category enumInput = Category.valueOf(categoryName.trim().toUpperCase());
+        System.out.println("枚举的信息：" + enumInput.toString());
+
+        System.out.println("请输入要比较的枚举的名字：");
+        String categoryName2 = in.next();
+        Category enumInput2 = Category.valueOf(categoryName2.trim().toUpperCase());
+        System.out.println("第二次输入的枚举的信息：" + enumInput2.toString());
+
+        System.out.println(enumInput == enumInput2);  //枚举在定义时候就已经创建了实例
+    }
+}
+
+```
+
 
 ### 2.29 各种特殊类
 #### 2.29.1 静态内部类
@@ -2429,3 +2693,14 @@ public class Phone extends MerchandiseV2 {
 - 方法的写法: 方法的类型(+、-) 方法名(参数名: 参数类型):返回值类型
 - 斜体表示抽象方法或类。
 ![image.png](https://raw.githubusercontent.com/BaihlUp/Figurebed/master/2024/20240701223715.png)
+
+# 10 native关键字的理解
+使用native关键字说明这个方法是原生函数，也就是这个方法是用`C/C++`等非Java语言实现的，并且`被编译成了DLL`，由Java去调用。
+- 本地方法是有方法体的，用c语言编写。由于本地方法的方法体源码没有对我们开源，所以我们看不到方法体
+- 在Java中定义一个native方法时，并不提供实现体。
+
+**1. 为什么要用native方法**
+Java使用起来非常方便，然而有些层次的任务用java实现起来不容易，或者我们对程序的效率很在意时，例如：Java需要与一些底层操作系统或某些硬件交换信息时的情况。native方法正是这样一种交流机制：它为我们提供了一个非常简洁的接口，而且我们无需去了解Java应用之外的繁琐的细节。
+
+**2. native声明的方法，对于调用者，可以当做和其他Java方法一样使用**
+native method的存在并不会对其他类调用这些本地方法产生任何影响，实际上调用这些方法的其他类甚至不知道它所调用的是一个本地方法。JVM将控制调用本地方法的所有细节。

@@ -913,14 +913,6 @@ Class<?> getEnclosingClass() ：返回某个内部类的外部类
 	}
 ```
 
-
-
-#### 4.2.7 小 结
-
-1. 在实际的操作中，取得类的信息的操作代码，并不会经常开发。
-
-2. 一定要熟悉java.lang.reflect包的作用，反射机制。
-
 ### 4.3 应用3：调用运行时类的指定结构
 
 #### 4.3.1 调用指定的属性
@@ -1119,92 +1111,6 @@ public class TestMethod {
 }
 
 ```
-
-#### 4.3.3 练习
-
-读取user.properties文件中的数据，通过反射完成User类对象的创建及对应方法的调用。
-
-配置文件：user.properties
-
-```
-className:com.atguigu.bean.User
-methodName:show
-```
-
-User.java文件：
-
-```java
-package com.atguigu.bean;
-
-/**
- * @author 尚硅谷-宋红康
- * @create 18:41
- */
-public class User {
-    private String name;
-
-    public User() {
-    }
-
-    public User(String name) {
-        this.name = name;
-    }
-
-    public void show(){
-        System.out.println("我是一个脉脉平台的用户");
-    }
-}
-```
-
-ReflectTest.java文件：
-
-```java
-package com.atguigu.java4;
-
-import org.junit.Test;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Method;
-import java.util.Properties;
-
-/**
- * @author 尚硅谷-宋红康
- * @create 18:43
- */
-public class ReflectTest {
-    @Test
-    public void test() throws Exception {
-        //1.创建Properties对象
-        Properties pro = new Properties();
-
-        //2.加载配置文件，转换为一个集合
-        ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-        InputStream is = classLoader.getResourceAsStream("user.properties");
-        pro.load(is);
-
-        //3.获取配置文件中定义的数据
-        String className = pro.getProperty("className");
-        String methodName = pro.getProperty("methodName");
-
-        //4.加载该类进内存
-        Class clazz = Class.forName(className);
-
-        //5.创建对象
-        Object instance = clazz.newInstance();
-
-        //6.获取方法对象
-        Method showMethod = clazz.getMethod(methodName);
-
-        //7.执行方法
-        showMethod.invoke(instance);
-    }
-}
-
-```
-
-
-
 ## 5. 应用4：读取注解信息
 
 一个完整的注解应该包含三个部分：
